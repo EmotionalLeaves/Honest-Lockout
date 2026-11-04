@@ -2,7 +2,11 @@ package com.honestlockout.app.ui.history
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,11 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,6 +48,7 @@ import com.honestlockout.app.data.repo.AppealResult
 import com.honestlockout.app.overlay.OverlayTexts
 import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.EmptyState
+import com.honestlockout.app.ui.SegmentedControl
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.theme.Danger
 import com.honestlockout.app.ui.theme.Primary
@@ -86,10 +88,10 @@ fun HistoryScreen(nav: NavController) {
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            PrimaryTabRow(selectedTabIndex = tab) {
-                Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.history_tab_overrides)) })
-                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.history_tab_screen_time)) })
-            }
+            SegmentedControl(
+                listOf(stringResource(R.string.history_tab_overrides), stringResource(R.string.history_tab_screen_time)), tab,
+                Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            ) { tab = it }
             if (tab == 0) OverridesTab(snackbar) else ScreenTimeTab()
         }
     }
@@ -115,11 +117,13 @@ private fun OverridesTab(snackbar: SnackbarHostState) {
         (overrideItems + standalone).sortedByDescending { it.at }
     }
 
-    Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        FilterChip(selected = !strikesOnly, onClick = { strikesOnly = false }, label = { Text(stringResource(R.string.history_filter_all)) })
-        FilterChip(selected = strikesOnly, onClick = { strikesOnly = true }, label = { Text(stringResource(R.string.history_filter_strikes)) })
+    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.history_filter_label).uppercase(), style = MaterialTheme.typography.labelSmall, color = TextMuted, modifier = Modifier.weight(1f))
+        TextButton(onClick = { strikesOnly = !strikesOnly }, contentPadding = PaddingValues(horizontal = 8.dp)) {
+            Text(stringResource(if (strikesOnly) R.string.history_filter_strikes else R.string.history_filter_all), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+        }
     }
-    if (items.isEmpty()) { EmptyState(stringResource(R.string.history_empty)); return }
+    if (items.isEmpty()) { EmptyState(stringResource(R.string.history_empty), icon = Icons.Outlined.History); return }
 
     fun appeal(s: Strike) = scope.launch {
         val msg = when (AppGraph.strikeRepo.appeal(s.id, System.currentTimeMillis())) {
@@ -148,6 +152,7 @@ private fun OverrideRow(o: Override, strike: Strike?, purpose: String, now: Long
     Card(
         modifier = Modifier.fillMaxWidth().alpha(if (forgiven) 0.5f else 1f),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -174,6 +179,7 @@ private fun StrikeRow(s: Strike, now: Long, onAppeal: (Strike) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().alpha(if (greyed) 0.5f else 1f),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(Format.dateTime(context, s.createdAt), style = MaterialTheme.typography.labelMedium, color = TextMuted)
@@ -192,7 +198,9 @@ private fun StrikeFooter(s: Strike, now: Long, onAppeal: (Strike) -> Unit) {
     when {
         s.appealed -> Text(stringResource(R.string.history_appealed), color = TextMuted)
         s.forgivenAt != null -> Text(stringResource(R.string.history_forgiven), color = TextMuted)
-        AppGraph.strikeRepo.canAppeal(s, now) -> TextButton(onClick = { onAppeal(s) }) { Text(stringResource(R.string.history_that_was_wrong)) }
+        AppGraph.strikeRepo.canAppeal(s, now) -> TextButton(onClick = { onAppeal(s) }, contentPadding = PaddingValues(0.dp)) {
+            Text(stringResource(R.string.history_that_was_wrong), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+        }
     }
 }
 

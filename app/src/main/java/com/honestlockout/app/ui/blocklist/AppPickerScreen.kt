@@ -6,7 +6,12 @@ import android.content.pm.ApplicationInfo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,19 +23,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,6 +57,10 @@ import com.honestlockout.app.data.db.BlockMode
 import com.honestlockout.app.engine.EmergencyAllowlist
 import com.honestlockout.app.ui.AppIcon
 import com.honestlockout.app.ui.AppScaffold
+import com.honestlockout.app.ui.AppTextField
+import com.honestlockout.app.ui.PrimaryButton
+import com.honestlockout.app.ui.RowDivider
+import com.honestlockout.app.ui.SegmentedControl
 import com.honestlockout.app.ui.EmptyState
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.Stepper
@@ -111,12 +116,11 @@ fun AppPickerScreen(nav: NavController) {
 
     AppScaffold(title = stringResource(R.string.apppicker_title), onBack = { nav.popBackStack() }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            OutlinedTextField(
+            AppTextField(
                 value = query, onValueChange = { query = it },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                placeholder = { Text(stringResource(R.string.apppicker_search)) },
-                singleLine = true,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                placeholder = stringResource(R.string.apppicker_search), singleLine = true,
             )
             val all = apps
             if (all == null) {
@@ -128,16 +132,11 @@ fun AppPickerScreen(nav: NavController) {
                 (category == AppCategory.ALL || it.category == category) &&
                     (query.isBlank() || it.label.contains(query, ignoreCase = true))
             }
-            Row(
-                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                AppCategory.entries.forEach { c ->
-                    val count = if (c == AppCategory.ALL) available.size else available.count { it.category == c }
-                    if (count == 0 && c != AppCategory.ALL) return@forEach
-                    FilterChip(selected = category == c, onClick = { category = c }, label = { Text("${categoryName(c)} · $count") })
-                }
-            }
+            val cats = AppCategory.entries.filter { c -> c == AppCategory.ALL || available.any { it.category == c } }
+            SegmentedControl(
+                cats.map { categoryName(it) }, cats.indexOf(category).coerceAtLeast(0),
+                Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            ) { category = cats[it] }
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 val allShownSelected = shown.isNotEmpty() && shown.all { it.packageName in selected }
                 TextButton(onClick = {
@@ -157,24 +156,26 @@ fun AppPickerScreen(nav: NavController) {
                         modifier = Modifier.clickable { selected = if (checked) selected - app.packageName else selected + app.packageName },
                         leadingContent = { AppIcon(app.packageName) },
                         headlineContent = { Text(app.label) },
-                        supportingContent = if (app.category != AppCategory.OTHER) ({ Text(categoryName(app.category)) }) else null,
-                        trailingContent = { Checkbox(checked = checked, onCheckedChange = null) },
+                        supportingContent = if (app.category != AppCategory.OTHER) ({ Text(categoryName(app.category), color = MaterialTheme.colorScheme.onSurfaceVariant) }) else null,
+                        trailingContent = {
+                            Box(
+                                Modifier.size(24.dp).clip(CircleShape)
+                                    .background(if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh),
+                                contentAlignment = Alignment.Center,
+                            ) { if (checked) Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp)) }
+                        },
+                        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                     )
-                    HorizontalDivider()
+                    RowDivider(inset = 72)
                 }
             }
             AnimatedVisibility(selected.isNotEmpty(), enter = slideInVertically { it }, exit = slideOutVertically { it }) {
-                Surface(tonalElevation = 3.dp, shadowElevation = 8.dp) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    Column {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         val modes = BlockMode.entries
-                        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                            modes.forEachIndexed { i, m ->
-                                SegmentedButton(
-                                    selected = mode == m, onClick = { mode = m },
-                                    shape = SegmentedButtonDefaults.itemShape(i, modes.size),
-                                ) { Text(modeName(m)) }
-                            }
-                        }
+                        SegmentedControl(modes.map { modeName(it) }, modes.indexOf(mode)) { mode = modes[it] }
                         when (mode) {
                             BlockMode.BUDGET -> Stepper(
                                 label = stringResource(R.string.rule_budget_label), value = budget,
@@ -191,16 +192,13 @@ fun AppPickerScreen(nav: NavController) {
                             }
                             BlockMode.ALWAYS -> Unit
                         }
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = mode != BlockMode.SCHEDULE || scheduleId != null,
-                            onClick = {
-                                scope.launch {
-                                    AppGraph.blockRepo.addAll(selected, mode, budget, scheduleId)
-                                    nav.popBackStack()
-                                }
-                            },
-                        ) { Text(stringResource(R.string.apppicker_block_n, selected.size)) }
+                        PrimaryButton(stringResource(R.string.apppicker_block_n, selected.size), enabled = mode != BlockMode.SCHEDULE || scheduleId != null) {
+                            scope.launch {
+                                AppGraph.blockRepo.addAll(selected, mode, budget, scheduleId)
+                                nav.popBackStack()
+                            }
+                        }
+                        }
                     }
                 }
             }

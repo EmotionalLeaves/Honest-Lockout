@@ -3,7 +3,9 @@ package com.honestlockout.app.ui.blocklist
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,9 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -40,6 +43,8 @@ import com.honestlockout.app.ui.AppIcon
 import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.EmptyState
 import com.honestlockout.app.ui.Format
+import com.honestlockout.app.ui.PrimaryButton
+import com.honestlockout.app.ui.RowDivider
 import com.honestlockout.app.ui.SectionCard
 import com.honestlockout.app.ui.Stat
 import com.honestlockout.app.ui.UsageBar
@@ -61,21 +66,24 @@ fun BlockListScreen(nav: NavController) {
     AppScaffold(
         title = stringResource(R.string.blocklist_title),
         onBack = { nav.popBackStack() },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { nav.navigate(Routes.APPPICKER) },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.blocklist_add)) },
-            )
+        actions = {
+            IconButton(onClick = { nav.navigate(Routes.APPPICKER) }) {
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.blocklist_add), tint = MaterialTheme.colorScheme.primary)
+            }
         },
     ) { padding ->
         val list = rules ?: return@AppScaffold
         if (list.isEmpty()) {
-            EmptyState(stringResource(R.string.blocklist_empty), padding)
+            Column(Modifier.fillMaxSize().padding(padding)) {
+                EmptyState(stringResource(R.string.blocklist_empty), icon = Icons.Outlined.Block, padding = PaddingValues(bottom = 80.dp))
+            }
+            Box(Modifier.fillMaxSize().padding(padding).padding(16.dp), contentAlignment = Alignment.BottomCenter) {
+                PrimaryButton(stringResource(R.string.blocklist_add)) { nav.navigate(Routes.APPPICKER) }
+            }
             return@AppScaffold
         }
         val sorted = list.sortedBy { Format.appLabel(context, it.packageName).lowercase() }
-        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 96.dp)) {
+        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 24.dp)) {
             item {
                 SectionCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -103,7 +111,7 @@ fun BlockListScreen(nav: NavController) {
                     trailingContent = { ModeChip(rule.mode) },
                     colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                 )
-                HorizontalDivider(Modifier.padding(start = 76.dp), color = MaterialTheme.colorScheme.outline)
+                RowDivider(inset = 76)
             }
         }
     }

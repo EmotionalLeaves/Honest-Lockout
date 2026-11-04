@@ -2,22 +2,19 @@ package com.honestlockout.app.ui.blocklist
 
 import android.app.TimePickerDialog
 import android.text.format.DateFormat
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,7 +38,15 @@ import com.honestlockout.app.data.db.entities.Schedule
 import com.honestlockout.app.engine.ScheduleLogic
 import com.honestlockout.app.engine.SettingChange
 import com.honestlockout.app.ui.AppScaffold
+import com.honestlockout.app.ui.AppTextField
+import com.honestlockout.app.ui.BottomActionBar
+import com.honestlockout.app.ui.DayToggles
+import com.honestlockout.app.ui.GroupHeader
+import com.honestlockout.app.ui.InfoNote
+import com.honestlockout.app.ui.PrimaryButton
+import com.honestlockout.app.ui.RowDivider
 import com.honestlockout.app.ui.SectionCard
+import com.honestlockout.app.ui.TextLink
 import com.honestlockout.app.ui.guardMessage
 import kotlinx.coroutines.launch
 
@@ -75,42 +80,9 @@ fun ScheduleEditorScreen(nav: NavController, id: Long?) {
     AppScaffold(
         title = stringResource(if (id == null) R.string.schedule_new_title else R.string.schedule_edit_title),
         onBack = { nav.popBackStack() }, snackbar = snackbar,
-    ) { padding ->
-        if (!loaded) return@AppScaffold
-        Column(
-            Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            OutlinedTextField(
-                value = name, onValueChange = { name = it.take(40) }, singleLine = true,
-                label = { Text(stringResource(R.string.schedule_name)) }, modifier = Modifier.fillMaxWidth(),
-            )
-            SectionCard(stringResource(R.string.schedule_days)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for (d in 0 until 7) {
-                        FilterChip(
-                            selected = days[d] == '1',
-                            onClick = { days = days.substring(0, d) + (if (days[d] == '1') '0' else '1') + days.substring(d + 1) },
-                            label = { Text(dayNames[d]) },
-                        )
-                    }
-                }
-            }
-            SectionCard(stringResource(R.string.schedule_hours)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedButton(onClick = { pickTime(start) { start = it } }) {
-                        Text(stringResource(R.string.schedule_start, ScheduleLogic.hhmm(start)))
-                    }
-                    OutlinedButton(onClick = { pickTime(end) { end = it } }) {
-                        Text(stringResource(R.string.schedule_end, ScheduleLogic.hhmm(end)))
-                    }
-                }
-                if (end <= start) Text(stringResource(R.string.schedule_crosses_midnight), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(14.dp),
-                enabled = name.isNotBlank() && days.contains('1') && start != end,
-                onClick = {
+        bottomBar = {
+            if (loaded) BottomActionBar {
+                PrimaryButton(stringResource(R.string.action_save), enabled = name.isNotBlank() && days.contains('1') && start != end) {
                     scope.launch {
                         if (id == null) {
                             val newId = AppGraph.blockRepo.saveSchedule(Schedule(name = name.trim(), days = days, startMinute = start, endMinute = end))
@@ -121,19 +93,56 @@ fun ScheduleEditorScreen(nav: NavController, id: Long?) {
                             snackbar.showSnackbar(guardMessage(context, r))
                         }
                     }
-                },
-            ) { Text(stringResource(R.string.action_save)) }
-            if (id != null) {
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        scope.launch {
-                            if (AppGraph.blockRepo.deleteSchedule(id)) nav.popBackStack()
-                            else snackbar.showSnackbar(context.getString(R.string.schedule_in_use))
-                        }
-                    },
-                ) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
+                }
+                if (id != null) TextLink(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) {
+                    scope.launch {
+                        if (AppGraph.blockRepo.deleteSchedule(id)) nav.popBackStack()
+                        else snackbar.showSnackbar(context.getString(R.string.schedule_in_use))
+                    }
+                }
             }
+        },
+    ) { padding ->
+        if (!loaded) return@AppScaffold
+        Column(
+            Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Column {
+                GroupHeader(stringResource(R.string.schedule_name))
+                AppTextField(value = name, onValueChange = { name = it.take(40) }, singleLine = true, placeholder = stringResource(R.string.schedule_default_name))
+            }
+            SectionCard(stringResource(R.string.schedule_days)) {
+                DayToggles(days, dayNames) { days = it }
+            }
+            Column {
+                GroupHeader(stringResource(R.string.schedule_hours))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                ) {
+                    Column {
+                        TimeRow(stringResource(R.string.schedule_starts), ScheduleLogic.hhmm(start)) { pickTime(start) { start = it } }
+                        RowDivider()
+                        TimeRow(stringResource(R.string.schedule_ends), ScheduleLogic.hhmm(end)) { pickTime(end) { end = it } }
+                    }
+                }
+                if (end <= start) {
+                    Text(
+                        stringResource(R.string.schedule_crosses_midnight), style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+                    )
+                }
+            }
+            if (id != null) InfoNote(stringResource(R.string.rule_loosen_note))
         }
+    }
+}
+
+@Composable
+private fun TimeRow(label: String, value: String, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 14.dp)) {
+        Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+        Text(value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
     }
 }

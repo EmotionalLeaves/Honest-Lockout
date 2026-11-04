@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,14 +31,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
 import com.honestlockout.app.engine.DayClock
 import com.honestlockout.app.ui.AppIcon
 import com.honestlockout.app.ui.EmptyState
 import com.honestlockout.app.ui.Format
+import com.honestlockout.app.ui.RowDivider
 import com.honestlockout.app.ui.theme.Primary
-import com.honestlockout.app.ui.theme.SurfaceHigh
+import com.honestlockout.app.ui.theme.SurfaceHighest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -74,10 +77,10 @@ fun ScreenTimeTab() {
     val max = (list.maxOf { it.total }).coerceAtLeast(1)
 
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-        Text(
-            stringResource(R.string.history_day_total, Format.date(context, DayClock.startOfDay(day.date)), Format.minutes(context, day.total)),
-            style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(vertical = 12.dp),
-        )
+        Column(Modifier.padding(vertical = 12.dp)) {
+            Text(Format.date(context, DayClock.startOfDay(day.date)).uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(Format.minutes(context, day.total), style = MaterialTheme.typography.headlineMedium)
+        }
         Canvas(
             Modifier.fillMaxWidth().height(160.dp).pointerInput(list) {
                 detectTapGestures { pos -> selected = (pos.x / (size.width / list.size.toFloat())).toInt().coerceIn(0, list.lastIndex) }
@@ -88,30 +91,33 @@ fun ScreenTimeTab() {
             list.forEachIndexed { i, d ->
                 val h = (d.total / max.toFloat()) * (size.height - 8f)
                 drawRoundRect(
-                    color = if (i == selected) Primary else SurfaceHigh,
+                    color = if (i == selected) Primary else SurfaceHighest,
                     topLeft = Offset(i * slot + (slot - barW) / 2, size.height - h),
                     size = Size(barW, h.coerceAtLeast(2f)),
-                    cornerRadius = CornerRadius(8f, 8f),
+                    cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx()),
                 )
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             list.forEach {
                 Text(
-                    it.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                    it.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()).take(1).uppercase(),
                     style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center,
+                    color = if (it == day) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
-        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+        HorizontalDivider(Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outline)
         if (day.perApp.isEmpty()) { EmptyState(stringResource(R.string.history_no_usage_day)); return@Column }
         LazyColumn(Modifier.fillMaxSize()) {
             items(day.perApp, key = { it.first }) { (pkg, minutes) ->
                 ListItem(
                     leadingContent = { AppIcon(pkg, 32) },
                     headlineContent = { Text(Format.appLabel(context, pkg)) },
-                    trailingContent = { Text(Format.minutes(context, minutes)) },
+                    trailingContent = { Text(Format.minutes(context, minutes), color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                 )
+                RowDivider(inset = 64)
             }
         }
     }

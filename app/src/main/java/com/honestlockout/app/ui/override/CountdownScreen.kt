@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.honestlockout.app.ui.TextLink
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
@@ -100,7 +101,7 @@ fun CountdownScreen(nav: NavController) {
                 Text(if (left >= 0) "$left" else "", style = HugeNumber, color = MaterialTheme.colorScheme.primary)
             }
             Spacer(Modifier.height(8.dp))
-            Text(stringResource(R.string.countdown_hint), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.countdown_hint).uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.2.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(24.dp))
             Text(draft.statement, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
             Spacer(Modifier.height(16.dp))
@@ -113,7 +114,7 @@ fun CountdownScreen(nav: NavController) {
                 Text(it, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
             }
             Spacer(Modifier.height(40.dp))
-            OutlinedButton(onClick = { cancel() }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_cancel)) }
+            TextLink(stringResource(R.string.action_cancel)) { cancel() }
         }
     }
 }

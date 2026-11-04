@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,13 +18,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TextButton
@@ -56,6 +55,10 @@ import com.honestlockout.app.data.rules.PurposeTemplates
 import com.honestlockout.app.service.OverrideForegroundService
 import com.honestlockout.app.ui.AppIcon
 import com.honestlockout.app.ui.AppScaffold
+import com.honestlockout.app.ui.AppTextField
+import com.honestlockout.app.ui.BottomActionBar
+import com.honestlockout.app.ui.GroupHeader
+import com.honestlockout.app.ui.PrimaryButton
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.SectionCard
 import com.honestlockout.app.ui.nav.Routes
@@ -105,22 +108,48 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
     }
 
     val s = setup
-    AppScaffold(title = s?.template?.name ?: "", onBack = { nav.popBackStack() }, snackbar = snackbar) { padding ->
+    val isCustom = s?.template?.id == PurposeTemplates.ID_CUSTOM
+    AppScaffold(
+        title = s?.template?.name ?: "", onBack = { nav.popBackStack() }, snackbar = snackbar,
+        bottomBar = {
+            if (s != null) BottomActionBar {
+                PrimaryButton(stringResource(R.string.declare_start), enabled = statement.trim().length >= STATEMENT_MIN && app != null) {
+                    val pkg = app ?: return@PrimaryButton
+                    scope.launch {
+                        val now = System.currentTimeMillis()
+                        val e = AppGraph.overrideRepo.eligibility(pkg, s.template.id, now, extending = extend)
+                        if (e is Eligibility.Refused) { snackbar.showSnackbar(e.message); return@launch }
+                        AppGraph.overrideRepo.draft = OverrideDraft(
+                            packageName = pkg, templateId = s.template.id, statement = statement.trim(),
+                            minutes = minutes.coerceIn(1, s.maxMinutes),
+                            customLabels = if (isCustom) labels else null, customShape = if (isCustom) shape else null,
+                            isExtend = extend,
+                        )
+                        if (extend) OverrideForegroundService.send(context, OverrideForegroundService.ACTION_DONE_FOR_EXTEND)
+                        nav.navigate(Routes.OVERRIDE_COUNTDOWN)
+                    }
+                }
+            }
+        },
+    ) { padding ->
         if (s == null) return@AppScaffold
-        val isCustom = s.template.id == PurposeTemplates.ID_CUSTOM
         Column(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            OutlinedTextField(
-                value = statement,
-                onValueChange = { statement = it.replace('\n', ' ').take(STATEMENT_MAX) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.declare_label)) },
-                placeholder = { Text(stringResource(R.string.declare_placeholder)) },
-                supportingText = { Text(stringResource(R.string.declare_count, statement.trim().length, STATEMENT_MAX)) },
-                minLines = 2,
-            )
+            Column {
+                GroupHeader(stringResource(R.string.declare_label))
+                AppTextField(
+                    value = statement,
+                    onValueChange = { statement = it.replace('\n', ' ').take(STATEMENT_MAX) },
+                    placeholder = stringResource(R.string.declare_placeholder), minLines = 2,
+                )
+                Text(
+                    stringResource(R.string.declare_count, statement.trim().length, STATEMENT_MAX),
+                    style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.End).padding(top = 6.dp, end = 4.dp),
+                )
+            }
             val suggestions = suggestionsFor(s.template.id)
             if (suggestions.isNotEmpty() && statement.isBlank()) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -193,26 +222,7 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                     Text(shapeHint(shape), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            Button(
-                modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(14.dp),
-                enabled = statement.trim().length >= STATEMENT_MIN && app != null,
-                onClick = {
-                    val pkg = app ?: return@Button
-                    scope.launch {
-                        val now = System.currentTimeMillis()
-                        val e = AppGraph.overrideRepo.eligibility(pkg, s.template.id, now, extending = extend)
-                        if (e is Eligibility.Refused) { snackbar.showSnackbar(e.message); return@launch }
-                        AppGraph.overrideRepo.draft = OverrideDraft(
-                            packageName = pkg, templateId = s.template.id, statement = statement.trim(),
-                            minutes = minutes.coerceIn(1, s.maxMinutes),
-                            customLabels = if (isCustom) labels else null, customShape = if (isCustom) shape else null,
-                            isExtend = extend,
-                        )
-                        if (extend) OverrideForegroundService.send(context, OverrideForegroundService.ACTION_DONE_FOR_EXTEND)
-                        nav.navigate(Routes.OVERRIDE_COUNTDOWN)
-                    }
-                },
-            ) { Text(stringResource(R.string.declare_start)) }
+            Spacer(Modifier.height(8.dp))
         }
         if (showAppSheet) {
             AppSheet(s.apps, onPick = { app = it; showAppSheet = false }, onDismiss = { showAppSheet = false })
@@ -225,11 +235,11 @@ private fun AppSheet(apps: List<String>, onPick: (String) -> Unit, onDismiss: ()
     val context = LocalContext.current
     var query by remember { mutableStateOf("") }
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        OutlinedTextField(
+        AppTextField(
             value = query, onValueChange = { query = it }, singleLine = true,
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-            placeholder = { Text(stringResource(R.string.apppicker_search)) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+            placeholder = stringResource(R.string.apppicker_search),
+            modifier = Modifier.padding(horizontal = 16.dp),
         )
         LazyColumn(Modifier.padding(top = 8.dp, bottom = 24.dp)) {
             items(apps.filter { query.isBlank() || Format.appLabel(context, it).contains(query, true) }, key = { it }) { p ->

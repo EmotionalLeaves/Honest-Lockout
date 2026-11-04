@@ -75,7 +75,6 @@
     <string name="home_today">Screen time today</string>
     <string name="home_oldest_expires">Oldest expires %1$s</string>
     <string name="home_next_override_at">Overrides available at %1$s</string>
-    <string name="home_next_override_now">Overrides available now</string>
     <string name="home_start_override">Start an override</string>
     <string name="home_block_list">Block list</string>
     <string name="home_history">History</string>
@@ -98,9 +97,8 @@
     <string name="rule_always_desc">Locked at all times. Only an override opens it.</string>
     <string name="rule_budget_label">Daily budget</string>
     <string name="rule_schedule_label">Schedule</string>
-    <string name="rule_no_schedules">No schedules yet.</string>
     <string name="rule_new_schedule">New schedule</string>
-    <string name="rule_loosen_note">Loosening applies in 24 h. Tightening applies now.</string>
+    <string name="rule_loosen_note">Stricter changes apply now. Looser changes wait 24 hours.</string>
     <string name="rule_remove">Remove from block list</string>
     <string name="rule_removed">This app is no longer on the block list.</string>
     <string name="schedule_new_title">New schedule</string>
@@ -109,8 +107,6 @@
     <string name="schedule_name">Name</string>
     <string name="schedule_days">Days</string>
     <string name="schedule_hours">Hours</string>
-    <string name="schedule_start">Start %1$s</string>
-    <string name="schedule_end">End %1$s</string>
     <string name="schedule_crosses_midnight">Ends the next morning (crosses midnight).</string>
     <string name="schedule_in_use">A block rule uses this schedule, so it cannot be deleted.</string>
 
@@ -181,7 +177,7 @@
     <string name="lock_next_at">Overrides available at %1$s</string>
     <string name="banner_warning_html"><![CDATA[This doesn\'t match <i>%1$s</i>. Return within %2$d s or end the override.]]></string>
     <string name="banner_checkin_html"><![CDATA[Still doing: <i>%1$s</i>?]]></string>
-    <string name="banner_seconds">%1$d s</string>
+    <string name="banner_seconds">%1$d s left</string>
     <string name="banner_back_to_it">Back to it</string>
     <string name="banner_end_it">End it</string>
     <string name="banner_yes">Yes</string>
@@ -228,7 +224,6 @@
     <string name="history_that_was_wrong">That was wrong</string>
     <string name="history_export_done">Log exported.</string>
     <string name="history_export_failed">Could not write the log.</string>
-    <string name="history_day_total">%1$s: %2$s</string>
     <string name="history_no_usage_access">Usage access is off, so there is no screen time to show.</string>
     <string name="history_no_usage_day">No screen time recorded for this day.</string>
     <string name="result_clean">Clean</string>
@@ -288,7 +283,6 @@
     <string name="rules_inspect">Inspect current screen</string>
     <string name="settings_pending">Pending changes</string>
     <string name="pending_empty">No changes are waiting.</string>
-    <string name="pending_created">Requested %1$s</string>
     <string name="pending_applies">Applies %1$s</string>
     <string name="settings_device_admin">Device admin</string>
     <string name="settings_device_admin_desc">Uninstalling requires turning this off first. Turning it off waits like other looser changes.</string>
@@ -313,10 +307,9 @@
     <string name="inspector_count">%1$d lines</string>
 
     <!-- Break-glass -->
-    <string name="break_glass_confirm">This unlocks every app for %1$d minutes, costs 2 strikes, and starts after a %2$d minute wait. Continue?</string>
     <string name="break_glass_continue">Continue</string>
-    <string name="break_glass_waiting">Emergency unlock starts when this reaches zero. Leaving this screen does not cancel it.</string>
-    <string name="break_glass_type">Type this sentence exactly:</string>
+    <string name="break_glass_waiting">Unlocks when this reaches zero. Leaving the screen doesn\'t cancel it.</string>
+    <string name="break_glass_type">Type the sentence below to confirm.</string>
     <string name="break_glass_sentence">I am choosing to unlock everything and I accept two strikes.</string>
     <string name="break_glass_unlock">Unlock</string>
     <string name="break_glass_active">Everything is unlocked until %1$s.</string>
@@ -422,4 +415,20 @@
     <string name="shape_any_hint">Any: activity isn\'t checked. Only the time and blocked screens apply.</string>
     <string name="shape_listen_hint">Listen: other apps and a locked screen are fine; time on screen in the app is limited.</string>
     <string name="home_hero_ready">%1$d apps blocked · overrides available</string>
+    <string name="rule_mode">Mode</string>
+    <string name="rule_budget_desc">Free until the daily budget is used, then locked until midnight.</string>
+    <string name="rule_schedule_desc">Locked during the hours of a schedule, free outside them.</string>
+    <string name="rule_budget_per_day">Per day</string>
+    <string name="schedule_starts">Starts</string>
+    <string name="schedule_ends">Ends</string>
+    <string name="template_length">Length</string>
+    <string name="history_filter_label">Show</string>
+    <string name="pending_intro">These changes loosen a rule, so they wait before applying. Cancel any of them now.</string>
+    <string name="break_glass_lead">Unlocks every app at once. Use it when you have to.</string>
+    <string name="break_glass_terms">What it costs</string>
+    <string name="break_glass_term_unlock">Everything unlocks for %1$d minutes</string>
+    <string name="break_glass_term_wait">Starts after a %1$d minute wait</string>
+    <string name="break_glass_term_strikes">Adds 2 strikes</string>
+    <string name="break_glass_cancel_wait">Cancel the unlock</string>
+    <string name="break_glass_type_here">Type it here</string>
 </resources>

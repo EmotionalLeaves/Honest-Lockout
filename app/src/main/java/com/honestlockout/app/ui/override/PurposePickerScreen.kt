@@ -1,5 +1,6 @@
 package com.honestlockout.app.ui.override
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
@@ -104,11 +105,12 @@ fun PurposePickerScreen(nav: NavController, packageName: String?) {
                     Card(
                         modifier = Modifier.fillMaxWidth().clickable { nav.navigate(Routes.declare(lastTemplate.id, packageName ?: last.packageName, statement = last.statement)) },
                         shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
                     ) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Text(stringResource(R.string.pick_last_time, lastTemplate.name, last.plannedMin), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                            Text(last.statement, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(stringResource(R.string.pick_last_time, lastTemplate.name, last.plannedMin).uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp), color = MaterialTheme.colorScheme.primary)
+                            Text(last.statement, style = MaterialTheme.typography.titleMedium)
                         }
                     }
                 }
@@ -123,12 +125,13 @@ fun PurposePickerScreen(nav: NavController, packageName: String?) {
                         .clickable(enabled = allowed) { nav.navigate(Routes.declare(t.id, packageName)) },
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 ) {
                     Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         Box(
-                            Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
+                            Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
                             contentAlignment = Alignment.Center,
-                        ) { Icon(purposeIcon(t.id), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer) }
+                        ) { Icon(purposeIcon(t.id), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp)) }
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(t.name, style = MaterialTheme.typography.titleMedium)
                             Text(stringResource(PurposeTemplates.descriptionRes(t.id)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -37,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -56,6 +61,8 @@ fun AppScaffold(
     snackbar: SnackbarHostState? = null,
     floatingActionButton: @Composable () -> Unit = {},
     titleModifier: Modifier = Modifier,
+    bottomBar: @Composable () -> Unit = {},
+    actions: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     // Large title that collapses into the bar as the content scrolls (iOS-style).
@@ -72,6 +79,7 @@ fun AppScaffold(
                         }
                     }
                 },
+                actions = { actions() },
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
@@ -81,6 +89,7 @@ fun AppScaffold(
         },
         snackbarHost = { if (snackbar != null) SnackbarHost(snackbar) },
         floatingActionButton = floatingActionButton,
+        bottomBar = bottomBar,
         content = content,
     )
 }
@@ -164,12 +173,17 @@ fun guardMessage(context: Context, result: GuardResult): String = when (result) 
 }
 
 @Composable
-fun EmptyState(text: String, padding: PaddingValues = PaddingValues()) {
+fun EmptyState(text: String, padding: PaddingValues = PaddingValues(), icon: ImageVector = Icons.Outlined.Inbox) {
     Column(
         Modifier.fillMaxSize().padding(padding).padding(32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Box(
+            Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainer),
+            contentAlignment = Alignment.Center,
+        ) { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+        Spacer(Modifier.height(16.dp))
         Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
     }
 }

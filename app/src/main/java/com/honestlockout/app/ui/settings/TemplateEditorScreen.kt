@@ -1,17 +1,15 @@
 package com.honestlockout.app.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -35,6 +33,13 @@ import com.honestlockout.app.R
 import com.honestlockout.app.data.rules.PurposeTemplates
 import com.honestlockout.app.engine.SettingChange
 import com.honestlockout.app.ui.AppScaffold
+import com.honestlockout.app.ui.BottomActionBar
+import com.honestlockout.app.ui.GroupHeader
+import com.honestlockout.app.ui.InfoNote
+import com.honestlockout.app.ui.PrimaryButton
+import com.honestlockout.app.ui.RowDivider
+import com.honestlockout.app.ui.SelectRow
+import com.honestlockout.app.ui.override.screenLabel
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.SectionCard
 import com.honestlockout.app.ui.Stepper
@@ -60,32 +65,12 @@ fun TemplateEditorScreen(nav: NavController, id: Long) {
     }
     val allLabels = remember { AppGraph.screenRules.allLabels() }
 
-    AppScaffold(title = t?.name.orEmpty(), onBack = { nav.popBackStack() }, snackbar = snackbar) { padding ->
-        val template = t ?: return@AppScaffold
-        val chosen = labels ?: return@AppScaffold
-        Column(
-            Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(stringResource(PurposeTemplates.descriptionRes(template.id)), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            SectionCard {
-                Stepper(stringResource(R.string.template_max), max, TEMPLATE_MAX_OPTIONS, { Format.minutes(context, it) }, { max = it })
-            }
-            SectionCard(stringResource(R.string.template_screens)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    (allLabels + chosen).distinct().sorted().forEach { l ->
-                        FilterChip(
-                            selected = l in chosen,
-                            onClick = { labels = if (l in chosen) chosen - l else chosen + l },
-                            label = { Text(com.honestlockout.app.ui.override.screenLabel(l)) },
-                        )
-                    }
-                }
-            }
-            Text(stringResource(R.string.rule_loosen_note), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Button(
-                modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(14.dp),
-                onClick = {
+    AppScaffold(
+        title = t?.name.orEmpty(), onBack = { nav.popBackStack() }, snackbar = snackbar,
+        bottomBar = {
+            val template = t; val chosen = labels
+            if (template != null && chosen != null) BottomActionBar {
+                PrimaryButton(stringResource(R.string.action_save)) {
                     scope.launch {
                         val guard = AppGraph.loosenGuard
                         val results = buildList {
@@ -100,8 +85,35 @@ fun TemplateEditorScreen(nav: NavController, id: Long) {
                         }?.let { guardMessage(context, it) } ?: context.getString(R.string.template_no_change)
                         snackbar.showSnackbar(msg)
                     }
-                },
-            ) { Text(stringResource(R.string.action_save)) }
+                }
+            }
+        },
+    ) { padding ->
+        val template = t ?: return@AppScaffold
+        val chosen = labels ?: return@AppScaffold
+        Column(
+            Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(stringResource(PurposeTemplates.descriptionRes(template.id)), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            SectionCard(stringResource(R.string.template_length)) {
+                Stepper(stringResource(R.string.template_max), max, TEMPLATE_MAX_OPTIONS, { Format.minutes(context, it) }, { max = it })
+            }
+            Column {
+                GroupHeader(stringResource(R.string.template_screens))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                ) {
+                    Column {
+                        (allLabels + chosen).distinct().sorted().forEachIndexed { i, l ->
+                            if (i > 0) RowDivider()
+                            SelectRow(title = screenLabel(l), selected = l in chosen) { labels = if (l in chosen) chosen - l else chosen + l }
+                        }
+                    }
+                }
+            }
+            InfoNote(stringResource(R.string.rule_loosen_note))
         }
     }
 }
