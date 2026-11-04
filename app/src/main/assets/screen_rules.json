@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "rules": [
+    {"package": "com.instagram.android", "label": "reels", "viewId": "com.instagram.android:id/clips_viewer_view_pager", "text": null},
+    {"package": "com.instagram.android", "label": "reels", "viewId": null, "text": "Reels"},
+    {"package": "com.instagram.android", "label": "stories", "viewId": "com.instagram.android:id/reel_viewer_root", "text": null},
+    {"package": "com.instagram.android", "label": "feed", "viewId": "com.instagram.android:id/feed_tab", "text": null},
+    {"package": "com.instagram.android", "label": "explore", "viewId": "com.instagram.android:id/explore_tab", "text": null},
+    {"package": "com.google.android.youtube", "label": "shorts", "viewId": "com.google.android.youtube:id/reel_recycler", "text": null},
+    {"package": "com.google.android.youtube", "label": "home_feed", "viewId": null, "text": "Home"},
+    {"package": "com.zhiliaoapp.musically", "label": "feed", "viewId": null, "text": "For You"},
+    {"package": "com.facebook.katana", "label": "reels", "viewId": null, "text": "Reels"},
+    {"package": "com.facebook.katana", "label": "feed", "viewId": null, "text": "News Feed"},
+    {"package": "com.twitter.android", "label": "feed", "viewId": null, "text": "For you"},
+    {"package": "com.reddit.frontpage", "label": "feed", "viewId": null, "text": "Home"}
+  ]
+}

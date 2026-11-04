@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mirrors ui/theme/Color.kt so overlays (classic Views) match the Compose screens. -->
+    <color name="hl_background">#FF101418</color>
+    <color name="hl_surface">#FF1A2027</color>
+    <color name="hl_surface_high">#FF242C35</color>
+    <color name="hl_primary">#FF7FB8A4</color>
+    <color name="hl_on_primary">#FF06261C</color>
+    <color name="hl_text">#FFE6EAEE</color>
+    <color name="hl_text_muted">#FF9AA5B1</color>
+    <color name="hl_warning">#FFF2B35E</color>
+    <color name="hl_on_warning">#FF2B1A00</color>
+    <color name="hl_danger">#FFEF7C72</color>
+    <color name="hl_on_danger">#FF3B0906</color>
+    <color name="hl_bubble">#E6242C35</color>
+</resources>

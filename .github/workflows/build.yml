@@ -1,0 +1,45 @@
+name: build
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      # Until the four signing secrets are added, builds are signed with the non-secret
+      # keystore committed at signing/honest-public.jks (password "honestlockout", alias "honest").
+      # To keep updates installable, later upload THAT SAME keystore as SIGNING_KEY_BASE64
+      # (see signing/README.md) instead of making a new one.
+      - name: Decode keystore
+        run: |
+          if [ -n "$SIGNING_KEY_BASE64" ]; then
+            echo "$SIGNING_KEY_BASE64" | base64 -d > app/release.jks
+          else
+            cp signing/honest-public.jks app/release.jks
+          fi
+        env:
+          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
+      - name: Build release APK
+        run: chmod +x gradlew && ./gradlew assembleRelease --no-daemon --stacktrace
+        env:
+          KEYSTORE_PATH: release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'honestlockout' }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'honest' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'honestlockout' }}
+          BUILD_NUMBER: ${{ github.run_number }}
+      - name: Rename APK
+        run: cp app/build/outputs/apk/release/app-release.apk HonestLockout-${{ github.run_number }}.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Honest Lockout build ${{ github.run_number }}
+          files: HonestLockout-${{ github.run_number }}.apk
