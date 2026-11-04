@@ -1,5 +1,6 @@
 package com.honestlockout.app.ui.override
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +20,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -59,6 +62,8 @@ import com.honestlockout.app.ui.AppTextField
 import com.honestlockout.app.ui.BottomActionBar
 import com.honestlockout.app.ui.GroupHeader
 import com.honestlockout.app.ui.PrimaryButton
+import com.honestlockout.app.ui.RowDivider
+import com.honestlockout.app.ui.SelectRow
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.SectionCard
 import com.honestlockout.app.ui.nav.Routes
@@ -204,11 +209,18 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                 }
             }
             if (isCustom) {
-                SectionCard(stringResource(R.string.declare_custom_screens)) {
+                Column {
+                    GroupHeader(stringResource(R.string.declare_custom_screens))
                     val all = remember { AppGraph.screenRules.allLabels() }
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        all.forEach { l ->
-                            FilterChip(selected = l in labels, onClick = { labels = if (l in labels) labels - l else labels + l }, label = { Text(screenLabel(l)) })
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    ) {
+                        Column {
+                            all.forEachIndexed { i, l ->
+                                if (i > 0) RowDivider()
+                                SelectRow(title = screenLabel(l), selected = l in labels) { labels = if (l in labels) labels - l else labels + l }
+                            }
                         }
                     }
                 }
