@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Platform theme only (no AppCompat / MDC dependency). Compose draws everything inside. -->
+    <style name="Theme.HonestLockout" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/hl_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:colorAccent">@color/hl_primary</item>
+    </style>
+</resources>
