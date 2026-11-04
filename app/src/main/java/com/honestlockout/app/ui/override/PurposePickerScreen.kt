@@ -1,16 +1,29 @@
 package com.honestlockout.app.ui.override
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +33,8 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -28,11 +43,21 @@ import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
 import com.honestlockout.app.data.repo.Eligibility
 import com.honestlockout.app.data.rules.PurposeTemplates
+import com.honestlockout.app.ui.AppIcon
 import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.nav.Routes
 
 private data class PickerGate(val refusal: String?, val activeStrikes: Int)
+
+fun purposeIcon(id: Long): ImageVector = when (id) {
+    PurposeTemplates.ID_NAVIGATION -> Icons.Filled.Navigation
+    PurposeTemplates.ID_REPLY -> Icons.Filled.ChatBubble
+    PurposeTemplates.ID_LOOKUP -> Icons.Filled.Search
+    PurposeTemplates.ID_WORK -> Icons.Filled.Work
+    PurposeTemplates.ID_PAY -> Icons.Filled.AccountBalance
+    else -> Icons.Filled.Tune
+}
 
 /** Enabled purpose templates as cards (Custom last). A refusal banner shows when not eligible. */
 @Composable
@@ -49,10 +74,15 @@ fun PurposePickerScreen(nav: NavController, packageName: String?) {
     AppScaffold(title = stringResource(R.string.pick_title), onBack = { nav.popBackStack() }) { padding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (packageName != null) {
-                item { Text(stringResource(R.string.pick_for_app, Format.appLabel(context, packageName)), style = MaterialTheme.typography.titleMedium) }
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(vertical = 4.dp)) {
+                        AppIcon(packageName, 36)
+                        Text(stringResource(R.string.pick_for_app, Format.appLabel(context, packageName)), style = MaterialTheme.typography.titleMedium)
+                    }
+                }
             }
             gate.refusal?.let { msg ->
                 item {
@@ -69,14 +99,19 @@ fun PurposePickerScreen(nav: NavController, packageName: String?) {
                 Card(
                     modifier = Modifier.fillMaxWidth().alpha(if (allowed) 1f else 0.45f)
                         .clickable(enabled = allowed) { nav.navigate(Routes.declare(t.id, packageName)) },
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                 ) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(t.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                            Text(stringResource(R.string.pick_default_minutes, t.maxMinutes), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Box(
+                            Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center,
+                        ) { Icon(purposeIcon(t.id), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer) }
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(t.name, style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(PurposeTemplates.descriptionRes(t.id)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        Text(stringResource(PurposeTemplates.descriptionRes(t.id)), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.pick_default_minutes, t.maxMinutes), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }

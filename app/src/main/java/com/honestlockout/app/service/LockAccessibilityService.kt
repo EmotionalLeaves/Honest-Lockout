@@ -236,6 +236,7 @@ class LockAccessibilityService : AccessibilityService() {
             },
             onClose = { goHome(); overlay.removeFull() },
         )
+        Haptics.tap(this)
         main.postDelayed({ if (frontPackage == pkg || frontPackage in launchers) goHome() }, HOME_DELAY_MS)
         AppLog.w(TAG, "Locked $pkg: ${decision.reason}")
     }

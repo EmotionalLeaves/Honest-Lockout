@@ -28,6 +28,24 @@ class BlockRepository(private val db: AppDatabase) {
         }
     }
 
+    /** Bulk add (blocking a free app in any mode is tightening, so it applies at once). Returns how many were new. */
+    suspend fun addAll(packages: Collection<String>, mode: BlockMode, budgetMin: Int, scheduleId: Long?, now: Long = System.currentTimeMillis()): Int {
+        var added = 0
+        for (pkg in packages) {
+            if (rules.get(pkg) != null) continue
+            rules.insert(
+                BlockRule(
+                    packageName = pkg, mode = mode,
+                    dailyBudgetMin = if (mode == BlockMode.BUDGET) budgetMin else 0,
+                    scheduleId = if (mode == BlockMode.SCHEDULE) scheduleId else null,
+                    createdAt = now,
+                )
+            )
+            added++
+        }
+        return added
+    }
+
     suspend fun applyMode(packageName: String, mode: BlockMode, budgetMin: Int, scheduleId: Long?) {
         val existing = rules.get(packageName) ?: return
         rules.update(
