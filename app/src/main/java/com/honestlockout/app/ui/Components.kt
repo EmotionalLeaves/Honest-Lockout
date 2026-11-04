@@ -104,10 +104,16 @@ fun Stepper(
     format: (Int) -> String,
     onChange: (Int) -> Unit,
     enabled: Boolean = true,
+    hint: String? = null,
 ) {
     val idx = options.indexOf(value).let { if (it >= 0) it else options.indexOfFirst { o -> o >= value }.coerceAtLeast(0) }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+        Column(Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge)
+            if (hint != null) {
+                Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
         IconButton(enabled = enabled && idx > 0, onClick = { onChange(options[idx - 1]) }) {
             Icon(Icons.Filled.Remove, contentDescription = stringResource(R.string.cd_decrease))
         }

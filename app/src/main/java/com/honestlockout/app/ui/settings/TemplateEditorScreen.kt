@@ -40,6 +40,9 @@ import com.honestlockout.app.ui.guardMessage
 import com.honestlockout.app.ui.rangeOptions
 import kotlinx.coroutines.launch
 
+/** 1–60 by the minute, then coarser steps up to 12 h (Listen purposes run overnight). */
+private val TEMPLATE_MAX_OPTIONS = rangeOptions(1, 60) + rangeOptions(75, 180, 15) + rangeOptions(240, 720, 60)
+
 /** Max minutes and blocked screens of one purpose. Built-ins cannot be deleted. */
 @Composable
 fun TemplateEditorScreen(nav: NavController, id: Long) {
@@ -64,7 +67,7 @@ fun TemplateEditorScreen(nav: NavController, id: Long) {
         ) {
             Text(stringResource(PurposeTemplates.descriptionRes(template.id)), color = MaterialTheme.colorScheme.onSurfaceVariant)
             SectionCard {
-                Stepper(stringResource(R.string.template_max), max, rangeOptions(1, 120), { Format.minutes(context, it) }, { max = it })
+                Stepper(stringResource(R.string.template_max), max, TEMPLATE_MAX_OPTIONS, { Format.minutes(context, it) }, { max = it })
             }
             SectionCard(stringResource(R.string.template_screens)) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

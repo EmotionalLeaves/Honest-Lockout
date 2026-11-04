@@ -19,6 +19,8 @@ object PurposeTemplates {
     const val ID_WORK = 4L
     const val ID_PAY = 5L
     const val ID_CUSTOM = 6L
+    /** Added after the spec: background audio such as YouTube while falling asleep. */
+    const val ID_LISTEN = 7L
 
     /** Purposes still allowed while active strikes >= 4. */
     val allowedAtFourStrikes = setOf(ID_NAVIGATION, ID_PAY)
@@ -54,12 +56,16 @@ object PurposeTemplates {
             allowedPackages = "", blockedScreenLabels = "",
             expectedShape = ActivityShape.ANY, maxMinutes = 30, builtIn = true,
         ),
+        PurposeTemplate(
+            id = ID_LISTEN, name = context.getString(R.string.purpose_listen),
+            allowedPackages = "", blockedScreenLabels = "shorts,reels",
+            expectedShape = ActivityShape.LISTEN, maxMinutes = 480, builtIn = true,
+        ),
     )
 
-    /** Inserts the built-ins on first run only; later edits by the user are kept. */
+    /** Inserts any built-in that is missing (first run, or one added in an update); user edits are kept. */
     suspend fun ensureInserted(context: Context, dao: PurposeTemplateDao) {
-        if (dao.count() > 0) return
-        builtIns(context).forEach { dao.insert(it) }
+        builtIns(context).forEach { if (dao.get(it.id) == null) dao.insert(it) }
     }
 
     fun descriptionRes(id: Long): Int = when (id) {
@@ -68,6 +74,7 @@ object PurposeTemplates {
         ID_LOOKUP -> R.string.purpose_lookup_desc
         ID_WORK -> R.string.purpose_work_desc
         ID_PAY -> R.string.purpose_pay_desc
+        ID_LISTEN -> R.string.purpose_listen_desc
         else -> R.string.purpose_custom_desc
     }
 

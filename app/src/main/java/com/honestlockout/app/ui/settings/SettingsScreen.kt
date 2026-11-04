@@ -2,6 +2,7 @@ package com.honestlockout.app.ui.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,13 +13,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Badge
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -41,7 +47,9 @@ import com.honestlockout.app.AppGraph
 import com.honestlockout.app.BuildConfig
 import com.honestlockout.app.R
 import com.honestlockout.app.data.db.Strictness
+import com.honestlockout.app.data.rules.PurposeTemplates
 import com.honestlockout.app.data.settings.Keys
+import com.honestlockout.app.data.settings.Settings
 import com.honestlockout.app.engine.GuardResult
 import com.honestlockout.app.engine.SettingChange
 import com.honestlockout.app.ui.AppScaffold
@@ -53,7 +61,10 @@ import com.honestlockout.app.ui.setup.PermissionChecks
 import com.honestlockout.app.ui.setup.StepId
 import kotlinx.coroutines.launch
 
-/** Every change goes through LoosenGuard and reports Applied or Queued. */
+/**
+ * Settings in plain language: how changes work, a strictness preset, what a strike costs, timers,
+ * purposes, then the advanced bits. Every change goes through LoosenGuard and says Applied or Queued.
+ */
 @Composable
 fun SettingsScreen(nav: NavController) {
     val context = LocalContext.current
@@ -91,56 +102,51 @@ fun SettingsScreen(nav: NavController) {
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SectionCard(stringResource(R.string.settings_strictness)) {
-                Text(stringResource(R.string.settings_strictness_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                val levels = Strictness.entries
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    levels.forEachIndexed { i, level ->
-                        SegmentedButton(
-                            selected = s.strictness == level,
-                            shape = SegmentedButtonDefaults.itemShape(i, levels.size),
-                            onClick = {
-                                scope.launch {
-                                    val guard = AppGraph.loosenGuard
-                                    val results = mutableListOf(guard.request(SettingChange.SetSetting(Keys.STRICTNESS, level.name)))
-                                    StrictnessPresets.values(level).forEach { (k, v) ->
-                                        if (s.int(k) != v) results += guard.request(SettingChange.SetSetting(k, v.toString()))
-                                    }
-                                    report(results)
-                                }
-                            },
-                        ) {
-                            Text(
-                                stringResource(
-                                    when (level) {
-                                        Strictness.LENIENT -> R.string.strict_lenient
-                                        Strictness.NORMAL -> R.string.strict_normal
-                                        Strictness.STRICT -> R.string.strict_strict
-                                    }
-                                )
-                            )
-                        }
+            HowChangesWork(s, pendingCount) { nav.navigate(Routes.PENDING) }
+
+            StrictnessPicker(s) { level ->
+                scope.launch {
+                    val guard = AppGraph.loosenGuard
+                    val results = mutableListOf(guard.request(SettingChange.SetSetting(Keys.STRICTNESS, level.name)))
+                    StrictnessPresets.values(level).forEach { (k, v) ->
+                        if (s.int(k) != v) results += guard.request(SettingChange.SetSetting(k, v.toString()))
                     }
+                    report(results)
                 }
             }
 
             LadderSettings(s, onInt)
             TimingSettings(s, onInt)
-            ThresholdSettings(s, onInt)
 
             ExpandableSection(stringResource(R.string.settings_templates), stringResource(R.string.settings_templates_desc)) {
-                templates.forEach { t ->
+                templates.forEachIndexed { i, t ->
+                    if (i > 0) HorizontalDivider()
                     Row(
                         Modifier.fillMaxWidth().clickable { nav.navigate(Routes.template(t.id)) }.padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(t.name, Modifier.weight(1f))
-                        Text(stringResource(R.string.pick_default_minutes, t.maxMinutes), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Column(Modifier.weight(1f)) {
+                            Text(t.name, style = MaterialTheme.typography.bodyLarge)
+                            val screens = PurposeTemplates.split(t.blockedScreenLabels)
+                            Text(
+                                if (screens.isEmpty()) stringResource(R.string.template_row_no_screens, t.maxMinutes)
+                                else stringResource(R.string.template_row, t.maxMinutes, screens.joinToString(", ")),
+                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
                     }
                 }
             }
 
-            ExpandableSection(stringResource(R.string.settings_screen_rules), stringResource(R.string.settings_screen_rules_desc)) {
+            ExpandableSection(stringResource(R.string.settings_advanced), stringResource(R.string.settings_advanced_desc)) {
+                ThresholdSettings(s, onInt)
+                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Text(stringResource(R.string.settings_screen_rules), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.settings_screen_rules_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { nav.navigate(Routes.INSPECTOR) }) {
+                    Text(stringResource(R.string.rules_inspect))
+                }
                 OutlinedButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
@@ -150,34 +156,18 @@ fun SettingsScreen(nav: NavController) {
                         }
                     },
                 ) { Text(stringResource(R.string.rules_reload)) }
-                OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { nav.navigate(Routes.INSPECTOR) }) {
-                    Text(stringResource(R.string.rules_inspect))
-                }
-            }
-
-            SectionCard {
-                Row(
-                    Modifier.fillMaxWidth().clickable { nav.navigate(Routes.PENDING) }.padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(stringResource(R.string.settings_pending), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
-                    if (pendingCount > 0) Badge { Text("$pendingCount") }
-                }
-            }
-
-            SectionCard(stringResource(R.string.settings_device_admin)) {
+                HorizontalDivider(Modifier.padding(vertical = 4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.settings_device_admin_desc), Modifier.weight(1f))
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.settings_device_admin), style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.settings_device_admin_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                     Switch(
                         checked = adminActive,
                         onCheckedChange = { on ->
                             if (on) {
                                 AppGraph.guardSuppressedUntil = System.currentTimeMillis() + 2 * 60_000L
-                                runCatching {
-                                    adminLauncher.launch(
-                                        PermissionChecks.intentFor(context, StepId.DEVICE_ADMIN)
-                                    )
-                                }
+                                runCatching { adminLauncher.launch(PermissionChecks.intentFor(context, StepId.DEVICE_ADMIN)) }
                             } else {
                                 scope.launch { report(listOf(AppGraph.loosenGuard.request(SettingChange.DisableDeviceAdmin()))) }
                             }
@@ -189,11 +179,84 @@ fun SettingsScreen(nav: NavController) {
             OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { nav.navigate(Routes.BREAKGLASS) }) {
                 Text(stringResource(R.string.settings_break_glass), color = MaterialTheme.colorScheme.error)
             }
-
-            SectionCard(stringResource(R.string.settings_about)) {
-                Text(stringResource(R.string.about_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE))
-            }
+            Text(
+                stringResource(R.string.about_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
             Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+/** The one rule that explains every other setting, plus the queue of waiting changes. */
+@Composable
+private fun HowChangesWork(s: Settings, pendingCount: Int, onOpenPending: () -> Unit) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Filled.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text(stringResource(R.string.settings_how_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+            Text(stringResource(R.string.settings_how_body, s.loosenDelayHours), color = MaterialTheme.colorScheme.onPrimaryContainer)
+            if (pendingCount > 0) {
+                Row(
+                    Modifier.fillMaxWidth().clickable(onClick = onOpenPending).padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        stringResource(R.string.settings_pending_count, pendingCount), Modifier.weight(1f),
+                        style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+            }
+        }
+    }
+}
+
+/** Three presets as selectable cards, each saying exactly what it changes. */
+@Composable
+private fun StrictnessPicker(s: Settings, onPick: (Strictness) -> Unit) {
+    SectionCard(stringResource(R.string.settings_strictness)) {
+        Text(stringResource(R.string.settings_strictness_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Strictness.entries.forEach { level ->
+            val selected = s.strictness == level
+            Card(
+                modifier = Modifier.fillMaxWidth().clickable { if (!selected) onPick(level) },
+                shape = RoundedCornerShape(16.dp),
+                border = if (selected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+            ) {
+                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = selected, onClick = { if (!selected) onPick(level) })
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            stringResource(
+                                when (level) {
+                                    Strictness.LENIENT -> R.string.strict_lenient
+                                    Strictness.NORMAL -> R.string.strict_normal
+                                    Strictness.STRICT -> R.string.strict_strict
+                                }
+                            ),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        Text(
+                            stringResource(
+                                when (level) {
+                                    Strictness.LENIENT -> R.string.strict_lenient_desc
+                                    Strictness.NORMAL -> R.string.strict_normal_desc
+                                    Strictness.STRICT -> R.string.strict_strict_desc
+                                }
+                            ),
+                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
     }
 }
