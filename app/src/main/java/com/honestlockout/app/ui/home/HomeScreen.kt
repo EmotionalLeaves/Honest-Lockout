@@ -69,7 +69,7 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = viewModel()) {
     AppScaffold(title = stringResource(R.string.app_name), onBack = null) { padding ->
         Column(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AnimatedContent(targetState = s.active != null, label = "hero") { running ->
                 if (running) ActiveHero(s, vm) else StatusHero(s, nav)
@@ -104,7 +104,7 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = viewModel()) {
                 Column {
                     NavRow(Icons.Filled.Block, Primary, stringResource(R.string.home_block_list), stringResource(R.string.home_tile_block_sub, s.blockedCount)) { nav.navigate(Routes.BLOCKLIST) }
                     HorizontalDivider(Modifier.padding(start = 60.dp), color = MaterialTheme.colorScheme.outline)
-                    NavRow(Icons.Filled.History, Color(0xFF64D2FF), stringResource(R.string.home_history), stringResource(R.string.home_tile_history_sub)) { nav.navigate(Routes.HISTORY) }
+                    NavRow(Icons.Filled.History, Color(0xFF6FA8DC), stringResource(R.string.home_history), stringResource(R.string.home_tile_history_sub)) { nav.navigate(Routes.HISTORY) }
                     HorizontalDivider(Modifier.padding(start = 60.dp), color = MaterialTheme.colorScheme.outline)
                     NavRow(Icons.Filled.Settings, TextMuted, stringResource(R.string.home_settings), stringResource(R.string.home_tile_settings_sub), badge = s.pendingCount) { nav.navigate(Routes.SETTINGS) }
                     HorizontalDivider(Modifier.padding(start = 60.dp), color = MaterialTheme.colorScheme.outline)

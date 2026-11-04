@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -34,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -152,18 +149,18 @@ private fun OverrideRow(o: Override, strike: Strike?, purpose: String, now: Long
         modifier = Modifier.fillMaxWidth().alpha(if (forgiven) 0.5f else 1f),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     "${Format.dateTime(context, o.startedAt)} · ${Format.appLabel(context, o.packageName)}",
-                    style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.labelMedium, color = TextMuted, modifier = Modifier.weight(1f),
                 )
                 ResultChip(o.endReason, forgiven)
             }
             Text(o.statement, style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(R.string.history_planned_actual, purpose, o.plannedMin, actual), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.history_planned_actual, purpose, o.plannedMin, actual), style = MaterialTheme.typography.bodySmall, color = TextMuted)
             if (strike != null) {
-                Text(OverlayTexts.reasonName(context, strike.reason), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(OverlayTexts.reasonName(context, strike.reason), style = MaterialTheme.typography.bodySmall, color = Danger)
                 StrikeFooter(strike, now, onAppeal)
             }
         }
@@ -178,8 +175,8 @@ private fun StrikeRow(s: Strike, now: Long, onAppeal: (Strike) -> Unit) {
         modifier = Modifier.fillMaxWidth().alpha(if (greyed) 0.5f else 1f),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(Format.dateTime(context, s.createdAt), style = MaterialTheme.typography.labelLarge)
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(Format.dateTime(context, s.createdAt), style = MaterialTheme.typography.labelMedium, color = TextMuted)
             Text(
                 if (s.reason == StrikeReason.APPEAL_REVERSED) stringResource(R.string.history_appeal_row)
                 else stringResource(R.string.history_strike_row, OverlayTexts.reasonName(context, s.reason)),
@@ -208,7 +205,7 @@ private fun ResultChip(reason: EndReason?, forgiven: Boolean) {
         EndReason.STRIKE -> stringResource(if (forgiven) R.string.result_strike_forgiven else R.string.result_strike) to Danger
         EndReason.TAMPER -> stringResource(R.string.result_tamper) to Warning
         EndReason.BREAK_GLASS -> stringResource(R.string.result_break_glass) to Warning
-        null -> stringResource(R.string.result_running) to Color.White
+        null -> stringResource(R.string.result_running) to MaterialTheme.colorScheme.onSurface
     }
-    AssistChip(onClick = {}, label = { Text(label) }, colors = AssistChipDefaults.assistChipColors(labelColor = color))
+    Text(label.uppercase(), style = MaterialTheme.typography.labelMedium, color = color)
 }

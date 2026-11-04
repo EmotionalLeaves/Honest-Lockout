@@ -74,8 +74,8 @@
     <string name="home_lock_it">End and lock</string>
     <string name="home_today">Screen time today</string>
     <string name="home_oldest_expires">Oldest expires %1$s</string>
-    <string name="home_next_override_at">Next override allowed at %1$s</string>
-    <string name="home_next_override_now">Next override allowed now</string>
+    <string name="home_next_override_at">Overrides available at %1$s</string>
+    <string name="home_next_override_now">Overrides available now</string>
     <string name="home_start_override">Start an override</string>
     <string name="home_block_list">Block list</string>
     <string name="home_history">History</string>
@@ -86,7 +86,7 @@
     <string name="blocklist_title">Block list</string>
     <string name="blocklist_add">Add app</string>
     <string name="blocklist_empty">No blocked apps yet. Tap Add app to choose one.</string>
-    <string name="apppicker_title">Choose an app</string>
+    <string name="apppicker_title">Add apps</string>
     <string name="apppicker_search">Search apps</string>
     <string name="apppicker_empty">No apps to show.</string>
     <string name="mode_always">Always</string>
@@ -115,7 +115,7 @@
     <string name="schedule_in_use">A block rule uses this schedule, so it cannot be deleted.</string>
 
     <!-- Override -->
-    <string name="pick_title">What is it for?</string>
+    <string name="pick_title">Purpose</string>
     <string name="pick_for_app">For %1$s</string>
     <string name="pick_default_minutes">up to %1$d min</string>
     <string name="purpose_navigation">Navigation</string>
@@ -177,8 +177,8 @@
     <string name="lock_reason_schedule">Blocked until %1$s</string>
     <string name="lock_reason_lockout">Locked out until %1$s after a strike</string>
     <string name="lock_reason_break_glass_wait">Emergency unlock starts at %1$s</string>
-    <string name="lock_next_now">An override is allowed now.</string>
-    <string name="lock_next_at">Next override allowed at %1$s</string>
+    <string name="lock_next_now">Overrides available</string>
+    <string name="lock_next_at">Overrides available at %1$s</string>
     <string name="banner_warning_html"><![CDATA[This doesn\'t match <i>%1$s</i>. Return within %2$d s or end the override.]]></string>
     <string name="banner_checkin_html"><![CDATA[Still doing: <i>%1$s</i>?]]></string>
     <string name="banner_seconds">%1$d s</string>
@@ -338,13 +338,13 @@
     <string name="home_budget_left_short">%1$d of %2$d min left</string>
     <string name="home_hero_protected">Blocking is on</string>
     <string name="home_hero_service_off">Blocking is off</string>
-    <string name="home_hero_no_apps">No apps are blocked yet.</string>
+    <string name="home_hero_no_apps">Choose the apps to block.</string>
     <string name="home_ring_min_left">min left</string>
-    <string name="home_tile_block_sub">%1$d app(s) · add or edit</string>
-    <string name="home_tile_history_sub">Overrides and screen time</string>
-    <string name="home_tile_settings_sub">Strictness, ladder, rules</string>
-    <string name="home_tile_emergency_sub">Costs 2 strikes</string>
-    <string name="declare_label">What exactly will you do?</string>
+    <string name="home_tile_block_sub">%1$d apps</string>
+    <string name="home_tile_history_sub">Overrides, screen time</string>
+    <string name="home_tile_settings_sub">Strictness, strikes, timing</string>
+    <string name="home_tile_emergency_sub">Unlock everything · 2 strikes</string>
+    <string name="declare_label">What will you do?</string>
     <string name="declare_choose_app">Choose an app</string>
     <string name="pick_last_time">Same as last time · %1$s · %2$d min</string>
     <string name="countdown_hint">Starts when the timer ends. Cancel any time.</string>
@@ -383,7 +383,7 @@
     </string-array>
     <string name="declare_listen_note">No check-ins. You can have the app open with the screen on for up to %1$d min in total to pick what to play. Playback isn\'t stopped when time\'s up, and the time\'s-up notification is silent.</string>
     <string name="settings_how_title">How changes work</string>
-    <string name="settings_how_body">Stricter changes apply right away. Looser ones wait %1$d hours, so a decision made in a weak moment can\'t undo the rest. You can cancel a waiting change at any time.</string>
+    <string name="settings_how_body">Stricter changes apply now. Looser changes apply after %1$d hours and can be cancelled while they wait.</string>
     <string name="settings_pending_count">%1$d change(s) waiting · view</string>
     <string name="strict_lenient_desc">45 s to return after a warning. Check-ins every 5–10 min. Scrolling patterns are not judged; blocked screens need 10 s to count.</string>
     <string name="strict_normal_desc">30 s to return after a warning. Check-ins every 3–8 min. Scrolling judged over 2 minutes.</string>
@@ -421,5 +421,5 @@
     <string name="shape_passive_hint">Passive: lots of scrolling or tapping gets a warning.</string>
     <string name="shape_any_hint">Any: activity isn\'t checked. Only the time and blocked screens apply.</string>
     <string name="shape_listen_hint">Listen: other apps and a locked screen are fine; time on screen in the app is limited.</string>
-    <string name="home_hero_ready">%1$d app(s) blocked. Overrides allowed now.</string>
+    <string name="home_hero_ready">%1$d apps blocked · overrides available</string>
 </resources>
