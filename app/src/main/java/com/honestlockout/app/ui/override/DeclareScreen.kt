@@ -68,7 +68,7 @@ private data class DeclareSetup(val template: PurposeTemplate, val apps: List<St
 
 /** Statement (with suggestions), app (sheet with search), minutes (quick chips + slider), Custom extras. */
 @Composable
-fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, extend: Boolean) {
+fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, extend: Boolean, presetStatement: String? = null) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -87,7 +87,7 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
         value = DeclareSetup(t, apps.sortedBy { Format.appLabel(context, it).lowercase() }, max, active?.packageName)
     }
 
-    var statement by rememberSaveable { mutableStateOf("") }
+    var statement by rememberSaveable { mutableStateOf(presetStatement.orEmpty()) }
     var app by rememberSaveable { mutableStateOf(presetPackage) }
     var minutes by rememberSaveable { mutableIntStateOf(-1) }
     var labels by rememberSaveable { mutableStateOf(listOf<String>()) }

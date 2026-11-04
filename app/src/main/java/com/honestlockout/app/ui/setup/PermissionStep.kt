@@ -9,6 +9,15 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AssistChip
@@ -37,6 +46,16 @@ data class PermissionStep(
     val checkable: Boolean = true,
     val optional: Boolean = false,
 )
+
+fun stepIcon(id: StepId): ImageVector = when (id) {
+    StepId.NOTIFICATIONS -> Icons.Filled.Notifications
+    StepId.USAGE -> Icons.Filled.Timer
+    StepId.BATTERY, StepId.SAMSUNG_BATTERY -> Icons.Filled.BatteryChargingFull
+    StepId.OVERLAY -> Icons.Filled.Layers
+    StepId.RESTRICTED -> Icons.Filled.LockOpen
+    StepId.ACCESSIBILITY -> Icons.Filled.Visibility
+    StepId.DEVICE_ADMIN -> Icons.Filled.AdminPanelSettings
+}
 
 object PermissionChecks {
     val isSamsung: Boolean get() = Build.MANUFACTURER.equals("samsung", ignoreCase = true)

@@ -1,5 +1,7 @@
 package com.honestlockout.app.ui.nav
 
+import android.net.Uri
+
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -45,7 +47,7 @@ object Routes {
     const val BLOCKRULE = "blockrule/{pkg}?new={new}"
     const val SCHEDULE = "schedule/{id}"
     const val OVERRIDE_PICK = "override/pick?pkg={pkg}"
-    const val OVERRIDE_DECLARE = "override/declare/{templateId}?pkg={pkg}&extend={extend}"
+    const val OVERRIDE_DECLARE = "override/declare/{templateId}?pkg={pkg}&extend={extend}&stmt={stmt}"
     const val OVERRIDE_EXTEND = "override/extend"
     const val OVERRIDE_COUNTDOWN = "override/countdown"
     const val HISTORY = "history"
@@ -58,8 +60,8 @@ object Routes {
     fun blockRule(pkg: String, isNew: Boolean = false) = "blockrule/$pkg?new=$isNew"
     fun schedule(id: Long?) = "schedule/${id ?: "new"}"
     fun pick(pkg: String? = null) = if (pkg == null) "override/pick" else "override/pick?pkg=$pkg"
-    fun declare(templateId: Long, pkg: String?, extend: Boolean = false) =
-        "override/declare/$templateId?pkg=${pkg.orEmpty()}&extend=$extend"
+    fun declare(templateId: Long, pkg: String?, extend: Boolean = false, statement: String? = null) =
+        "override/declare/$templateId?pkg=${pkg.orEmpty()}&extend=$extend&stmt=${Uri.encode(statement.orEmpty())}"
     fun template(id: Long) = "template/$id"
 
     /** The lock screen opens "override/<package>"; it lands on the purpose picker for that app. */
@@ -115,6 +117,7 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
                 navArgument("templateId") { type = NavType.LongType },
                 navArgument("pkg") { type = NavType.StringType; nullable = true; defaultValue = null },
                 navArgument("extend") { type = NavType.BoolType; defaultValue = false },
+                navArgument("stmt") { type = NavType.StringType; nullable = true; defaultValue = null },
             ),
         ) {
             DeclareScreen(
@@ -122,6 +125,7 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
                 templateId = it.arguments?.getLong("templateId") ?: 0L,
                 presetPackage = it.arguments?.getString("pkg")?.takeIf { p -> p.isNotEmpty() },
                 extend = it.arguments?.getBoolean("extend") ?: false,
+                presetStatement = it.arguments?.getString("stmt")?.takeIf { p -> p.isNotEmpty() },
             )
         }
         composable(Routes.OVERRIDE_EXTEND) { ExtendEntry(nav) }

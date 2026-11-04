@@ -49,6 +49,12 @@ class OverrideRepository(
     fun templates(): Flow<List<PurposeTemplate>> = templates.getAll()
 
     suspend fun getActive(): Override? = dao.getActive()
+
+    /** The most recent clean override (for this app when given), for the "same as last time" shortcut. */
+    suspend fun lastClean(packageName: String?): Override? = dao.lastN(30).firstOrNull {
+        (packageName == null || it.packageName == packageName) &&
+            (it.endReason == EndReason.DONE || it.endReason == EndReason.TIMEOUT)
+    }
     suspend fun get(id: Long): Override? = dao.get(id)
     suspend fun template(id: Long): PurposeTemplate? = templates.get(id)
     suspend fun updateTemplate(t: PurposeTemplate) = templates.update(t)

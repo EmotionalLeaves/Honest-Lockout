@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
+import com.honestlockout.app.data.db.entities.Override
 import com.honestlockout.app.data.repo.Eligibility
 import com.honestlockout.app.data.rules.PurposeTemplates
 import com.honestlockout.app.ui.AppIcon
@@ -48,7 +49,7 @@ import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.nav.Routes
 
-private data class PickerGate(val refusal: String?, val activeStrikes: Int)
+private data class PickerGate(val refusal: String?, val activeStrikes: Int, val last: Override? = null)
 
 fun purposeIcon(id: Long): ImageVector = when (id) {
     PurposeTemplates.ID_NAVIGATION -> Icons.Filled.Navigation
@@ -67,7 +68,8 @@ fun PurposePickerScreen(nav: NavController, packageName: String?) {
     val gate by produceState(PickerGate(null, 0), packageName) {
         val now = System.currentTimeMillis()
         val e = AppGraph.overrideRepo.eligibility(packageName, null, now)
-        value = PickerGate((e as? Eligibility.Refused)?.message, AppGraph.strikeRepo.activeCount(now))
+        val last = AppGraph.overrideRepo.lastClean(packageName)
+        value = PickerGate((e as? Eligibility.Refused)?.message, AppGraph.strikeRepo.activeCount(now), last)
     }
     val shown = templates.filter { it.enabled }.sortedBy { if (it.id == PurposeTemplates.ID_CUSTOM) Long.MAX_VALUE else it.id }
 
@@ -88,6 +90,24 @@ fun PurposePickerScreen(nav: NavController, packageName: String?) {
                 item {
                     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                         Text(msg, Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onErrorContainer)
+                    }
+                }
+            }
+            val last = gate.last
+            val lastTemplate = last?.let { l -> templates.firstOrNull { it.id == l.purposeId && it.enabled } }
+            if (gate.refusal == null && last != null && lastTemplate != null &&
+                (gate.activeStrikes < 4 || lastTemplate.id in PurposeTemplates.allowedAtFourStrikes)
+            ) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().clickable { nav.navigate(Routes.declare(lastTemplate.id, packageName ?: last.packageName, statement = last.statement)) },
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    ) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(stringResource(R.string.pick_last_time, lastTemplate.name, last.plannedMin), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                            Text(last.statement, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        }
                     }
                 }
             }

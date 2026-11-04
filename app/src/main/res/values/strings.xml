@@ -349,6 +349,7 @@
     <string name="home_tile_emergency_sub">Costs 2 strikes</string>
     <string name="declare_label">What exactly will you do?</string>
     <string name="declare_choose_app">Choose an app</string>
+    <string name="pick_last_time">Same as last time · %1$s · %2$d min</string>
     <string name="countdown_hint">Take a breath. Still want this?</string>
     <string name="settings_timing_desc">Grace, countdown, check-ins, windows</string>
     <string name="settings_templates_desc">Max minutes and blocked screens per purpose</string>
