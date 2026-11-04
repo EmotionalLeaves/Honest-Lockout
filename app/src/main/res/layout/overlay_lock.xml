@@ -86,12 +86,12 @@
         <Button
             android:id="@+id/lock_close"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/hl_button_secondary"
+            android:layout_height="48dp"
+            android:layout_marginTop="4dp"
+            android:background="@android:color/transparent"
             android:text="@string/lock_close"
             android:textAllCaps="false"
             android:textColor="@color/hl_text_muted"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
     </LinearLayout>
 </FrameLayout>

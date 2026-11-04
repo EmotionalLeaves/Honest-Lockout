@@ -1,6 +1,7 @@
 package com.honestlockout.app.ui.home
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,10 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,6 +42,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -77,7 +79,10 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = viewModel()) {
 
             Column {
                 GroupHeader(stringResource(R.string.home_today))
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                ) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                             Stat(Format.minutes(context, s.todayMinutes), stringResource(R.string.home_stat_screen_time))
@@ -100,15 +105,18 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = viewModel()) {
                 }
             }
 
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+            ) {
                 Column {
-                    NavRow(Icons.Filled.Block, Primary, stringResource(R.string.home_block_list), stringResource(R.string.home_tile_block_sub, s.blockedCount)) { nav.navigate(Routes.BLOCKLIST) }
+                    NavRow(Icons.Outlined.Block, Primary, stringResource(R.string.home_block_list), stringResource(R.string.home_tile_block_sub, s.blockedCount)) { nav.navigate(Routes.BLOCKLIST) }
                     HorizontalDivider(Modifier.padding(start = 60.dp), color = MaterialTheme.colorScheme.outline)
-                    NavRow(Icons.Filled.History, Color(0xFF6FA8DC), stringResource(R.string.home_history), stringResource(R.string.home_tile_history_sub)) { nav.navigate(Routes.HISTORY) }
+                    NavRow(Icons.Outlined.History, MaterialTheme.colorScheme.onSurface, stringResource(R.string.home_history), stringResource(R.string.home_tile_history_sub)) { nav.navigate(Routes.HISTORY) }
                     HorizontalDivider(Modifier.padding(start = 60.dp), color = MaterialTheme.colorScheme.outline)
-                    NavRow(Icons.Filled.Settings, TextMuted, stringResource(R.string.home_settings), stringResource(R.string.home_tile_settings_sub), badge = s.pendingCount) { nav.navigate(Routes.SETTINGS) }
+                    NavRow(Icons.Outlined.Settings, MaterialTheme.colorScheme.onSurface, stringResource(R.string.home_settings), stringResource(R.string.home_tile_settings_sub), badge = s.pendingCount) { nav.navigate(Routes.SETTINGS) }
                     HorizontalDivider(Modifier.padding(start = 60.dp), color = MaterialTheme.colorScheme.outline)
-                    NavRow(Icons.Filled.LockOpen, Danger, stringResource(R.string.home_emergency_unlock), stringResource(R.string.home_tile_emergency_sub)) { nav.navigate(Routes.BREAKGLASS) }
+                    NavRow(Icons.Outlined.LockOpen, Danger, stringResource(R.string.home_emergency_unlock), stringResource(R.string.home_tile_emergency_sub)) { nav.navigate(Routes.BREAKGLASS) }
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -123,8 +131,8 @@ private fun NavRow(icon: ImageVector, tint: Color, title: String, subtitle: Stri
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Box(Modifier.size(30.dp).clip(RoundedCornerShape(8.dp)).background(tint), contentAlignment = Alignment.Center) {
-            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+        Box(Modifier.size(32.dp).clip(RoundedCornerShape(9.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh), contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
         }
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge)
@@ -144,15 +152,16 @@ private fun StatusHero(s: HomeState, nav: NavController) {
     val context = LocalContext.current
     val ok = s.accessibilityOn
     Card(
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(12.dp).clip(CircleShape).background(if (ok) Primary else Danger))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(Modifier.size(8.dp).clip(CircleShape).background(if (ok) Primary else Danger))
                 Text(
-                    stringResource(if (ok) R.string.home_hero_protected else R.string.home_hero_service_off),
-                    style = MaterialTheme.typography.headlineSmall,
+                    stringResource(if (ok) R.string.home_hero_protected else R.string.home_hero_service_off).uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.2.sp), color = TextMuted,
                 )
             }
             Text(
@@ -162,7 +171,7 @@ private fun StatusHero(s: HomeState, nav: NavController) {
                     s.nextOverrideAt != null -> stringResource(R.string.home_next_override_at, Format.dateTime(context, s.nextOverrideAt))
                     else -> stringResource(R.string.home_hero_ready, s.blockedCount)
                 },
-                style = MaterialTheme.typography.bodyLarge, color = TextMuted,
+                style = MaterialTheme.typography.titleLarge,
             )
             Button(
                 onClick = { nav.navigate(if (s.blockedCount == 0) Routes.APPPICKER else Routes.pick()) },
