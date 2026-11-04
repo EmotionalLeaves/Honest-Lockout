@@ -58,6 +58,7 @@ class OverrideRepository(
      * [templateId] may be null when only the global conditions should be checked.
      */
     suspend fun eligibility(packageName: String?, templateId: Long?, now: Long, extending: Boolean = false): Eligibility {
+        endIfExpired(now)
         strikes.activeGlobalLockout(now)?.let {
             return Eligibility.Refused(context.getString(R.string.refuse_global_lockout, Format.time(context, it.until)))
         }
@@ -73,6 +74,16 @@ class OverrideRepository(
             return Eligibility.Refused(context.getString(R.string.refuse_override_active))
         }
         return Eligibility.Ok
+    }
+
+    /**
+     * An active row past its planned end whose service never ran (e.g. the process died) is
+     * ended as TIMEOUT so it cannot grant access or block new overrides forever.
+     */
+    suspend fun endIfExpired(now: Long): Boolean {
+        val o = dao.getActive() ?: return false
+        if (now < o.startedAt + o.plannedMin * 60_000L) return false
+        return end(EndReason.TIMEOUT, now) != null
     }
 
     /** Extend is refused on the third Extend in a row. */
@@ -92,29 +103,32 @@ class OverrideRepository(
         }
         val chain = if (d.isExtend) settings.snapshot().extendChain + 1 else 0
         settings.setExtendChain(chain)
-        val id = dao.insert(
-            Override(
-                packageName = d.packageName, purposeId = d.templateId, statement = d.statement.trim(),
-                startedAt = now, plannedMin = d.minutes,
-            )
+        if (!d.isExtend) settings.setExtendChainStartedAt(now)
+        val row = Override(
+            packageName = d.packageName, purposeId = d.templateId, statement = d.statement.trim(),
+            startedAt = now, plannedMin = d.minutes,
         )
+        val id = dao.insert(row)
         AppLog.w("HL/Engine", "Override $id started: ${d.packageName} for ${d.minutes} min")
-        return dao.get(id)!!
+        return row.copy(id = id)
     }
 
     /**
      * Ends the active override. DONE, CONFESSED and TIMEOUT are clean runs: they grow the
      * clean-run streak and may forgive the oldest strike. STRIKE resets the streak.
+     * An override replaced by Extend ends DONE but does not count ([countsAsCleanRun] = false),
+     * so Extend cannot be used to farm forgiveness.
      */
-    suspend fun end(reason: EndReason, now: Long): EndOutcome? {
+    suspend fun end(reason: EndReason, now: Long, countsAsCleanRun: Boolean = true): EndOutcome? {
         val active = dao.getActive() ?: return null
+        // Atomic: when two paths race (service, boot, break-glass) only the first one ends it.
+        if (dao.endIfActive(active.id, now, reason) != 1) return null
         val ended = active.copy(endedAt = now, endReason = reason)
-        dao.update(ended)
         AppLog.w("HL/Engine", "Override ${active.id} ended: $reason")
         var forgave = false
         val s = settings.snapshot()
         when (reason) {
-            EndReason.DONE, EndReason.CONFESSED, EndReason.TIMEOUT -> {
+            EndReason.DONE, EndReason.CONFESSED, EndReason.TIMEOUT -> if (countsAsCleanRun) {
                 val streak = s.cleanRunStreak + 1
                 if (streak >= s.cleanRunsToForgive && strikes.forgiveOldest(now)) {
                     forgave = true

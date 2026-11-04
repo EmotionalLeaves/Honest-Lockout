@@ -31,8 +31,8 @@ class BlockDecider(
         // 3. Break-glass unlock.
         val s = settings.snapshot()
         if (s.breakGlassUntil > now) return Decision.Allow
-        // 4. Active override for this app, or for a package its purpose allows.
-        db.overrideDao().getActive()?.let { o ->
+        // 4. Active override for this app, or for a package its purpose allows (never past its end).
+        db.overrideDao().getActive()?.takeIf { now < it.startedAt + it.plannedMin * 60_000L }?.let { o ->
             if (o.packageName == packageName) return Decision.AllowedByOverride(o.id)
             val template = db.purposeTemplateDao().get(o.purposeId)
             if (template != null && packageName in PurposeTemplates.split(template.allowedPackages)) {

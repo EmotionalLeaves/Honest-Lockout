@@ -1,6 +1,8 @@
 package com.honestlockout.app.service
 
 import android.accessibilityservice.AccessibilityService
+import android.os.Handler
+import android.os.Looper
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import com.honestlockout.app.AppGraph
@@ -10,6 +12,9 @@ import com.honestlockout.app.data.rules.ScreenRulesLoader
 import com.honestlockout.app.data.repo.PendingChangeRepository
 import com.honestlockout.app.engine.SettingChange
 import com.honestlockout.app.overlay.OverlayController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 /**
@@ -22,14 +27,22 @@ class SettingsGuard(private val service: AccessibilityService) {
     private val appName = service.getString(R.string.app_name).lowercase()
     private val keywords = service.resources.getStringArray(R.array.guard_keywords).map { it.lowercase() }
 
+    private val main = Handler(Looper.getMainLooper())
+
     @Volatile var connectedAt: Long = System.currentTimeMillis()
     @Volatile private var active = false
 
-    fun isSettingsPackage(pkg: String, windowTitle: CharSequence?): Boolean =
-        pkg == "com.android.settings" || pkg == "com.samsung.android.settings" ||
-            (windowTitle?.toString()?.contains("Settings", ignoreCase = true) == true)
+    fun isSystemSettings(pkg: String): Boolean = pkg in SYSTEM_SETTINGS
 
-    /** Recomputed by the service whenever the database changes enough to matter (cheap). */
+    /** System settings packages, or any window whose title contains "Settings". */
+    fun isSettingsPackage(pkg: String, windowTitle: CharSequence?): Boolean =
+        isSystemSettings(pkg) || (windowTitle?.toString()?.contains("Settings", ignoreCase = true) == true)
+
+    /**
+     * Active while setup is complete, the guard is not paused, and a block rule, a lockout or a
+     * pending loosening exists. Recomputed whenever those tables change and once a minute (for
+     * lockouts and the pause running out).
+     */
     suspend fun refreshActive(now: Long) {
         val s = AppGraph.settings.snapshot()
         active = s.setupComplete && now >= s.guardPausedUntil &&
@@ -37,9 +50,18 @@ class SettingsGuard(private val service: AccessibilityService) {
                 AppGraph.pendingRepo.hasPendingLoosening())
     }
 
+    fun watch(scope: CoroutineScope) {
+        scope.launch {
+            merge(
+                AppGraph.settings.data.map { }, AppGraph.blockRepo.rules().map { },
+                AppGraph.strikeRepo.lockouts().map { }, AppGraph.pendingRepo.pending().map { },
+            ).collect { refreshActive(System.currentTimeMillis()) }
+        }
+    }
+
     /** Returns true if the page was covered. Must run on the main thread. */
     fun check(pkg: String, now: Long): Boolean {
-        if (!active || now - connectedAt < GRACE_AFTER_CONNECT_MS) return false
+        if (!active || now - connectedAt < GRACE_AFTER_CONNECT_MS || now < AppGraph.guardSuppressedUntil) return false
         val root = settingsRoot(pkg) ?: return false
         val texts = StringBuilder()
         ScreenRulesLoader.walk(root) { node ->
@@ -52,8 +74,9 @@ class SettingsGuard(private val service: AccessibilityService) {
         val overlay = AppGraph.overlay
         if (hit) {
             overlay.showChangeQueued {
-                service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+                // Remove the (focused) overlay first so the BACK reaches Settings, not the overlay.
                 overlay.removeFull()
+                main.postDelayed({ service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK) }, 120L)
             }
             queueAllowDisableIfNeeded(now)
         } else if (overlay.fullKind == OverlayController.FullKind.CHANGE_QUEUED) {
@@ -91,6 +114,7 @@ class SettingsGuard(private val service: AccessibilityService) {
     }
 
     companion object {
+        private val SYSTEM_SETTINGS = setOf("com.android.settings", "com.samsung.android.settings")
         private const val GRACE_AFTER_CONNECT_MS = 2 * 60_000L
         private const val DAY_MS = 24L * 60 * 60 * 1000
     }

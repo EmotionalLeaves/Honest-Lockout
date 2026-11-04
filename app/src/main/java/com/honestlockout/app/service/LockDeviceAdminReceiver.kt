@@ -32,7 +32,7 @@ class LockDeviceAdminReceiver : DeviceAdminReceiver() {
                 }
                 val lockoutActive = AppGraph.strikeRepo.anyLockoutActive(now)
                 val strikeId = if (lockoutActive) {
-                    AppGraph.ladder.record(null, null, StrikeReason.TAMPER, now).strikeId
+                    AppGraph.ladder.record(null, null, StrikeReason.TAMPER, now)?.strikeId
                 } else null
                 AppGraph.strikeRepo.recordTamperEvent(TamperEvent.SERVICE_OFF, now, strikeId ?: NO_STRIKE)
                 AppLog.w("HL/Svc", "Device admin disabled; strike=${strikeId != null}")

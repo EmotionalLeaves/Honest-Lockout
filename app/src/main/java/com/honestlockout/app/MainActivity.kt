@@ -21,7 +21,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        pendingRoute.value = intent?.getStringExtra(EXTRA_ROUTE)
+        // Only on a fresh start: after rotation the route was already consumed.
+        if (savedInstanceState == null) pendingRoute.value = intent?.getStringExtra(EXTRA_ROUTE)
         setContent {
             HonestLockoutTheme {
                 AppNavHost(

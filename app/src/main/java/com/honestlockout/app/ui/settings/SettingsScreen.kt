@@ -1,6 +1,5 @@
 package com.honestlockout.app.ui.settings
 
-import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -50,6 +49,7 @@ import com.honestlockout.app.ui.SectionCard
 import com.honestlockout.app.ui.guardMessage
 import com.honestlockout.app.ui.nav.Routes
 import com.honestlockout.app.ui.setup.PermissionChecks
+import com.honestlockout.app.ui.setup.StepId
 import kotlinx.coroutines.launch
 
 /** Every change goes through LoosenGuard and reports Applied or Queued. */
@@ -171,9 +171,10 @@ fun SettingsScreen(nav: NavController) {
                         checked = adminActive,
                         onCheckedChange = { on ->
                             if (on) {
+                                AppGraph.guardSuppressedUntil = System.currentTimeMillis() + 2 * 60_000L
                                 runCatching {
                                     adminLauncher.launch(
-                                        PermissionChecks.intentFor(context, com.honestlockout.app.ui.setup.StepId.DEVICE_ADMIN) ?: Intent()
+                                        PermissionChecks.intentFor(context, StepId.DEVICE_ADMIN)
                                     )
                                 }
                             } else {

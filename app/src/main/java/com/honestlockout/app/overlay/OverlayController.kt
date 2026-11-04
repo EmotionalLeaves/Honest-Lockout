@@ -110,6 +110,9 @@ class OverlayController(private val appContext: Context) {
         val existing = banner
         if (existing != null && existing.kind == kind) { existing.setSeconds(secondsLeft); return@onMain }
         removeBannerNow()
+        // A full-screen lock (TYPE_ACCESSIBILITY_OVERLAY) always sits above application overlays,
+        // which would hide the banner. During an override the banner matters more: drop the lock.
+        if (fullKind == FullKind.LOCK) removeFullNow()
         val useApp = canDrawApp()
         val ctx: Context = if (useApp) appContext else (service ?: return@onMain)
         val view = WarningBannerView(themed(ctx), onPrimary, onEnd)

@@ -95,7 +95,6 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = viewModel()) {
             Button(
                 onClick = { nav.navigate(Routes.pick()) },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = s.active == null,
             ) { Text(stringResource(R.string.home_start_override)) }
             FilledTonalButton(onClick = { nav.navigate(Routes.BLOCKLIST) }, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.home_block_list))

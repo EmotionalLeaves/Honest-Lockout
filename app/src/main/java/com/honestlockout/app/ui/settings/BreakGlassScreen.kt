@@ -107,6 +107,7 @@ fun BreakGlassScreen(nav: NavController) {
                             scope.launch {
                                 runCatching {
                                     val t = System.currentTimeMillis()
+                                    AppGraph.monitor.stop() // no tick may strike while we end the override
                                     AppGraph.ladder.recordBreakGlass(t)
                                     AppGraph.settings.setBreakGlassUntil(t + s.breakGlassUnlockMin * 60_000L)
                                     if (AppGraph.overrideRepo.end(EndReason.BREAK_GLASS, t) != null) {

@@ -19,6 +19,7 @@ class LiveUsageTracker {
         rollDay(now)
         msByPackage.clear()
         msByPackage.putAll(values)
+        segmentStart = now // the seed already includes time up to now
     }
 
     /** Front app changed. [counts] is false while the package is covered by an override. */

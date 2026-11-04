@@ -20,4 +20,6 @@ interface PendingChangeDao {
     @Query("SELECT * FROM PendingChange WHERE cancelled = 0 ORDER BY applyAt") fun pending(): Flow<List<PendingChange>>
     @Query("SELECT * FROM PendingChange WHERE cancelled = 0 ORDER BY applyAt") suspend fun pendingOnce(): List<PendingChange>
     @Query("SELECT * FROM PendingChange WHERE id = :id LIMIT 1") suspend fun get(id: Long): PendingChange?
+    /** Returns 1 if this call removed the row (used to claim a change before applying it). */
+    @Query("DELETE FROM PendingChange WHERE id = :id") suspend fun deleteById(id: Long): Int
 }

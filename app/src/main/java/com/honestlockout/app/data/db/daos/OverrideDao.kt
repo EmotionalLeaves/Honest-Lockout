@@ -16,6 +16,9 @@ interface OverrideDao {
     @Delete suspend fun delete(item: Override)
     @Query("SELECT * FROM Override ORDER BY startedAt DESC") fun getAll(): Flow<List<Override>>
     @Query("SELECT * FROM Override WHERE endedAt IS NULL LIMIT 1") suspend fun getActive(): Override?
+    /** Ends the row only if it is still active; returns 1 if this call ended it. */
+    @Query("UPDATE Override SET endedAt = :now, endReason = :reason WHERE id = :id AND endedAt IS NULL")
+    suspend fun endIfActive(id: Long, now: Long, reason: com.honestlockout.app.data.db.EndReason): Int
     @Query("SELECT * FROM Override WHERE endedAt IS NULL LIMIT 1") fun getActiveFlow(): Flow<Override?>
     @Query("SELECT * FROM Override WHERE id = :id LIMIT 1") suspend fun get(id: Long): Override?
     @Query("SELECT * FROM Override ORDER BY startedAt DESC LIMIT :n") suspend fun lastN(n: Int): List<Override>

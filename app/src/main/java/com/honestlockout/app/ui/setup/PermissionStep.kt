@@ -77,7 +77,7 @@ object PermissionChecks {
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}"))
 
     /** The settings page each step opens. Notifications on API 33+ use the runtime dialog instead. */
-    fun intentFor(context: Context, id: StepId): Intent? = when (id) {
+    fun intentFor(context: Context, id: StepId): Intent = when (id) {
         StepId.NOTIFICATIONS -> Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
         StepId.USAGE -> Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
         StepId.BATTERY -> Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:${context.packageName}"))
@@ -92,9 +92,10 @@ object PermissionChecks {
             .putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, context.getString(R.string.device_admin_explanation))
     }
 
-    /** Starts [intent]; falls back to the battery saver page, then to Settings. */
-    fun launch(context: Context, intent: Intent?) {
-        val tries = listOfNotNull(intent, Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS), Intent(Settings.ACTION_SETTINGS))
+    /** Starts [intent]; falls back to App info (or, for the Samsung step, battery settings), then Settings. */
+    fun launch(context: Context, intent: Intent?, batteryFallback: Boolean = false) {
+        val fallback = if (batteryFallback) Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS) else appInfoIntent(context)
+        val tries = listOfNotNull(intent, fallback, Intent(Settings.ACTION_SETTINGS))
         for (i in tries) {
             if (runCatching { context.startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.isSuccess) return
         }
