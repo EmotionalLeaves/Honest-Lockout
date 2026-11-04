@@ -1,4 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Honest Lockout</string>
-    <string name="accessibility_description">x</string>
+    <string name="accessibility_description">Honest Lockout uses this service to see which app is in front, cover blocked apps with a lock screen, and compare what you do during an override with what you said you would do. Nothing leaves your phone.</string>
+
+    <!-- Common -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_ok">OK</string>
+    <string name="action_apply">Apply</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_edit">Edit</string>
+    <string name="cd_increase">Increase</string>
+    <string name="cd_decrease">Decrease</string>
+    <string name="fmt_minutes">%1$d min</string>
+    <string name="fmt_hours_minutes">%1$d h %2$d min</string>
+    <string name="fmt_seconds">%1$d s</string>
+    <string name="fmt_hours">%1$d h</string>
+    <string name="fmt_days">%1$d days</string>
+    <string name="guard_applied">Applied.</string>
+    <string name="guard_queued">Queued. Applies %1$s.</string>
+    <string name="guard_mixed">Applied, except %1$d of %2$d changes that loosen rules: those are queued for 24 hours.</string>
+
+    <string-array name="day_short_names">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+
+    <!-- Setup wizard -->
+    <string name="setup_title">Set up</string>
+    <string name="setup_step_of">Step %1$s of %2$d</string>
+    <string name="setup_open_settings">Open settings</string>
+    <string name="setup_check_again">Check again</string>
+    <string name="setup_next">Next</string>
+    <string name="setup_finish">Finish</string>
+    <string name="setup_skip">Skip</string>
+    <string name="setup_open_app_info">Open App info</string>
+    <string name="status_granted">Granted</string>
+    <string name="status_not_yet">Not yet</string>
+    <string name="status_reminder">Reminder only</string>
+    <string name="step_notifications_title">Notifications</string>
+    <string name="step_notifications_why">Overrides show a timer notification with I\'m done and Extend.\nWarnings and check-ins also arrive as notifications.</string>
+    <string name="step_usage_title">Usage access</string>
+    <string name="step_usage_why">Daily budgets and screen-time history need to know how long each app was open.\nThis stays on your phone.</string>
+    <string name="step_battery_title">Ignore battery optimization</string>
+    <string name="step_battery_why">Android stops background apps to save power.\nWithout this exemption, blocking can quietly stop working.</string>
+    <string name="step_samsung_title">Samsung: never sleeping</string>
+    <string name="step_samsung_why">Samsung phones put apps to sleep on their own.\nThis cannot be checked automatically, so it is a reminder.</string>
+    <string name="step_samsung_note">Open Battery, then Background usage limits, then Never sleeping apps, and add Honest Lockout.</string>
+    <string name="step_overlay_title">Display over other apps</string>
+    <string name="step_overlay_why">Warnings, check-ins and the timer bubble are drawn on top of the app you are using.\nThe lock screen itself works without it.</string>
+    <string name="step_restricted_title">Allow restricted settings</string>
+    <string name="step_restricted_why">Android 13 and later grey out accessibility for apps installed outside the Play Store.\nAllow it once from App info.</string>
+    <string name="step_restricted_1">Tap Open settings to open App info.</string>
+    <string name="step_restricted_2">Tap the ⋮ menu in the top corner.</string>
+    <string name="step_restricted_3">Tap Allow restricted settings, then come back.</string>
+    <string name="step_accessibility_title">Accessibility service</string>
+    <string name="step_accessibility_why">This is how the app sees which app is open and covers blocked ones.\nFind Honest Lockout in the list and turn it on.</string>
+    <string name="step_accessibility_greyed">Toggle greyed out? Allow restricted settings in App info first (step 5), then try again.</string>
+    <string name="step_admin_title">Device admin (optional)</string>
+    <string name="step_admin_why">With device admin on, uninstalling needs it turned off first, and turning it off waits 24 hours.\nYou can skip this.</string>
+    <string name="device_admin_explanation">Uninstalling Honest Lockout will require turning this off first. Honest Lockout uses no device admin policies.</string>
+    <string name="device_admin_disable_warning">Turning this off is a loosening and will be queued for 24 hours.</string>
+
+    <!-- Home -->
+    <string name="home_service_off">The accessibility service is off, so nothing is blocked. Turn it back on in Settings &gt; Accessibility.</string>
+    <string name="home_active_title">Override running: %1$s</string>
+    <string name="home_minutes_left">%1$d min left</string>
+    <string name="home_lock_it">I got distracted, lock it</string>
+    <string name="home_today">Screen time today</string>
+    <string name="home_budget_left">%1$s: %2$d of %3$d min left</string>
+    <string name="home_strikes">Strikes</string>
+    <string name="home_no_strikes">No active strikes</string>
+    <string name="home_strike_count">%1$d active strike(s)</string>
+    <string name="home_oldest_expires">Oldest expires %1$s</string>
+    <string name="home_next_override_at">Next override allowed at %1$s</string>
+    <string name="home_next_override_now">Next override allowed now</string>
+    <string name="home_start_override">Start an override</string>
+    <string name="home_block_list">Block list</string>
+    <string name="home_history">History</string>
+    <string name="home_settings">Settings</string>
+    <string name="home_emergency_unlock">Emergency unlock</string>
+
+    <!-- Block list -->
+    <string name="blocklist_title">Block list</string>
+    <string name="blocklist_add">Add app</string>
+    <string name="blocklist_empty">No blocked apps yet. Tap Add app to choose one.</string>
+    <string name="apppicker_title">Choose an app</string>
+    <string name="apppicker_search">Search apps</string>
+    <string name="apppicker_empty">No apps to show.</string>
+    <string name="mode_always">Always</string>
+    <string name="mode_budget">Budget</string>
+    <string name="mode_schedule">Schedule</string>
+    <string name="mode_budget_summary">%1$d min/day</string>
+    <string name="mode_budget_left">%1$d min/day, %2$d left</string>
+    <string name="mode_schedule_summary">%1$s %2$s–%3$s</string>
+    <string name="rule_always_desc">Locked at all times. Only an override opens it.</string>
+    <string name="rule_budget_label">Daily budget</string>
+    <string name="rule_schedule_label">Schedule</string>
+    <string name="rule_no_schedules">No schedules yet.</string>
+    <string name="rule_new_schedule">New schedule</string>
+    <string name="rule_loosen_note">Loosening applies in 24 h. Tightening applies now.</string>
+    <string name="rule_remove">Remove from block list</string>
+    <string name="rule_removed">This app is no longer on the block list.</string>
+    <string name="schedule_new_title">New schedule</string>
+    <string name="schedule_edit_title">Edit schedule</string>
+    <string name="schedule_default_name">Bedtime</string>
+    <string name="schedule_name">Name</string>
+    <string name="schedule_days">Days</string>
+    <string name="schedule_hours">Hours</string>
+    <string name="schedule_start">Start %1$s</string>
+    <string name="schedule_end">End %1$s</string>
+    <string name="schedule_crosses_midnight">Ends the next morning (crosses midnight).</string>
+    <string name="schedule_in_use">A block rule uses this schedule, so it cannot be deleted.</string>
+
+    <!-- Override -->
+    <string name="pick_title">What is it for?</string>
+    <string name="pick_for_app">For %1$s</string>
+    <string name="pick_default_minutes">up to %1$d min</string>
+    <string name="purpose_navigation">Navigation</string>
+    <string name="purpose_reply">Reply to someone</string>
+    <string name="purpose_lookup">Look something up</string>
+    <string name="purpose_work">Work or school task</string>
+    <string name="purpose_pay">Pay, bank or 2FA code</string>
+    <string name="purpose_custom">Custom</string>
+    <string name="purpose_navigation_desc">Directions in a map app. Expect little scrolling.</string>
+    <string name="purpose_reply_desc">Write a reply. Feeds, reels, stories and shorts stay blocked.</string>
+    <string name="purpose_lookup_desc">Find one thing in the browser or YouTube. No shorts, no home feed.</string>
+    <string name="purpose_work_desc">Get a task done. Feeds, reels, stories and shorts stay blocked.</string>
+    <string name="purpose_pay_desc">A payment, a bank check or a login code. Short and quick.</string>
+    <string name="purpose_custom_desc">You choose the screens to block and the activity to expect.</string>
+    <string name="refuse_global_lockout">Overrides return at %1$s.</string>
+    <string name="refuse_app_lockout">This app is locked out until %1$s.</string>
+    <string name="refuse_four_strikes">With 4 or more strikes, only Navigation and Pay overrides are allowed.</string>
+    <string name="refuse_override_active">End the current override first.</string>
+    <string name="declare_placeholder">What exactly will you do?</string>
+    <string name="declare_count">%1$d / %2$d</string>
+    <string name="declare_app">App</string>
+    <string name="declare_no_apps">Add an app to the block list first.</string>
+    <string name="declare_minutes">Minutes: %1$d</string>
+    <string name="declare_max">Up to %1$d min</string>
+    <string name="declare_custom_screens">Screens to block</string>
+    <string name="declare_custom_shape">Expected activity</string>
+    <string name="declare_start">Start</string>
+    <string name="shape_typing">Typing</string>
+    <string name="shape_reading">Reading</string>
+    <string name="shape_passive">Passive</string>
+    <string name="shape_any">Any</string>
+    <string name="countdown_app_minutes">%1$s · %2$d min</string>
+    <string name="extend_none">There is no override running.</string>
+    <string name="extend_refused">Take a break first.</string>
+
+    <!-- Notifications -->
+    <string name="channel_override">Running override</string>
+    <string name="channel_warning">Warnings and check-ins</string>
+    <string name="channel_info">Override results</string>
+    <string name="notif_override_title">Override starting</string>
+    <string name="notif_override_progress">%1$d of %2$d min</string>
+    <string name="notif_done">I\'m done</string>
+    <string name="notif_extend">Extend</string>
+    <string name="notif_warning_title">Get back to it</string>
+    <string name="notif_warning_text">This doesn\'t look like: %1$s</string>
+    <string name="notif_checkin_title">Check-in</string>
+    <string name="notif_checkin_text">Still doing: %1$s?</string>
+    <string name="notif_times_up">Time\'s up on: %1$s</string>
+    <string name="toast_done">Nice. Ended clean.</string>
+    <string name="toast_confessed">Thanks for being honest.</string>
+    <string name="toast_forgiven">Three clean runs. One strike forgiven.</string>
+    <string name="toast_unlocked">Unlocked for %1$d minutes.</string>
+
+    <!-- Overlays -->
+    <string name="lock_override">Override</string>
+    <string name="lock_close">Close</string>
+    <string name="lock_times_up">Time\'s up</string>
+    <string name="lock_reason_always">Always blocked</string>
+    <string name="lock_reason_budget">Daily budget used (%1$d min)</string>
+    <string name="lock_reason_schedule">Blocked until %1$s</string>
+    <string name="lock_reason_lockout">Locked out until %1$s after a strike</string>
+    <string name="lock_reason_break_glass_wait">Emergency unlock starts at %1$s</string>
+    <string name="lock_next_now">An override is allowed now.</string>
+    <string name="lock_next_at">Next override allowed at %1$s</string>
+    <string name="banner_warning_html"><![CDATA[This doesn\'t look like <i>%1$s</i>. Get back to it in %2$d s, or end the override.]]></string>
+    <string name="banner_checkin_html"><![CDATA[Still doing: <i>%1$s</i>?]]></string>
+    <string name="banner_seconds">%1$d s</string>
+    <string name="banner_back_to_it">Back to it</string>
+    <string name="banner_end_it">End it</string>
+    <string name="banner_yes">Yes</string>
+    <string name="bubble_minutes">%1$d\'</string>
+    <string name="lockout_title">Strike %1$d of the week</string>
+    <string name="lockout_app_until">%1$s is locked until %2$s</string>
+    <string name="lockout_overrides_return">Overrides return at %1$s</string>
+    <string name="lockout_ok">OK</string>
+    <string name="guard_title">Change queued</string>
+    <string name="guard_body">Turning Honest Lockout off is a loosening. It has been queued and will apply in 24 hours. Until then this page is covered.</string>
+    <string name="guard_go_back">Go back</string>
+    <string-array name="guard_keywords">
+        <item>App info</item>
+        <item>Accessibility</item>
+        <item>Installed services</item>
+        <item>Device admin</item>
+        <item>Uninstall</item>
+        <item>Force stop</item>
+        <item>Clear storage</item>
+    </string-array>
+
+    <!-- Strike reasons -->
+    <string name="reason_off_app">Left the app you declared</string>
+    <string name="reason_off_screen">Stayed on a blocked screen</string>
+    <string name="reason_wrong_shape">Activity didn\'t match the purpose</string>
+    <string name="reason_checkin_missed">Missed a check-in</string>
+    <string name="reason_third_warning">Third warning in one override</string>
+    <string name="reason_tamper">Accessibility service turned off</string>
+    <string name="reason_break_glass">Emergency unlock</string>
+    <string name="reason_appeal_reversed">Appeal: strike reversed</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <string name="history_tab_overrides">Overrides</string>
+    <string name="history_tab_screen_time">Screen time</string>
+    <string name="history_filter_all">All</string>
+    <string name="history_filter_strikes">Strikes only</string>
+    <string name="history_empty">Nothing here yet.</string>
+    <string name="history_planned_actual">%1$s · planned %2$d min · used %3$d min</string>
+    <string name="history_strike_row">Strike: %1$s</string>
+    <string name="history_appeal_row">Appeal: strike reversed</string>
+    <string name="history_forgiven">Forgiven</string>
+    <string name="history_appealed">Reversed by appeal</string>
+    <string name="history_that_was_wrong">That was wrong</string>
+    <string name="history_export_done">Log exported.</string>
+    <string name="history_export_failed">Could not write the log.</string>
+    <string name="history_day_total">%1$s: %2$s</string>
+    <string name="history_no_usage_access">Usage access is off, so there is no screen time to show.</string>
+    <string name="history_no_usage_day">No screen time recorded for this day.</string>
+    <string name="result_clean">Clean</string>
+    <string name="result_confessed">Confessed</string>
+    <string name="result_timed_out">Timed out</string>
+    <string name="result_strike">Strike</string>
+    <string name="result_strike_forgiven">Strike (forgiven)</string>
+    <string name="result_tamper">Tamper</string>
+    <string name="result_break_glass">Emergency unlock</string>
+    <string name="result_running">Running</string>
+    <string name="appeal_done">Strike reversed. One appeal per week.</string>
+    <string name="appeal_weekly_limit">You already used this week\'s appeal.</string>
+    <string name="appeal_not_allowed">Only strikes from the last 24 hours can be appealed.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_strictness">Strictness</string>
+    <string name="settings_strictness_desc">Sets grace time, check-in gaps and activity thresholds together. Lowering it is a loosening.</string>
+    <string name="strict_lenient">Lenient</string>
+    <string name="strict_normal">Normal</string>
+    <string name="strict_strict">Strict</string>
+    <string name="settings_ladder">Ladder</string>
+    <string name="settings_ladder_desc">What a strike costs, by active strikes in the window.</string>
+    <string name="ladder_row_n">%1$d active strike(s)</string>
+    <string name="ladder_row_4">4 or more active strikes</string>
+    <string name="ladder_app_lock">App locked for</string>
+    <string name="ladder_wait">Wait before any override</string>
+    <string name="ladder_rest_of_declared">Rest of override</string>
+    <string name="ladder_rest_of_day">Rest of day</string>
+    <string name="settings_timing">Timing</string>
+    <string name="timing_grace">Warning grace</string>
+    <string name="timing_countdown">Override countdown</string>
+    <string name="timing_checkin_min">Check-in gap, shortest</string>
+    <string name="timing_checkin_max">Check-in gap, longest</string>
+    <string name="timing_checkin_answer">Time to answer a check-in</string>
+    <string name="timing_max_warnings">Warnings per override</string>
+    <string name="timing_strike_window">Strikes expire after</string>
+    <string name="timing_clean_runs">Clean runs to forgive a strike</string>
+    <string name="timing_loosen_delay">Loosening delay</string>
+    <string name="timing_break_glass_wait">Emergency unlock wait</string>
+    <string name="timing_break_glass_unlock">Emergency unlock length</string>
+    <string name="settings_thresholds">Activity thresholds</string>
+    <string name="settings_thresholds_desc">Events per minute that count as feed-style use. Higher is looser.</string>
+    <string name="threshold_typing">Typing: max scrolls without typing</string>
+    <string name="threshold_reading">Reading: max scrolls</string>
+    <string name="threshold_passive_scroll">Passive: max scrolls</string>
+    <string name="threshold_passive_click">Passive: max taps</string>
+    <string name="settings_suggest">Suggest thresholds</string>
+    <string name="suggest_explain">From the last 14 days of clean overrides (90th percentile). Nothing changes until you tap Apply.</string>
+    <string name="suggest_none">%1$s: not enough data yet</string>
+    <string name="suggest_value">%1$s: suggest %2$d (now %3$d)</string>
+    <string name="settings_templates">Purpose templates</string>
+    <string name="template_max">Max minutes</string>
+    <string name="template_screens">Blocked screens</string>
+    <string name="template_no_change">No changes.</string>
+    <string name="settings_screen_rules">Screen rules</string>
+    <string name="rules_reload">Reload from file</string>
+    <string name="rules_reloaded">Loaded %1$d screen rules.</string>
+    <string name="rules_inspect">Inspect current screen</string>
+    <string name="settings_pending">Pending changes</string>
+    <string name="pending_empty">No changes are waiting.</string>
+    <string name="pending_created">Requested %1$s</string>
+    <string name="pending_applies">Applies %1$s</string>
+    <string name="settings_device_admin">Device admin</string>
+    <string name="settings_device_admin_desc">Require turning this off before uninstalling. Turning it off waits 24 hours.</string>
+    <string name="settings_break_glass">Emergency unlock everything</string>
+    <string name="settings_about">About</string>
+    <string name="about_version">Version %1$s (build %2$d)</string>
+    <string name="change_remove_rule">Remove %1$s from block list</string>
+    <string name="change_set_mode">Set %1$s to %2$s</string>
+    <string name="change_set_setting">Change %1$s to %2$s</string>
+    <string name="change_template_max">Raise purpose max to %1$d min</string>
+    <string name="change_template_screens">Blocked screens: %1$s</string>
+    <string name="change_disable_admin">Turn off device admin</string>
+    <string name="change_schedule">Shorten schedule %1$s</string>
+    <string name="change_allow_disable">Allow disabling the service</string>
+    <string name="change_break_glass">Break glass</string>
+
+    <!-- Inspector -->
+    <string name="inspector_help">Tap Start, switch to the app and open the screen you want to block, then come back. View IDs and texts of that screen are listed below and in logcat (tag HL/Inspect). Copy an ID into screen_rules.json.</string>
+    <string name="inspector_needs_service">The accessibility service is off, so nothing can be inspected.</string>
+    <string name="inspector_start">Start (60 s)</string>
+    <string name="inspector_stop">Stop</string>
+    <string name="inspector_running">Inspecting… %1$d s left</string>
+    <string name="inspector_count">%1$d lines</string>
+
+    <!-- Break-glass -->
+    <string name="break_glass_confirm">This unlocks every app for %1$d minutes, costs 2 strikes, and starts after a %2$d minute wait. Continue?</string>
+    <string name="break_glass_continue">Continue</string>
+    <string name="break_glass_waiting">Emergency unlock starts when this reaches zero. Leaving this screen does not cancel it.</string>
+    <string name="break_glass_type">Type this sentence exactly:</string>
+    <string name="break_glass_sentence">I am choosing to unlock everything and I accept two strikes.</string>
+    <string name="break_glass_unlock">Unlock</string>
+    <string name="break_glass_active">Everything is unlocked until %1$s.</string>
 </resources>
