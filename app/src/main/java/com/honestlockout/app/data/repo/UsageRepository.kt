@@ -70,7 +70,8 @@ class UsageRepository(private val context: Context, private val db: AppDatabase)
     fun todayMinutesByPackage(now: Long): Map<String, Int> =
         foregroundMs(DayClock.startOfDay(now), now).mapValues { (it.value / 60_000L).toInt() }.filterValues { it > 0 }
 
-    fun todayTotalMinutes(now: Long): Int = (foregroundMs(DayClock.startOfDay(now), now).values.sum() / 60_000L).toInt()
+    /** Same per-app rounding as the History chart, so Home and today's bar always agree. */
+    fun todayTotalMinutes(now: Long): Int = todayMinutesByPackage(now).values.sum()
 
     /** Writes [date]'s UsageDay rows from UsageStatsManager.queryUsageStats(INTERVAL_DAILY). */
     suspend fun writeDay(date: LocalDate) {

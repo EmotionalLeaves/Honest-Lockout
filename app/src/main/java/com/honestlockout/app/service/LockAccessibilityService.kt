@@ -81,6 +81,7 @@ class LockAccessibilityService : AccessibilityService() {
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
         tamper.watchConditions()
+        guard.watch(scope)
         scope.launch { safe("connect") { onConnected(now) } }
         scope.launch {
             while (isActive) {

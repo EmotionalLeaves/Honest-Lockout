@@ -12,6 +12,9 @@ import com.honestlockout.app.data.rules.ScreenRulesLoader
 import com.honestlockout.app.data.repo.PendingChangeRepository
 import com.honestlockout.app.engine.SettingChange
 import com.honestlockout.app.overlay.OverlayController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 /**
@@ -35,12 +38,25 @@ class SettingsGuard(private val service: AccessibilityService) {
     fun isSettingsPackage(pkg: String, windowTitle: CharSequence?): Boolean =
         isSystemSettings(pkg) || (windowTitle?.toString()?.contains("Settings", ignoreCase = true) == true)
 
-    /** Recomputed by the service whenever the database changes enough to matter (cheap). */
+    /**
+     * Active while setup is complete, the guard is not paused, and a block rule, a lockout or a
+     * pending loosening exists. Recomputed whenever those tables change and once a minute (for
+     * lockouts and the pause running out).
+     */
     suspend fun refreshActive(now: Long) {
         val s = AppGraph.settings.snapshot()
         active = s.setupComplete && now >= s.guardPausedUntil &&
             (AppGraph.blockRepo.ruleCount() > 0 || AppGraph.strikeRepo.anyLockoutActive(now) ||
                 AppGraph.pendingRepo.hasPendingLoosening())
+    }
+
+    fun watch(scope: CoroutineScope) {
+        scope.launch {
+            merge(
+                AppGraph.settings.data.map { }, AppGraph.blockRepo.rules().map { },
+                AppGraph.strikeRepo.lockouts().map { }, AppGraph.pendingRepo.pending().map { },
+            ).collect { refreshActive(System.currentTimeMillis()) }
+        }
     }
 
     /** Returns true if the page was covered. Must run on the main thread. */
