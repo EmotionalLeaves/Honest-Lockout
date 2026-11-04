@@ -37,7 +37,7 @@ object Routes {
     const val HOME = "home"
     const val BLOCKLIST = "blocklist"
     const val APPPICKER = "apppicker"
-    const val BLOCKRULE = "blockrule/{pkg}"
+    const val BLOCKRULE = "blockrule/{pkg}?new={new}"
     const val SCHEDULE = "schedule/{id}"
     const val OVERRIDE_PICK = "override/pick?pkg={pkg}"
     const val OVERRIDE_DECLARE = "override/declare/{templateId}?pkg={pkg}&extend={extend}"
@@ -50,7 +50,7 @@ object Routes {
     const val INSPECTOR = "inspector"
     const val BREAKGLASS = "breakglass"
 
-    fun blockRule(pkg: String) = "blockrule/$pkg"
+    fun blockRule(pkg: String, isNew: Boolean = false) = "blockrule/$pkg?new=$isNew"
     fun schedule(id: Long?) = "schedule/${id ?: "new"}"
     fun pick(pkg: String? = null) = if (pkg == null) "override/pick" else "override/pick?pkg=$pkg"
     fun declare(templateId: Long, pkg: String?, extend: Boolean = false) =
@@ -82,8 +82,14 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
         composable(Routes.HOME) { HomeScreen(nav) }
         composable(Routes.BLOCKLIST) { BlockListScreen(nav) }
         composable(Routes.APPPICKER) { AppPickerScreen(nav) }
-        composable(Routes.BLOCKRULE, arguments = listOf(navArgument("pkg") { type = NavType.StringType })) {
-            BlockRuleEditorScreen(nav, it.arguments?.getString("pkg").orEmpty())
+        composable(
+            Routes.BLOCKRULE,
+            arguments = listOf(
+                navArgument("pkg") { type = NavType.StringType },
+                navArgument("new") { type = NavType.BoolType; defaultValue = false },
+            ),
+        ) {
+            BlockRuleEditorScreen(nav, it.arguments?.getString("pkg").orEmpty(), it.arguments?.getBoolean("new") ?: false)
         }
         composable(Routes.SCHEDULE, arguments = listOf(navArgument("id") { type = NavType.StringType })) {
             ScheduleEditorScreen(nav, it.arguments?.getString("id")?.toLongOrNull())

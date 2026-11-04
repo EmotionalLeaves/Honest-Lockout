@@ -103,7 +103,9 @@ class LoosenGuard(
         is SettingChange.SetTemplateScreens -> {
             val old = db.purposeTemplateDao().get(change.templateId)?.let { PurposeTemplates.split(it.blockedScreenLabels).toSet() } ?: emptySet()
             val new = PurposeTemplates.split(change.labels).toSet()
-            new.size < old.size && old.containsAll(new) // strict subset
+            // Spec: a strict subset is loosening. A swap (drop one, add another) also removes a
+            // blocked screen, so any label removed counts as loosening.
+            !new.containsAll(old)
         }
         is SettingChange.SetSetting -> settingLoosens(change.key, change.value)
         is SettingChange.SetBlockMode -> blockModeLoosens(change)

@@ -92,9 +92,10 @@ object PermissionChecks {
             .putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, context.getString(R.string.device_admin_explanation))
     }
 
-    /** Starts [intent]; falls back to the battery saver page, then to Settings. */
-    fun launch(context: Context, intent: Intent?) {
-        val tries = listOfNotNull(intent, Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS), Intent(Settings.ACTION_SETTINGS))
+    /** Starts [intent]; falls back to App info (or, for the Samsung step, battery settings), then Settings. */
+    fun launch(context: Context, intent: Intent?, batteryFallback: Boolean = false) {
+        val fallback = if (batteryFallback) Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS) else appInfoIntent(context)
+        val tries = listOfNotNull(intent, fallback, Intent(Settings.ACTION_SETTINGS))
         for (i in tries) {
             if (runCatching { context.startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.isSuccess) return
         }

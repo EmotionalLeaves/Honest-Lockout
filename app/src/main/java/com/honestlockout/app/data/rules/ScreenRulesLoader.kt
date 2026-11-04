@@ -61,28 +61,39 @@ class ScreenRulesLoader(private val context: Context, private val dao: ScreenRul
     fun allLabels(): List<String> = byPackage.values.flatten().map { it.label }.distinct().sorted()
 
     /**
-     * Returns the label of the first BLOCK rule that matches [root], or null.
+     * Returns the labels of every BLOCK rule that matches [root] (viewId matches first).
      * viewId rules are checked first (strong); text rules are the fallback (weak): a text rule
      * matches only a node whose text/contentDescription equals it (case-insensitive) and that is
      * selected, or the window title. The walk is capped at [MAX_NODES]; child nodes are recycled.
+     *
+     * Choice (spec rule 1): a viewId counts only when its node is visible to the user, and an id
+     * ending in "_tab" counts only when that tab is selected, because tab buttons such as
+     * Instagram's feed_tab are always present in the window.
      */
-    fun matchesAny(root: AccessibilityNodeInfo?, packageName: String, windowTitle: CharSequence? = null): String? {
-        val rules = byPackage[packageName]?.filter { it.action == ScreenAction.BLOCK } ?: return null
-        if (root == null || rules.isEmpty()) return null
+    fun matchingLabels(root: AccessibilityNodeInfo?, packageName: String, windowTitle: CharSequence? = null): Set<String> {
+        val rules = byPackage[packageName]?.filter { it.action == ScreenAction.BLOCK } ?: return emptySet()
+        if (root == null || rules.isEmpty()) return emptySet()
         val viewIds = HashSet<String>()
         val selectedTexts = HashSet<String>()
         windowTitle?.toString()?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }?.let { selectedTexts += it }
         walk(root) { node ->
-            node.viewIdResourceName?.let { viewIds += it }
+            node.viewIdResourceName?.let { id ->
+                val isTab = id.endsWith("_tab")
+                if (node.isVisibleToUser && (!isTab || node.isSelected)) viewIds += id
+            }
             if (node.isSelected) {
                 node.text?.toString()?.trim()?.lowercase()?.let { selectedTexts += it }
                 node.contentDescription?.toString()?.trim()?.lowercase()?.let { selectedTexts += it }
             }
         }
-        rules.firstOrNull { it.matchViewId != null && it.matchViewId in viewIds }?.let { return it.label }
-        rules.firstOrNull { it.matchText != null && it.matchText.trim().lowercase() in selectedTexts }?.let { return it.label }
-        return null
+        val strong = rules.filter { it.matchViewId != null && it.matchViewId in viewIds }.map { it.label }
+        val weak = rules.filter { it.matchText != null && it.matchText.trim().lowercase() in selectedTexts }.map { it.label }
+        return LinkedHashSet<String>().apply { addAll(strong); addAll(weak) }
     }
+
+    /** The first matching label (viewId matches first), or null. */
+    fun matchesAny(root: AccessibilityNodeInfo?, packageName: String, windowTitle: CharSequence? = null): String? =
+        matchingLabels(root, packageName, windowTitle).firstOrNull()
 
     companion object {
         const val MAX_NODES = 400

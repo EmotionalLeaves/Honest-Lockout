@@ -92,7 +92,7 @@ fun AppPickerScreen(nav: NavController) {
                         modifier = Modifier.clickable {
                             scope.launch {
                                 AppGraph.blockRepo.add(app.packageName)
-                                nav.navigate(Routes.blockRule(app.packageName)) { popUpTo(Routes.BLOCKLIST) }
+                                nav.navigate(Routes.blockRule(app.packageName, isNew = true)) { popUpTo(Routes.BLOCKLIST) }
                             }
                         },
                         leadingContent = { AppIcon(app.packageName) },

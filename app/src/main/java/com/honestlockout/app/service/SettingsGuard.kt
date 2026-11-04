@@ -45,7 +45,7 @@ class SettingsGuard(private val service: AccessibilityService) {
 
     /** Returns true if the page was covered. Must run on the main thread. */
     fun check(pkg: String, now: Long): Boolean {
-        if (!active || now - connectedAt < GRACE_AFTER_CONNECT_MS) return false
+        if (!active || now - connectedAt < GRACE_AFTER_CONNECT_MS || now < AppGraph.guardSuppressedUntil) return false
         val root = settingsRoot(pkg) ?: return false
         val texts = StringBuilder()
         ScreenRulesLoader.walk(root) { node ->

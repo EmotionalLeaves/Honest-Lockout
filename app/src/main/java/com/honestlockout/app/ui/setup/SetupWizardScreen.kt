@@ -53,7 +53,13 @@ fun SetupWizardScreen(onFinished: () -> Unit) {
     var refresh by remember { mutableIntStateOf(0) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { refresh++ }
 
-    val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { refresh++ }
+    // After two denials Android stops showing the dialog; then open the notification settings page.
+    val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (!granted && !PermissionChecks.isGranted(context, StepId.NOTIFICATIONS)) {
+            PermissionChecks.launch(context, PermissionChecks.intentFor(context, StepId.NOTIFICATIONS))
+        }
+        refresh++
+    }
     val adminLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (PermissionChecks.deviceAdminActive(context)) {
             scope.launch { AppGraph.loosenGuard.request(SettingChange.SetSetting(Keys.DEVICE_ADMIN_WANTED, "true")) }
@@ -115,7 +121,10 @@ fun SetupWizardScreen(onFinished: () -> Unit) {
                             notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         step.id == StepId.DEVICE_ADMIN ->
                             runCatching { adminLauncher.launch(PermissionChecks.intentFor(context, step.id)!!) }
-                        else -> PermissionChecks.launch(context, PermissionChecks.intentFor(context, step.id))
+                        else -> PermissionChecks.launch(
+                            context, PermissionChecks.intentFor(context, step.id),
+                            batteryFallback = step.id == StepId.SAMSUNG_BATTERY,
+                        )
                     }
                 },
             ) { Text(stringResource(R.string.setup_open_settings)) }

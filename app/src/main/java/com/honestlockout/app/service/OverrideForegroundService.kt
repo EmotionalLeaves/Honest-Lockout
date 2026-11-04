@@ -41,6 +41,8 @@ class OverrideForegroundService : Service() {
     private var lastNotifAt = 0L
     private var ending = false
     private var graceSec = 30
+    private var lastInteractive = true
+    private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -81,7 +83,8 @@ class OverrideForegroundService : Service() {
         if (current?.id != o.id || !AppGraph.monitor.isActive) {
             val template = AppGraph.overrideRepo.template(o.purposeId)
             AppGraph.monitor.start(o, template, AppGraph.settings.snapshot(), now, AppGraph.accessibility?.frontPackage)
-            AppGraph.monitor.onScreenState((getSystemService(POWER_SERVICE) as PowerManager).isInteractive)
+            lastInteractive = power.isInteractive
+            AppGraph.monitor.onScreenState(lastInteractive)
             AppGraph.liveUsage.refresh(counts = false, now = now)
         }
         current = o
@@ -102,6 +105,9 @@ class OverrideForegroundService : Service() {
     private suspend fun tickOnce(now: Long) {
         val o = current ?: return
         val monitor = AppGraph.monitor
+        // Screen state also comes from the accessibility service; polling here covers its absence.
+        val interactive = power.isInteractive
+        if (interactive != lastInteractive) { lastInteractive = interactive; monitor.onScreenState(interactive) }
         val result = monitor.tick(now)
         monitor.takeSample()?.let { AppGraph.overrideRepo.insertSample(it) }
         when (result) {
@@ -184,11 +190,12 @@ class OverrideForegroundService : Service() {
         if (ending) return
         ending = true
         syncCounters()
-        val outcome = AppGraph.overrideRepo.end(reason, System.currentTimeMillis())
+        val outcome = AppGraph.overrideRepo.end(reason, System.currentTimeMillis(), countsAsCleanRun = goHome)
         cleanupAfterEnd()
         if (goHome) AppGraph.accessibility?.goHome()
         if (outcome != null) {
-            toast(if (reason == EndReason.CONFESSED) R.string.toast_confessed else R.string.toast_done)
+            // An Extend replaces this override, so no "Ended clean" toast then.
+            if (goHome) toast(if (reason == EndReason.CONFESSED) R.string.toast_confessed else R.string.toast_done)
             if (outcome.forgaveStrike) toast(R.string.toast_forgiven)
         }
         stopAll()

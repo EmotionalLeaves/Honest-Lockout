@@ -105,8 +105,10 @@ class OverrideRepository(
     /**
      * Ends the active override. DONE, CONFESSED and TIMEOUT are clean runs: they grow the
      * clean-run streak and may forgive the oldest strike. STRIKE resets the streak.
+     * An override replaced by Extend ends DONE but does not count ([countsAsCleanRun] = false),
+     * so Extend cannot be used to farm forgiveness.
      */
-    suspend fun end(reason: EndReason, now: Long): EndOutcome? {
+    suspend fun end(reason: EndReason, now: Long, countsAsCleanRun: Boolean = true): EndOutcome? {
         val active = dao.getActive() ?: return null
         val ended = active.copy(endedAt = now, endReason = reason)
         dao.update(ended)
@@ -114,7 +116,7 @@ class OverrideRepository(
         var forgave = false
         val s = settings.snapshot()
         when (reason) {
-            EndReason.DONE, EndReason.CONFESSED, EndReason.TIMEOUT -> {
+            EndReason.DONE, EndReason.CONFESSED, EndReason.TIMEOUT -> if (countsAsCleanRun) {
                 val streak = s.cleanRunStreak + 1
                 if (streak >= s.cleanRunsToForgive && strikes.forgiveOldest(now)) {
                     forgave = true

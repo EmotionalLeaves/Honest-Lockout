@@ -60,11 +60,17 @@ const val NEW_SCHEDULE_KEY = "new_schedule_id"
 /**
  * The spec's stepper is 5–240 min; 1–4 are added so round 2's "BUDGET 2 min" test can be run.
  */
+private const val NEW_RULE_WINDOW_MS = 15 * 60_000L
+
 val BUDGET_OPTIONS: List<Int> = listOf(1, 2, 3, 4) + rangeOptions(5, 240, 5)
 
-/** ALWAYS / BUDGET / SCHEDULE for one app. Save and Remove go through LoosenGuard. */
+/**
+ * ALWAYS / BUDGET / SCHEDULE for one app. Save and Remove go through LoosenGuard.
+ * Choice: the first Save right after adding the app from the picker is part of adding it
+ * (blocking a previously free app in any mode is tightening), so it applies at once.
+ */
 @Composable
-fun BlockRuleEditorScreen(nav: NavController, packageName: String) {
+fun BlockRuleEditorScreen(nav: NavController, packageName: String, isNew: Boolean = false) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -75,6 +81,7 @@ fun BlockRuleEditorScreen(nav: NavController, packageName: String) {
     var mode by rememberSaveable { mutableStateOf<BlockMode?>(null) }
     var budget by rememberSaveable { mutableIntStateOf(30) }
     var scheduleId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var firstSaveFree by rememberSaveable { mutableStateOf(isNew) }
     LaunchedEffect(rule) {
         if (rule != null && mode == null) {
             mode = rule.mode
@@ -163,7 +170,16 @@ fun BlockRuleEditorScreen(nav: NavController, packageName: String) {
                 enabled = m != BlockMode.SCHEDULE || scheduleId != null,
                 onClick = {
                     scope.launch {
-                        show(AppGraph.loosenGuard.request(SettingChange.SetBlockMode(packageName, m, budget, scheduleId)))
+                        val change = SettingChange.SetBlockMode(packageName, m, budget, scheduleId)
+                        val now = System.currentTimeMillis()
+                        val fresh = firstSaveFree && rule != null && now - rule.createdAt < NEW_RULE_WINDOW_MS
+                        if (fresh) {
+                            AppGraph.loosenGuard.applyChange(change, now)
+                            firstSaveFree = false
+                            show(GuardResult.Applied)
+                        } else {
+                            show(AppGraph.loosenGuard.request(change))
+                        }
                     }
                 },
             ) { Text(stringResource(R.string.action_save)) }

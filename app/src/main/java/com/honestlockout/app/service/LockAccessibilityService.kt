@@ -14,7 +14,6 @@ import com.honestlockout.app.AppGraph
 import com.honestlockout.app.AppLog
 import com.honestlockout.app.MainActivity
 import com.honestlockout.app.R
-import com.honestlockout.app.data.db.entities.TamperEvent
 import com.honestlockout.app.data.repo.Eligibility
 import com.honestlockout.app.data.rules.ScreenRulesLoader
 import com.honestlockout.app.engine.Decision
@@ -31,9 +30,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * The eyes and hands: tracks the front app, draws the lock overlay, feeds OverrideMonitor and runs
@@ -52,6 +49,7 @@ class LockAccessibilityService : AccessibilityService() {
     private val lastContentAt = HashMap<String, Long>()
     private var lastRecheckAt = 0L
     @Volatile private var offRecorded = false
+    private val tamper by lazy { TamperWatch(this, scope) }
 
     /** The last real front app (launcher included). */
     @Volatile var frontPackage: String? = null
@@ -82,6 +80,7 @@ class LockAccessibilityService : AccessibilityService() {
             IntentFilter().apply { addAction(Intent.ACTION_SCREEN_ON); addAction(Intent.ACTION_SCREEN_OFF) },
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
+        tamper.watchConditions()
         scope.launch { safe("connect") { onConnected(now) } }
         scope.launch {
             while (isActive) {
@@ -98,16 +97,7 @@ class LockAccessibilityService : AccessibilityService() {
     }
 
     private suspend fun onConnected(now: Long) {
-        val s = AppGraph.settings.snapshot()
-        val strikes = AppGraph.strikeRepo
-        // Killed by the OS (no onUnbind): logged, never punished.
-        if (s.setupComplete && s.lastServiceSeen > 0 && now - s.lastServiceSeen > KILLED_GAP_MS &&
-            strikes.unpunishedServiceOff().isEmpty() && !strikes.rebootSince(s.lastServiceSeen)
-        ) {
-            strikes.recordTamperEvent(TamperEvent.SERVICE_KILLED, now)
-            AppLog.w(TAG, "Service was killed while away; logged without a strike")
-        }
-        AppGraph.settings.setLastServiceSeen(now)
+        tamper.onConnected(now)
         // Turned off by the user: the strike lands now, so the user sees it.
         AppGraph.ladder.recordTamper(now)?.let { result ->
             AppGraph.overlay.showLockout(OverlayTexts.lockoutInfo(this, result)) { goHome(); AppGraph.overlay.removeFull() }
@@ -199,7 +189,7 @@ class LockAccessibilityService : AccessibilityService() {
             val root = runCatching { rootInActiveWindow }.getOrNull()
             if (root != null && root.packageName?.toString() == pkg) {
                 val title = runCatching { windows.firstOrNull { it.isActive }?.title }.getOrNull()
-                monitor.onScreen(AppGraph.screenRules.matchesAny(root, pkg, title))
+                monitor.onScreen(AppGraph.screenRules.matchingLabels(root, pkg, title))
             }
             root?.let { ScreenRulesLoader.recycle(it) }
         }
@@ -266,24 +256,12 @@ class LockAccessibilityService : AccessibilityService() {
         super.onDestroy()
     }
 
-    /** The user turned the service off while rules exist: a TAMPER strike lands on the next connect. */
     private fun recordServiceOff() {
         if (offRecorded) return
         offRecorded = true
         AppGraph.accessibilityConnected = false
         if (AppGraph.accessibility === this) AppGraph.accessibility = null
-        runCatching {
-            runBlocking(Dispatchers.IO) {
-                withTimeoutOrNull(2_000L) {
-                    val now = System.currentTimeMillis()
-                    val s = AppGraph.settings.snapshot()
-                    if (s.setupComplete && now >= s.guardPausedUntil && AppGraph.blockRepo.ruleCount() > 0) {
-                        AppGraph.strikeRepo.recordTamperEvent(TamperEvent.SERVICE_OFF, now)
-                        AppLog.w(TAG, "Service turned off while rules exist: tamper recorded")
-                    }
-                }
-            }
-        }.onFailure { AppLog.w(TAG, "recordServiceOff failed", it) }
+        tamper.onServiceOff(System.currentTimeMillis())
     }
 
     private suspend fun safe(what: String, block: suspend () -> Unit) {
@@ -293,7 +271,6 @@ class LockAccessibilityService : AccessibilityService() {
     companion object {
         private const val TAG = "HL/Acc"
         private const val HEARTBEAT_MS = 60_000L
-        private const val KILLED_GAP_MS = 10 * 60_000L
         private const val CONTENT_THROTTLE_MS = 500L
         private const val RECHECK_MS = 1_500L
         private const val HOME_DELAY_MS = 300L

@@ -56,6 +56,12 @@ object AppGraph {
     /** State of Settings > Screen rules > Inspect current screen. */
     val inspector = InspectorState()
 
+    /**
+     * The settings guard stays quiet until this time. Set when this app itself opens a system
+     * page that names it (the device-admin activation prompt), so tightening is never covered.
+     */
+    @Volatile var guardSuppressedUntil: Long = 0L
+
     @Volatile var accessibilityConnected: Boolean = false
     @Volatile var accessibility: LockAccessibilityService? = null
 
