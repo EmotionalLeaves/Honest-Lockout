@@ -23,6 +23,10 @@ import kotlin.random.Random
  * - A check-in waits while a warning shows, and a new warning waits while a check-in shows.
  * - While the screen is off nothing can be seen or answered: mismatches are ignored and a running
  *   warning's grace clock is frozen until the screen is back on.
+ * - LISTEN purposes (background audio, e.g. falling asleep to YouTube): being in other apps or
+ *   on the home screen is the point, so it never counts as off-app, and there are no check-ins.
+ *   The declared app may be on screen for max(5 min, a tenth of the override) in total to pick
+ *   what to play; past that, being on screen in it is a mismatch. Blocked screens still apply.
  * - Screen rules can match several labels at once (e.g. a tab bar plus the open screen); the
  *   OFF_SCREEN signal fires when any matched label is one the purpose blocks.
  */
@@ -47,6 +51,9 @@ class OverrideMonitor(private val random: Random = Random.Default) {
     private var allowed: Set<String> = emptySet()
     private var blockedLabels: Set<String> = emptySet()
     private var shape = ActivityShape.ANY
+    private var onScreenMs = 0L
+    private var onScreenAllowanceMs = 5 * 60_000L
+    val isListening: Boolean get() = override != null && shape == ActivityShape.LISTEN
     private var cfg = MonitorConfig(
         Strictness.NORMAL, 30_000L, 3, 3, 8, 30_000L,
         ShapeThresholds(TYPING_SCROLL_MAX, READING_SCROLL_MAX, PASSIVE_SCROLL_MAX, PASSIVE_CLICK_MAX),
@@ -98,6 +105,8 @@ class OverrideMonitor(private val random: Random = Random.Default) {
         blockedLabels = template?.let { PurposeTemplates.split(it.blockedScreenLabels).toSet() } ?: emptySet()
         shape = template?.expectedShape ?: ActivityShape.ANY
         cfg = MonitorConfig.from(s)
+        onScreenMs = 0L
+        onScreenAllowanceMs = maxOf(5L, o.plannedMin / 10L) * 60_000L
         frontPackage = frontNow ?: o.packageName
         blockedAttempt = false
         screenLabels = emptySet()
@@ -126,6 +135,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
     /** Random gap of checkin_min_gap..checkin_max_gap minutes; never in the first 2 or last 1 minute. */
     private fun scheduleCheckin(from: Long): Long? {
         val o = override ?: return null
+        if (shape == ActivityShape.LISTEN) return null // you may be asleep: no check-ins
         val gapMin = if (cfg.checkinMaxGap > cfg.checkinMinGap) random.nextInt(cfg.checkinMinGap, cfg.checkinMaxGap + 1) else cfg.checkinMinGap
         val t = maxOf(from + gapMin * 60_000L + random.nextLong(0, 60_000L), o.startedAt + 2 * 60_000L)
         return if (t > endAt(o) - 60_000L) null else t
@@ -217,6 +227,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
             mismatchSince = null
             return TickResult.Nothing
         }
+        if (shape == ActivityShape.LISTEN && frontPackage?.let { watchesPackage(it) } == true) onScreenMs += sinceLastTick
 
         checkinShownAt?.let { if (now - it >= cfg.checkinAnswerMs) return onCheckinMissed() }
 
@@ -275,6 +286,11 @@ class OverrideMonitor(private val random: Random = Random.Default) {
 
     private fun currentMismatch(now: Long): StrikeReason? {
         val fp = frontPackage ?: return null
+        if (shape == ActivityShape.LISTEN) {
+            if (!watchesPackage(fp)) return null // background listening: anywhere else is fine
+            if (screenLabels.any { it in blockedLabels }) return StrikeReason.OFF_SCREEN
+            return if (onScreenMs > onScreenAllowanceMs) StrikeReason.WRONG_SHAPE else null
+        }
         val onAllowed = isAllowedPackage(fp)
         if (blockedAttempt && !onAllowed) return StrikeReason.OFF_APP
         if (isIgnored(fp)) return null

@@ -144,18 +144,30 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                 }
             }
 
-            SectionCard(stringResource(R.string.declare_minutes, minutes.coerceAtLeast(1))) {
+            SectionCard(stringResource(R.string.declare_minutes, Format.minutes(context, minutes.coerceAtLeast(1)))) {
+                val quick = if (s.maxMinutes > 60) listOf(15, 30, 60, 120, 240) else listOf(2, 5, 10, 15, 30)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(2, 5, 10, 15, 30).filter { it < s.maxMinutes }.plus(s.maxMinutes).distinct().forEach { m ->
-                        FilterChip(selected = minutes == m, onClick = { minutes = m }, label = { Text(stringResource(R.string.fmt_minutes, m)) })
+                    quick.filter { it < s.maxMinutes }.plus(s.maxMinutes).distinct().forEach { m ->
+                        FilterChip(selected = minutes == m, onClick = { minutes = m }, label = { Text(Format.minutes(context, m)) })
                     }
                 }
                 if (s.maxMinutes > 1) {
+                    // Long purposes snap to 5 min so the slider stays usable.
+                    val snap = if (s.maxMinutes > 60) 5 else 1
                     Slider(
                         value = minutes.coerceIn(1, s.maxMinutes).toFloat(),
-                        onValueChange = { minutes = it.toInt().coerceIn(1, s.maxMinutes) },
+                        onValueChange = { v ->
+                            val m = if (snap > 1) ((v / snap).toInt() * snap).coerceAtLeast(snap) else v.toInt()
+                            minutes = m.coerceIn(1, s.maxMinutes)
+                        },
                         valueRange = 1f..s.maxMinutes.toFloat(),
-                        steps = (s.maxMinutes - 2).coerceAtLeast(0),
+                        steps = if (s.maxMinutes <= 60) (s.maxMinutes - 2).coerceAtLeast(0) else 0,
+                    )
+                }
+                if (s.template.expectedShape == ActivityShape.LISTEN) {
+                    Text(
+                        stringResource(R.string.declare_listen_note, maxOf(5, minutes / 10)),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -234,6 +246,7 @@ private fun suggestionsFor(templateId: Long): List<String> = when (templateId) {
     PurposeTemplates.ID_LOOKUP -> stringArrayResource(R.array.suggest_lookup)
     PurposeTemplates.ID_WORK -> stringArrayResource(R.array.suggest_work)
     PurposeTemplates.ID_PAY -> stringArrayResource(R.array.suggest_pay)
+    PurposeTemplates.ID_LISTEN -> stringArrayResource(R.array.suggest_listen)
     else -> emptyArray()
 }.toList()
 
@@ -244,5 +257,6 @@ private fun shapeName(shape: ActivityShape) = stringResource(
         ActivityShape.READING -> R.string.shape_reading
         ActivityShape.PASSIVE -> R.string.shape_passive
         ActivityShape.ANY -> R.string.shape_any
+        ActivityShape.LISTEN -> R.string.shape_listen
     }
 )

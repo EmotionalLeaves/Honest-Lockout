@@ -2,7 +2,8 @@ package com.honestlockout.app.data.db
 
 enum class BlockMode { ALWAYS, BUDGET, SCHEDULE }
 
-enum class ActivityShape { TYPING, READING, PASSIVE, ANY }
+/** LISTEN (added after the spec): background audio; the app may sit in front only briefly. */
+enum class ActivityShape { TYPING, READING, PASSIVE, ANY, LISTEN }
 
 enum class EndReason { DONE, TIMEOUT, CONFESSED, STRIKE, TAMPER, BREAK_GLASS }
 

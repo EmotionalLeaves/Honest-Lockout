@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
@@ -57,6 +58,7 @@ fun purposeIcon(id: Long): ImageVector = when (id) {
     PurposeTemplates.ID_LOOKUP -> Icons.Filled.Search
     PurposeTemplates.ID_WORK -> Icons.Filled.Work
     PurposeTemplates.ID_PAY -> Icons.Filled.AccountBalance
+    PurposeTemplates.ID_LISTEN -> Icons.Filled.Headphones
     else -> Icons.Filled.Tune
 }
 

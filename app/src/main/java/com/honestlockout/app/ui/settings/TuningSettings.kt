@@ -1,5 +1,6 @@
 package com.honestlockout.app.ui.settings
 
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -14,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
@@ -22,7 +24,6 @@ import com.honestlockout.app.data.db.EndReason
 import com.honestlockout.app.data.db.Strictness
 import com.honestlockout.app.data.settings.Keys
 import com.honestlockout.app.data.settings.Settings
-import com.honestlockout.app.ui.ExpandableSection
 import com.honestlockout.app.ui.Stepper
 import com.honestlockout.app.ui.rangeOptions
 import kotlinx.coroutines.Dispatchers
@@ -83,32 +84,35 @@ suspend fun suggestThresholds(now: Long): Map<String, Int?> = withContext(Dispat
     )
 }
 
-/** Shape thresholds (per minute) plus Suggest thresholds (display only; the user applies them). */
+/** Activity thresholds (per minute) plus Suggest thresholds; shown inside the Advanced group. */
 @Composable
-fun ThresholdSettings(s: Settings, onChange: (key: String, value: Int) -> Unit) {
+fun ColumnScope.ThresholdSettings(s: Settings, onChange: (key: String, value: Int) -> Unit) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var suggestions by remember { mutableStateOf<Map<String, Int?>?>(null) }
-    ExpandableSection(stringResource(R.string.settings_thresholds), stringResource(R.string.settings_thresholds_desc)) {
-        Text(stringResource(R.string.settings_thresholds_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(R.string.settings_thresholds), style = MaterialTheme.typography.titleSmall)
+    Text(stringResource(R.string.settings_thresholds_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    THRESHOLD_KEYS.forEach { (label, key) ->
+        Stepper(
+            stringResource(label), s.int(key), rangeOptions(1, 200), { "$it" }, { onChange(key, it) },
+            hint = guardedHint(context, s, key, stringResource(R.string.threshold_hint)),
+        )
+    }
+    OutlinedButton(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { scope.launch { suggestions = suggestThresholds(System.currentTimeMillis()) } },
+    ) { Text(stringResource(R.string.settings_suggest)) }
+    suggestions?.let { map ->
+        Text(stringResource(R.string.suggest_explain), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         THRESHOLD_KEYS.forEach { (label, key) ->
-            Stepper(stringResource(label), s.int(key), rangeOptions(1, 200), { "$it" }, { onChange(key, it) })
-        }
-        OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { scope.launch { suggestions = suggestThresholds(System.currentTimeMillis()) } },
-        ) { Text(stringResource(R.string.settings_suggest)) }
-        suggestions?.let { map ->
-            Text(stringResource(R.string.suggest_explain), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            THRESHOLD_KEYS.forEach { (label, key) ->
-                val v = map[key]
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        if (v == null) stringResource(R.string.suggest_none, stringResource(label))
-                        else stringResource(R.string.suggest_value, stringResource(label), v, s.int(key)),
-                        Modifier.weight(1f),
-                    )
-                    if (v != null && v != s.int(key)) TextButton(onClick = { onChange(key, v) }) { Text(stringResource(R.string.action_apply)) }
-                }
+            val v = map[key]
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    if (v == null) stringResource(R.string.suggest_none, stringResource(label))
+                    else stringResource(R.string.suggest_value, stringResource(label), v, s.int(key)),
+                    Modifier.weight(1f),
+                )
+                if (v != null && v != s.int(key)) TextButton(onClick = { onChange(key, v) }) { Text(stringResource(R.string.action_apply)) }
             }
         }
     }

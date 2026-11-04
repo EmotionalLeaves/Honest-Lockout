@@ -179,7 +179,7 @@ class OverrideForegroundService : Service() {
         AppGraph.overrideRepo.end(EndReason.TIMEOUT, System.currentTimeMillis())?.let { outcome ->
             if (outcome.forgaveStrike) toast(R.string.toast_forgiven)
         }
-        Notifications.showTimesUp(this, o.statement)
+        Notifications.showTimesUp(this, o.statement, silent = AppGraph.monitor.isListening)
         cleanupAfterEnd()
         AppGraph.accessibility?.reevaluateFront(timesUp = true)
         stopAll()

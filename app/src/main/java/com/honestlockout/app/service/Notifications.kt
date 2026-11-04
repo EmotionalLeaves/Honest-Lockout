@@ -102,9 +102,11 @@ object Notifications {
 
     fun cancelWarning(context: Context) = NotificationManagerCompat.from(context).cancel(ID_WARNING)
 
-    fun showTimesUp(context: Context, statement: String) {
+    /** [silent] for listening overrides, so a timeout doesn't wake you up. */
+    fun showTimesUp(context: Context, statement: String, silent: Boolean = false) {
         val n = NotificationCompat.Builder(context, CHANNEL_INFO)
             .setSmallIcon(smallIcon)
+            .setSilent(silent)
             .setContentTitle(context.getString(R.string.notif_times_up, statement))
             .setAutoCancel(true)
             .setContentIntent(openApp(context, null, 40))

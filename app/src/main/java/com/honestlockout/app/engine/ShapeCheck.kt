@@ -35,7 +35,7 @@ object ShapeCheck {
         ActivityShape.TYPING -> m.typing == 0 && m.scroll >= th.typingScrollMax
         ActivityShape.READING -> m.scroll >= th.readingScrollMax
         ActivityShape.PASSIVE -> m.scroll >= th.passiveScrollMax || m.click >= th.passiveClickMax
-        ActivityShape.ANY -> false
+        ActivityShape.ANY, ActivityShape.LISTEN -> false
     }
 
     /** True when the completed minutes (at or after [baselineMinute]) show the wrong shape. */
@@ -61,7 +61,7 @@ object ShapeCheck {
             ActivityShape.READING -> e >= 10_000 && scroll * 120_000L <= th.readingScrollMax * e
             ActivityShape.PASSIVE -> e >= 10_000 &&
                 scroll * 120_000L <= th.passiveScrollMax * e && click * 120_000L <= th.passiveClickMax * e
-            ActivityShape.ANY -> true
+            ActivityShape.ANY, ActivityShape.LISTEN -> true
         }
     }
 }
