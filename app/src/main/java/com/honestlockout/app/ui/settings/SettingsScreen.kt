@@ -2,7 +2,6 @@ package com.honestlockout.app.ui.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -228,8 +227,7 @@ private fun StrictnessPicker(s: Settings, onPick: (Strictness) -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth().clickable { if (!selected) onPick(level) },
                 shape = RoundedCornerShape(16.dp),
-                border = if (selected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                colors = CardDefaults.cardColors(containerColor = if (selected) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainerHigh),
             ) {
                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(selected = selected, onClick = { if (!selected) onPick(level) })

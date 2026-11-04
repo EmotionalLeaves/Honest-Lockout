@@ -1,10 +1,12 @@
 package com.honestlockout.app.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -82,7 +84,7 @@ fun TemplateEditorScreen(nav: NavController, id: Long) {
             }
             Text(stringResource(R.string.rule_loosen_note), color = MaterialTheme.colorScheme.onSurfaceVariant)
             Button(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(14.dp),
                 onClick = {
                     scope.launch {
                         val guard = AppGraph.loosenGuard

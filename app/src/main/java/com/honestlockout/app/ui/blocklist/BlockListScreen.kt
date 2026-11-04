@@ -12,11 +12,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,7 +77,7 @@ fun BlockListScreen(nav: NavController) {
         val sorted = list.sortedBy { Format.appLabel(context, it.packageName).lowercase() }
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 96.dp)) {
             item {
-                SectionCard(modifier = Modifier.padding(16.dp)) {
+                SectionCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         Stat("${list.size}", stringResource(R.string.blocklist_stat_blocked))
                         Stat("${list.count { it.mode == BlockMode.ALWAYS }}", stringResource(R.string.mode_always))
@@ -101,7 +101,9 @@ fun BlockListScreen(nav: NavController) {
                         }
                     },
                     trailingContent = { ModeChip(rule.mode) },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                 )
+                HorizontalDivider(Modifier.padding(start = 76.dp), color = MaterialTheme.colorScheme.outline)
             }
         }
     }
@@ -114,7 +116,7 @@ fun ModeChip(mode: BlockMode) {
         BlockMode.BUDGET -> stringResource(R.string.mode_budget) to Warning
         BlockMode.SCHEDULE -> stringResource(R.string.mode_schedule) to TextMuted
     }
-    AssistChip(onClick = {}, label = { Text(label, style = MaterialTheme.typography.labelMedium) }, colors = AssistChipDefaults.assistChipColors(labelColor = color))
+    Text(label, style = MaterialTheme.typography.labelLarge, color = color)
 }
 
 /** "Always", "30 min/day, 12 left", "Bedtime 22:00–07:00". */
