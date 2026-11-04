@@ -1,6 +1,8 @@
 package com.honestlockout.app.service
 
 import android.accessibilityservice.AccessibilityService
+import android.os.Handler
+import android.os.Looper
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import com.honestlockout.app.AppGraph
@@ -22,12 +24,16 @@ class SettingsGuard(private val service: AccessibilityService) {
     private val appName = service.getString(R.string.app_name).lowercase()
     private val keywords = service.resources.getStringArray(R.array.guard_keywords).map { it.lowercase() }
 
+    private val main = Handler(Looper.getMainLooper())
+
     @Volatile var connectedAt: Long = System.currentTimeMillis()
     @Volatile private var active = false
 
+    fun isSystemSettings(pkg: String): Boolean = pkg in SYSTEM_SETTINGS
+
+    /** System settings packages, or any window whose title contains "Settings". */
     fun isSettingsPackage(pkg: String, windowTitle: CharSequence?): Boolean =
-        pkg == "com.android.settings" || pkg == "com.samsung.android.settings" ||
-            (windowTitle?.toString()?.contains("Settings", ignoreCase = true) == true)
+        isSystemSettings(pkg) || (windowTitle?.toString()?.contains("Settings", ignoreCase = true) == true)
 
     /** Recomputed by the service whenever the database changes enough to matter (cheap). */
     suspend fun refreshActive(now: Long) {
@@ -52,8 +58,9 @@ class SettingsGuard(private val service: AccessibilityService) {
         val overlay = AppGraph.overlay
         if (hit) {
             overlay.showChangeQueued {
-                service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
+                // Remove the (focused) overlay first so the BACK reaches Settings, not the overlay.
                 overlay.removeFull()
+                main.postDelayed({ service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK) }, 120L)
             }
             queueAllowDisableIfNeeded(now)
         } else if (overlay.fullKind == OverlayController.FullKind.CHANGE_QUEUED) {
@@ -91,6 +98,7 @@ class SettingsGuard(private val service: AccessibilityService) {
     }
 
     companion object {
+        private val SYSTEM_SETTINGS = setOf("com.android.settings", "com.samsung.android.settings")
         private const val GRACE_AFTER_CONNECT_MS = 2 * 60_000L
         private const val DAY_MS = 24L * 60 * 60 * 1000
     }

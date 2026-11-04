@@ -57,6 +57,11 @@ import kotlinx.coroutines.launch
 
 const val NEW_SCHEDULE_KEY = "new_schedule_id"
 
+/**
+ * The spec's stepper is 5–240 min; 1–4 are added so round 2's "BUDGET 2 min" test can be run.
+ */
+val BUDGET_OPTIONS: List<Int> = listOf(1, 2, 3, 4) + rangeOptions(5, 240, 5)
+
 /** ALWAYS / BUDGET / SCHEDULE for one app. Save and Remove go through LoosenGuard. */
 @Composable
 fun BlockRuleEditorScreen(nav: NavController, packageName: String) {
@@ -73,7 +78,7 @@ fun BlockRuleEditorScreen(nav: NavController, packageName: String) {
     LaunchedEffect(rule) {
         if (rule != null && mode == null) {
             mode = rule.mode
-            budget = if (rule.dailyBudgetMin in 5..240) rule.dailyBudgetMin else 30
+            budget = if (rule.dailyBudgetMin in BUDGET_OPTIONS) rule.dailyBudgetMin else 30
             scheduleId = rule.scheduleId
         }
     }
@@ -125,7 +130,7 @@ fun BlockRuleEditorScreen(nav: NavController, packageName: String) {
                 BlockMode.BUDGET -> SectionCard {
                     Stepper(
                         label = stringResource(R.string.rule_budget_label), value = budget,
-                        options = rangeOptions(5, 240, 5), format = { Format.minutes(context, it) },
+                        options = BUDGET_OPTIONS, format = { Format.minutes(context, it) },
                         onChange = { budget = it },
                     )
                 }
