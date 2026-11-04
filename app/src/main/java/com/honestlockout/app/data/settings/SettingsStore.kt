@@ -60,6 +60,7 @@ object Keys {
     const val GUARD_PAUSED_UNTIL = "guard_paused_until"
     const val LAST_ALLOW_DISABLE_REQUEST = "last_allow_disable_request"
     const val EXTEND_CHAIN = "extend_chain"
+    const val EXTEND_CHAIN_STARTED = "extend_chain_started"
 
     val guardedInts: List<IntSetting> = listOf(
         IntSetting(WARNING_GRACE_SEC, 30, LoosenDirection.HIGHER),
@@ -93,11 +94,12 @@ object Keys {
 
     /**
      * Ladder lock values are not monotonic: -1 = rest of the local day, 0 = rest of the declared
-     * override. For comparisons they are ranked by strength: 0 is the weakest, -1 counts as 720 min.
+     * override. For loosening comparisons they are ranked by their longest possible effect:
+     * 0 counts as 60 min (the longest built-in purpose), -1 as 1440 min.
      */
     fun lockStrength(value: Int): Int = when (value) {
-        0 -> 0
-        -1 -> 720
+        0 -> 60
+        -1 -> 1440
         else -> value
     }
 }
@@ -116,6 +118,8 @@ data class Settings(
     val guardPausedUntil: Long = 0,
     val lastAllowDisableRequest: Long = 0,
     val extendChain: Int = 0,
+    /** When the first override of the current Extend chain started (caps the chain's minutes). */
+    val extendChainStartedAt: Long = 0,
 ) {
     fun int(key: String): Int = ints[key] ?: Keys.guardedIntMap[key]?.default ?: 0
     val warningGraceSec get() = int(Keys.WARNING_GRACE_SEC)
@@ -155,6 +159,7 @@ class SettingsStore(private val context: Context) {
             guardPausedUntil = this[longPreferencesKey(Keys.GUARD_PAUSED_UNTIL)] ?: 0L,
             lastAllowDisableRequest = this[longPreferencesKey(Keys.LAST_ALLOW_DISABLE_REQUEST)] ?: 0L,
             extendChain = this[intPreferencesKey(Keys.EXTEND_CHAIN)] ?: 0,
+            extendChainStartedAt = this[longPreferencesKey(Keys.EXTEND_CHAIN_STARTED)] ?: 0L,
         )
     }
 
@@ -184,6 +189,7 @@ class SettingsStore(private val context: Context) {
     suspend fun setGuardPausedUntil(ms: Long) = putLong(Keys.GUARD_PAUSED_UNTIL, ms)
     suspend fun setLastAllowDisableRequest(ms: Long) = putLong(Keys.LAST_ALLOW_DISABLE_REQUEST, ms)
     suspend fun setExtendChain(n: Int) = putInt(Keys.EXTEND_CHAIN, n)
+    suspend fun setExtendChainStartedAt(ms: Long) = putLong(Keys.EXTEND_CHAIN_STARTED, ms)
 
     private suspend fun putInt(k: String, v: Int) { context.dataStore.edit { it[intPreferencesKey(k)] = v } }
     private suspend fun putLong(k: String, v: Long) { context.dataStore.edit { it[longPreferencesKey(k)] = v } }

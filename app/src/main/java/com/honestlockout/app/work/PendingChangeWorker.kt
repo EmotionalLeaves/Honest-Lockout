@@ -11,11 +11,13 @@ import androidx.work.WorkerParameters
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.AppLog
 import com.honestlockout.app.data.repo.PendingChangeRepository
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.TimeUnit
 
 /**
- * Applies every PendingChange with applyAt <= now && !cancelled through LoosenGuard.apply, then
- * deletes it so it never applies twice. BreakGlass rows are skipped: they complete on the
+ * Applies every PendingChange with applyAt <= now && !cancelled through LoosenGuard.apply,
+ * claiming (deleting) it first so it never applies twice. BreakGlass rows are skipped: they complete on the
  * break-glass screen once the sentence is typed. Also runs on every app open and on boot.
  */
 class PendingChangeWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
@@ -30,12 +32,15 @@ class PendingChangeWorker(context: Context, params: WorkerParameters) : Coroutin
         private const val PERIODIC = "pending_change_periodic"
         private const val ONCE = "pending_change_once"
 
-        suspend fun applyDue(now: Long) {
+        private val applying = Mutex()
+
+        /** Exactly once: callers are serialized, and each change is claimed (deleted) before it applies. */
+        suspend fun applyDue(now: Long) = applying.withLock {
             val repo = AppGraph.pendingRepo
             for (change in repo.due(now)) {
                 if (PendingChangeRepository.isBreakGlass(change)) continue
+                if (!repo.claim(change.id)) continue
                 AppGraph.loosenGuard.apply(change.changeJson, now)
-                repo.delete(change.id)
                 AppLog.w("HL/Work", "Applied pending change ${change.id}: ${change.description}")
             }
         }

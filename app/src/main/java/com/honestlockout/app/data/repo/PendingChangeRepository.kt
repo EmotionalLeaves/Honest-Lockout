@@ -25,8 +25,11 @@ class PendingChangeRepository(private val db: AppDatabase) {
     }
 
     suspend fun delete(id: Long) {
-        dao.get(id)?.let { dao.delete(it) }
+        dao.deleteById(id)
     }
+
+    /** True if this caller now owns the change (it was still there and is now removed). */
+    suspend fun claim(id: Long): Boolean = dao.deleteById(id) == 1
 
     fun breakGlass(): Flow<PendingChange?> = dao.pending().map { list -> list.firstOrNull { isBreakGlass(it) } }
     suspend fun breakGlassOnce(): PendingChange? = dao.pendingOnce().firstOrNull { isBreakGlass(it) }

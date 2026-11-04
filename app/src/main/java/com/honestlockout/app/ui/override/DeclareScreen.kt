@@ -67,7 +67,9 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
         val allowed = PurposeTemplates.split(t.allowedPackages).filter { Format.isInstalled(context, it) }
         val apps = if (allowed.isNotEmpty()) allowed else rules.map { it.packageName }
         val max = if (active != null) {
-            val used = ((System.currentTimeMillis() - active.startedAt) / 60_000L).toInt()
+            // Minutes used across the whole Extend chain, so extending never exceeds maxMinutes.
+            val chainStart = AppGraph.settings.snapshot().extendChainStartedAt.takeIf { it in 1..active.startedAt } ?: active.startedAt
+            val used = ((System.currentTimeMillis() - chainStart) / 60_000L).toInt()
             (t.maxMinutes - used).coerceAtLeast(1)
         } else t.maxMinutes.coerceAtLeast(1)
         value = DeclareSetup(t, apps, max, active?.packageName)

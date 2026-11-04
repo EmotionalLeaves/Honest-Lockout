@@ -29,6 +29,10 @@ class BootReceiver : BroadcastReceiver() {
                 if (AppGraph.overrideRepo.getActive() != null) {
                     AppGraph.monitor.stop()
                     AppGraph.overrideRepo.end(EndReason.TAMPER, now)
+                    // The service may already have been resumed by the accessibility service.
+                    if (OverrideForegroundService.running) {
+                        OverrideForegroundService.send(context, OverrideForegroundService.ACTION_STOP_SILENT)
+                    }
                 }
                 AppLog.w("HL/Svc", "Boot/update handled: ${intent.action}")
             }.onFailure { AppLog.w("HL/Svc", "BootReceiver failed", it) }

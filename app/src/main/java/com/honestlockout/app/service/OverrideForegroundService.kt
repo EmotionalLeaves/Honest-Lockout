@@ -42,6 +42,8 @@ class OverrideForegroundService : Service() {
     private var ending = false
     private var graceSec = 30
     private var lastInteractive = true
+    private var ticks = 0
+    private var bannerShown = false
     private val power by lazy { getSystemService(POWER_SERVICE) as PowerManager }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -66,6 +68,8 @@ class OverrideForegroundService : Service() {
 
     private suspend fun handle(action: String) {
         val now = System.currentTimeMillis()
+        // Started cold by a stale notification button: attach to the active override first.
+        if (current == null && (action == ACTION_BACK_TO_IT || action == ACTION_CHECKIN_YES)) begin(now)
         when (action) {
             ACTION_START, ACTION_RESUME -> begin(now)
             ACTION_DONE -> finish(EndReason.DONE, goHome = true)
@@ -105,6 +109,13 @@ class OverrideForegroundService : Service() {
     private suspend fun tickOnce(now: Long) {
         val o = current ?: return
         val monitor = AppGraph.monitor
+        // Ended elsewhere (boot/update receiver, break-glass): stop instead of ticking forever.
+        if (!monitor.isActive || (++ticks % 10 == 0 && AppGraph.overrideRepo.getActive()?.id != o.id)) {
+            AppLog.w(TAG, "Override ${o.id} ended elsewhere; stopping")
+            cleanupAfterEnd()
+            stopAll()
+            return
+        }
         // Screen state also comes from the accessibility service; polling here covers its absence.
         val interactive = power.isInteractive
         if (interactive != lastInteractive) { lastInteractive = interactive; monitor.onScreenState(interactive) }
@@ -126,7 +137,10 @@ class OverrideForegroundService : Service() {
     private fun renderBanner(now: Long, o: Override) {
         val overlay = AppGraph.overlay
         val grace = graceSec
-        when (val b = AppGraph.monitor.bannerState(now)) {
+        val state = AppGraph.monitor.bannerState(now)
+        if (state == BannerState.None && bannerShown) Notifications.cancelWarning(this) // no stale heads-up
+        bannerShown = state != BannerState.None
+        when (val b = state) {
             BannerState.None -> if (overlay.hasBanner) overlay.hideBanner()
             is BannerState.Warning -> overlay.showBanner(BannerKind.WARNING, o.statement, b.secondsLeft, grace, ::onBannerPrimary) {
                 send(this, ACTION_CONFESS)
@@ -177,11 +191,13 @@ class OverrideForegroundService : Service() {
         syncCounters()
         val result = AppGraph.ladder.record(o.id, o.packageName, s.reason, System.currentTimeMillis())
         cleanupAfterEnd()
-        AppGraph.overlay.showLockout(OverlayTexts.lockoutInfo(this, result)) {
+        if (result != null) {
+            AppGraph.overlay.showLockout(OverlayTexts.lockoutInfo(this, result)) {
+                AppGraph.accessibility?.goHome()
+                AppGraph.overlay.removeFull()
+            }
             AppGraph.accessibility?.goHome()
-            AppGraph.overlay.removeFull()
         }
-        AppGraph.accessibility?.goHome()
         stopAll()
     }
 

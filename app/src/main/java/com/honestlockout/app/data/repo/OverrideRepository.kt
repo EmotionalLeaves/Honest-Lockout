@@ -58,6 +58,7 @@ class OverrideRepository(
      * [templateId] may be null when only the global conditions should be checked.
      */
     suspend fun eligibility(packageName: String?, templateId: Long?, now: Long, extending: Boolean = false): Eligibility {
+        endIfExpired(now)
         strikes.activeGlobalLockout(now)?.let {
             return Eligibility.Refused(context.getString(R.string.refuse_global_lockout, Format.time(context, it.until)))
         }
@@ -73,6 +74,16 @@ class OverrideRepository(
             return Eligibility.Refused(context.getString(R.string.refuse_override_active))
         }
         return Eligibility.Ok
+    }
+
+    /**
+     * An active row past its planned end whose service never ran (e.g. the process died) is
+     * ended as TIMEOUT so it cannot grant access or block new overrides forever.
+     */
+    suspend fun endIfExpired(now: Long): Boolean {
+        val o = dao.getActive() ?: return false
+        if (now < o.startedAt + o.plannedMin * 60_000L) return false
+        return end(EndReason.TIMEOUT, now) != null
     }
 
     /** Extend is refused on the third Extend in a row. */
@@ -92,6 +103,7 @@ class OverrideRepository(
         }
         val chain = if (d.isExtend) settings.snapshot().extendChain + 1 else 0
         settings.setExtendChain(chain)
+        if (!d.isExtend) settings.setExtendChainStartedAt(now)
         val id = dao.insert(
             Override(
                 packageName = d.packageName, purposeId = d.templateId, statement = d.statement.trim(),
@@ -110,8 +122,9 @@ class OverrideRepository(
      */
     suspend fun end(reason: EndReason, now: Long, countsAsCleanRun: Boolean = true): EndOutcome? {
         val active = dao.getActive() ?: return null
+        // Atomic: when two paths race (service, boot, break-glass) only the first one ends it.
+        if (dao.endIfActive(active.id, now, reason) != 1) return null
         val ended = active.copy(endedAt = now, endReason = reason)
-        dao.update(ended)
         AppLog.w("HL/Engine", "Override ${active.id} ended: $reason")
         var forgave = false
         val s = settings.snapshot()

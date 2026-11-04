@@ -74,7 +74,7 @@ class LockAccessibilityService : AccessibilityService() {
         inspector = ScreenInspector(this)
         refreshIgnoreSet()
         EmergencyAllowlist.refreshDefaults(this)
-        AppGraph.monitor.isIgnored = { it in launchers || it == packageName }
+        AppGraph.monitor.isIgnored = { it in launchers || it == packageName || it in TRANSIENT_SYSTEM }
         ContextCompat.registerReceiver(
             this, screenReceiver,
             IntentFilter().apply { addAction(Intent.ACTION_SCREEN_ON); addAction(Intent.ACTION_SCREEN_OFF) },
@@ -90,6 +90,10 @@ class LockAccessibilityService : AccessibilityService() {
                     AppGraph.settings.setLastServiceSeen(t)
                     guard.refreshActive(t)
                     refreshIgnoreSet()
+                    // Watchdog: an active override must always have its clock running.
+                    if (!AppGraph.overrideRepo.endIfExpired(t) && AppGraph.overrideRepo.getActive() != null &&
+                        !OverrideForegroundService.running
+                    ) OverrideForegroundService.resume(this@LockAccessibilityService)
                 }
                 delay(HEARTBEAT_MS)
             }
@@ -165,7 +169,9 @@ class LockAccessibilityService : AccessibilityService() {
         monitor.onFrontApp(pkg)
 
         val overlay = AppGraph.overlay
-        if (overlay.hasFullScreen && pkg !in launchers && pkg != packageName) {
+        if (overlay.fullKind == OverlayController.FullKind.CHANGE_QUEUED && !guard.isSettingsPackage(pkg, title)) {
+            overlay.removeFull() // the guard only covers Settings pages
+        } else if (overlay.hasFullScreen && pkg !in launchers && pkg != packageName) {
             val sameLock = overlay.fullKind == OverlayController.FullKind.LOCK && overlay.fullPackage == pkg
             if (!sameLock) overlay.removeFull()
         }
@@ -221,6 +227,7 @@ class LockAccessibilityService : AccessibilityService() {
             nextOverrideLine = OverlayTexts.nextOverrideLine(this, AppGraph.strikeRepo.activeGlobalLockout(now)?.until),
             refusal = refusal,
         )
+        if (frontPackage != pkg) return // the user moved on (maybe to an emergency app) meanwhile
         overlay.showLock(
             info,
             onOverride = {
@@ -229,7 +236,7 @@ class LockAccessibilityService : AccessibilityService() {
             },
             onClose = { goHome(); overlay.removeFull() },
         )
-        main.postDelayed({ goHome() }, HOME_DELAY_MS)
+        main.postDelayed({ if (frontPackage == pkg || frontPackage in launchers) goHome() }, HOME_DELAY_MS)
         AppLog.w(TAG, "Locked $pkg: ${decision.reason}")
     }
 
@@ -275,5 +282,17 @@ class LockAccessibilityService : AccessibilityService() {
         private const val CONTENT_THROTTLE_MS = 500L
         private const val RECHECK_MS = 1_500L
         private const val HOME_DELAY_MS = 300L
+
+        /**
+         * System pickers and dialogs an override's task can legitimately pass through (share
+         * sheet, permission prompts, photo/document pickers, account chooser, installer).
+         * They never count as leaving the declared app.
+         */
+        private val TRANSIENT_SYSTEM = setOf(
+            "com.android.intentresolver", "com.android.permissioncontroller", "com.google.android.permissioncontroller",
+            "com.android.providers.media.module", "com.google.android.providers.media.module",
+            "com.android.documentsui", "com.google.android.documentsui", "com.google.android.gms",
+            "com.android.packageinstaller", "com.google.android.packageinstaller",
+        )
     }
 }

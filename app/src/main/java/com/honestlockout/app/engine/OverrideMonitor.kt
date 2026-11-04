@@ -21,6 +21,8 @@ import kotlin.random.Random
  * - "Back to it" pauses the grace clock for 10 s once per warning; pressing it again only hides
  *   the banner, so it cannot stall a warning forever ("a courtesy, not a reset").
  * - A check-in waits while a warning shows, and a new warning waits while a check-in shows.
+ * - While the screen is off nothing can be seen or answered: mismatches are ignored and a running
+ *   warning's grace clock is frozen until the screen is back on.
  * - Screen rules can match several labels at once (e.g. a tab bar plus the open screen); the
  *   OFF_SCREEN signal fires when any matched label is one the purpose blocks.
  */
@@ -74,6 +76,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
     private var mismatchReason: StrikeReason? = null
     private var warningStartedAt: Long? = null
     private var hiddenUntil = 0L
+    private var lastTickAt = 0L
     private var pausedThisWarning = false
     private var warnTyping = 0; private var warnScroll = 0; private var warnClick = 0
     var warningCount = 0
@@ -82,6 +85,8 @@ class OverrideMonitor(private val random: Random = Random.Default) {
     // Check-in state.
     private var nextCheckinAt: Long? = null
     private var checkinShownAt: Long? = null
+    /** The current check-in was already counted in checkinsAsked (it may be re-shown after screen-off). */
+    private var checkinCounted = false
     var checkinsAsked = 0
         private set
     var checkinsAnswered = 0
@@ -109,6 +114,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
         typing = 0; scroll = 0; click = 0; flaggedThisMinute = null
         minutes.clear(); shapeBaselineMinute = 0; pendingSample = null
         mismatchSince = null; mismatchReason = null; warningStartedAt = null; hiddenUntil = 0; pausedThisWarning = false
+        lastTickAt = 0L; checkinCounted = false
         warningCount = o.warningCount
         checkinsAsked = o.checkinsAsked
         checkinsAnswered = o.checkinsAnswered
@@ -183,12 +189,14 @@ class OverrideMonitor(private val random: Random = Random.Default) {
     @Synchronized fun onCheckinYes(now: Long) {
         if (checkinShownAt == null) return
         checkinShownAt = null
+        checkinCounted = false
         checkinsAnswered++
         nextCheckinAt = scheduleCheckin(now)
     }
 
     @Synchronized fun onCheckinMissed(): TickResult {
         checkinShownAt = null
+        checkinCounted = false
         return TickResult.Strike(StrikeReason.CHECKIN_MISSED)
     }
 
@@ -211,6 +219,13 @@ class OverrideMonitor(private val random: Random = Random.Default) {
         val o = override ?: return TickResult.Nothing
         rollMinute(o, now)
         if (now >= endAt(o)) return TickResult.Timeout
+        val sinceLastTick = if (lastTickAt > 0) (now - lastTickAt).coerceIn(0, 5_000L) else 0L
+        lastTickAt = now
+        if (!screenOn) {
+            warningStartedAt?.let { warningStartedAt = it + sinceLastTick }
+            mismatchSince = null
+            return TickResult.Nothing
+        }
 
         checkinShownAt?.let { if (now - it >= checkinAnswerMs) return onCheckinMissed() }
 
@@ -245,7 +260,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
             val due = nextCheckinAt
             if (due != null && now >= due && now < endAt(o) - 30_000L) {
                 checkinShownAt = now
-                checkinsAsked++
+                if (!checkinCounted) { checkinsAsked++; checkinCounted = true }
                 return TickResult.AskCheckin
             }
         }

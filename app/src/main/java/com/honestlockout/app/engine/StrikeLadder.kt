@@ -26,13 +26,20 @@ class StrikeLadder(
     private val settings: SettingsStore,
     private val overrides: OverrideRepository,
 ) {
-    suspend fun record(overrideId: Long?, packageName: String?, reason: StrikeReason, now: Long): LadderResult {
+    /**
+     * Returns null (and records nothing) when [overrideId] was already ended by another path,
+     * e.g. break-glass or I'm done landing at the same moment as the strike.
+     */
+    suspend fun record(overrideId: Long?, packageName: String?, reason: StrikeReason, now: Long): LadderResult? {
         val strikes = AppGraph.strikeRepo
+        // 2 (first, atomically). End the override with STRIKE; the "rest of declared" lock needs it.
+        val active = overrideId?.let { overrides.get(it) }
+        if (overrideId != null) {
+            if (active == null || active.endedAt != null) return null
+            if (overrides.end(EndReason.STRIKE, now) == null) return null
+        }
         // 1. Strike row.
         val strikeId = strikes.insertStrike(overrideId, packageName, reason, now)
-        // 2. End the override with STRIKE (needed for the "rest of declared" lock below).
-        val active = overrideId?.let { overrides.get(it) }
-        if (active != null && active.endedAt == null) overrides.end(EndReason.STRIKE, now)
         // 3–4. Ladder row from the active strike count (including this one).
         val n = strikes.activeCount(now)
         val row = n.coerceIn(1, 4)
@@ -57,7 +64,7 @@ class StrikeLadder(
     suspend fun recordTamper(now: Long): LadderResult? {
         var last: LadderResult? = null
         for (event: TamperEvent in AppGraph.strikeRepo.unpunishedServiceOff()) {
-            val result = record(null, null, StrikeReason.TAMPER, now)
+            val result = record(null, null, StrikeReason.TAMPER, now) ?: continue
             AppGraph.strikeRepo.markTamperPunished(event, result.strikeId)
             last = result
         }

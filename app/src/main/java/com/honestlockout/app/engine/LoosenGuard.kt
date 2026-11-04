@@ -75,11 +75,35 @@ class LoosenGuard(
     suspend fun request(change: SettingChange, now: Long = System.currentTimeMillis()): GuardResult {
         if (!isLoosening(change)) {
             applyChange(change, now)
+            cancelQueuedFor(change)
             return GuardResult.Applied
         }
         val applyAt = now + settings.snapshot().loosenDelayHours.coerceAtLeast(0) * 3_600_000L
         queue(change, describe(change), now, applyAt)
         return GuardResult.Queued(applyAt)
+    }
+
+    /**
+     * A tightening the user applies now supersedes any loosening still queued for the same target,
+     * so a day-old request cannot silently undo it (e.g. queue BUDGET 60, then switch to ALWAYS).
+     */
+    private suspend fun cancelQueuedFor(change: SettingChange) {
+        val key = targetOf(change) ?: return
+        for (p in pending.pendingOnce()) {
+            val queued = runCatching { json.decodeFromString(SettingChange.serializer(), p.changeJson) }.getOrNull() ?: continue
+            if (targetOf(queued) == key) pending.cancel(p.id)
+        }
+    }
+
+    private fun targetOf(c: SettingChange): String? = when (c) {
+        is SettingChange.RemoveBlockRule -> "rule:${c.packageName}"
+        is SettingChange.SetBlockMode -> "rule:${c.packageName}"
+        is SettingChange.SetSetting -> "setting:${c.key}"
+        is SettingChange.SetTemplateMax -> "tmax:${c.templateId}"
+        is SettingChange.SetTemplateScreens -> "tscreens:${c.templateId}"
+        is SettingChange.SetSchedule -> "schedule:${c.id}"
+        is SettingChange.DisableDeviceAdmin -> "setting:${Keys.DEVICE_ADMIN_WANTED}"
+        is SettingChange.AllowDisable, is SettingChange.BreakGlass -> null
     }
 
     /** Inserts a PendingChange and schedules a one-time worker for its applyAt. */

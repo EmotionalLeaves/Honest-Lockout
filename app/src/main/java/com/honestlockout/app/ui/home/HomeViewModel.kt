@@ -14,6 +14,7 @@ import com.honestlockout.app.data.repo.UsageRepository
 import com.honestlockout.app.engine.DayClock
 import com.honestlockout.app.service.OverrideForegroundService
 import com.honestlockout.app.ui.Format
+import com.honestlockout.app.ui.setup.PermissionChecks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,7 +79,8 @@ class HomeViewModel @JvmOverloads constructor(
                 (((it.startedAt + it.plannedMin * 60_000L) - now + 59_999L) / 60_000L).toInt().coerceAtLeast(0)
             } ?: 0,
             pendingCount = pendingCount,
-            accessibilityOn = AppGraph.accessibilityConnected,
+            // The toggle in Settings, not the live binding (which lags a moment after app start).
+            accessibilityOn = PermissionChecks.accessibilityEnabled(ctx),
         )
     }.flowOn(Dispatchers.IO).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), HomeState())
 

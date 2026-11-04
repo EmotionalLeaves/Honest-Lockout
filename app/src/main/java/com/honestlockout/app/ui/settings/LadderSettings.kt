@@ -15,8 +15,8 @@ import com.honestlockout.app.ui.SectionCard
 import com.honestlockout.app.ui.Stepper
 import com.honestlockout.app.ui.rangeOptions
 
-/** Ladder lock values ordered by strength: 0 = rest of declared, -1 = rest of day (~720). */
-val LADDER_LOCK_OPTIONS = listOf(0, 15, 30, 60, 120, 240, 480, -1, 1440, 2880)
+/** Ladder lock values ordered by strength (Keys.lockStrength): 0 = rest of override, -1 = rest of day. */
+val LADDER_LOCK_OPTIONS = listOf(15, 30, 0, 60, 120, 240, 480, 720, -1, 1440, 2880)
 val LADDER_WAIT_OPTIONS = listOf(0, 5, 10, 15, 30, 60, 120, 240, 480, 1440)
 
 fun ladderLockLabel(context: Context, v: Int): String = when (v) {

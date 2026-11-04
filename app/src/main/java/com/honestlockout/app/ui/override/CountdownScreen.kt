@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.AppLog
@@ -35,11 +38,14 @@ import com.honestlockout.app.service.OverrideForegroundService
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.nav.Routes
 import com.honestlockout.app.ui.theme.HugeNumber
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 /**
  * override_countdown_sec seconds (default 20) with the statement in large text and a Cancel button.
- * There is no way to skip. At 0 the override starts, MainActivity finishes and the app launches.
+ * There is no way to skip, and leaving the screen restarts it. At 0 the override starts,
+ * MainActivity finishes and the app launches.
  */
 @Composable
 fun CountdownScreen(nav: NavController) {
@@ -54,20 +60,30 @@ fun CountdownScreen(nav: NavController) {
     }
     BackHandler { cancel() }
 
-    LaunchedEffect(draft) {
+    // The countdown only runs while this screen is in front; leaving it starts over on return.
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val resumed by lifecycle.currentStateFlow.collectAsState()
+    val inFront = resumed.isAtLeast(Lifecycle.State.RESUMED)
+
+    LaunchedEffect(draft, inFront) {
         if (draft == null) { cancel(); return@LaunchedEffect }
+        if (!inFront) { left = -1; return@LaunchedEffect }
         left = AppGraph.settings.snapshot().countdownSec.coerceAtLeast(1)
         while (left > 0) { delay(1_000L); left-- }
-        val now = System.currentTimeMillis()
-        val e = AppGraph.overrideRepo.eligibility(draft.packageName, draft.templateId, now)
-        if (e is Eligibility.Refused) { error = e.message; return@LaunchedEffect }
-        runCatching {
-            AppGraph.overrideRepo.start(draft, now)
-            AppGraph.overrideRepo.draft = null
-            OverrideForegroundService.send(context, OverrideForegroundService.ACTION_START)
-            context.packageManager.getLaunchIntentForPackage(draft.packageName)?.let { context.startActivity(it) }
-            (context as? Activity)?.finish()
-        }.onFailure { AppLog.w("HL/Svc", "Override start failed", it); error = it.message }
+        // Past this point nothing may cancel half way: the row and its service start together.
+        withContext(NonCancellable) {
+            val now = System.currentTimeMillis()
+            val e = AppGraph.overrideRepo.eligibility(draft.packageName, draft.templateId, now)
+            if (e is Eligibility.Refused) { error = e.message; return@withContext }
+            runCatching {
+                AppGraph.overrideRepo.start(draft, now)
+                AppGraph.overrideRepo.draft = null
+                OverrideForegroundService.send(context, OverrideForegroundService.ACTION_START)
+                context.packageManager.getLaunchIntentForPackage(draft.packageName)?.let { context.startActivity(it) }
+                (context as? Activity)?.finish()
+            }.onFailure { AppLog.w("HL/Svc", "Override start failed", it); error = it.message }
+            Unit
+        }
     }
 
     Scaffold { padding ->
