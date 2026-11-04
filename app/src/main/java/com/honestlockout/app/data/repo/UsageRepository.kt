@@ -23,6 +23,7 @@ class UsageRepository(private val context: Context, private val db: AppDatabase)
     fun hasUsageAccess(): Boolean {
         val ops = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = if (Build.VERSION.SDK_INT >= 29) {
+            @Suppress("DEPRECATION") // the spec's check; still the documented way to read this op
             ops.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), context.packageName)
         } else {
             @Suppress("DEPRECATION")
