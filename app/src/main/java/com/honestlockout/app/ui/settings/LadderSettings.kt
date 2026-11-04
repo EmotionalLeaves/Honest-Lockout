@@ -11,7 +11,7 @@ import com.honestlockout.app.R
 import com.honestlockout.app.data.settings.Keys
 import com.honestlockout.app.data.settings.Settings
 import com.honestlockout.app.ui.Format
-import com.honestlockout.app.ui.SectionCard
+import com.honestlockout.app.ui.ExpandableSection
 import com.honestlockout.app.ui.Stepper
 import com.honestlockout.app.ui.rangeOptions
 
@@ -29,7 +29,7 @@ fun ladderLockLabel(context: Context, v: Int): String = when (v) {
 @Composable
 fun LadderSettings(s: Settings, onChange: (key: String, value: Int) -> Unit) {
     val context = LocalContext.current
-    SectionCard(stringResource(R.string.settings_ladder)) {
+    ExpandableSection(stringResource(R.string.settings_ladder), stringResource(R.string.settings_ladder_desc)) {
         Text(stringResource(R.string.settings_ladder_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
         for (n in 1..4) {
             val label = if (n == 4) stringResource(R.string.ladder_row_4) else stringResource(R.string.ladder_row_n, n)
@@ -54,7 +54,7 @@ fun TimingSettings(s: Settings, onChange: (key: String, value: Int) -> Unit) {
     val context = LocalContext.current
     val sec: (Int) -> String = { context.getString(R.string.fmt_seconds, it) }
     val min: (Int) -> String = { Format.minutes(context, it) }
-    SectionCard(stringResource(R.string.settings_timing)) {
+    ExpandableSection(stringResource(R.string.settings_timing), stringResource(R.string.settings_timing_desc)) {
         IntStepper(R.string.timing_grace, s, Keys.WARNING_GRACE_SEC, rangeOptions(10, 120, 5), sec, onChange)
         IntStepper(R.string.timing_countdown, s, Keys.OVERRIDE_COUNTDOWN_SEC, rangeOptions(5, 120, 5), sec, onChange)
         IntStepper(R.string.timing_checkin_min, s, Keys.CHECKIN_MIN_GAP_MIN, rangeOptions(1, 30), min, onChange)

@@ -37,6 +37,7 @@ data class HomeState(
     val active: Override? = null,
     val activeMinutesLeft: Int = 0,
     val pendingCount: Int = 0,
+    val blockedCount: Int = 0,
     val accessibilityOn: Boolean = true,
 )
 
@@ -79,6 +80,7 @@ class HomeViewModel @JvmOverloads constructor(
                 (((it.startedAt + it.plannedMin * 60_000L) - now + 59_999L) / 60_000L).toInt().coerceAtLeast(0)
             } ?: 0,
             pendingCount = pendingCount,
+            blockedCount = rules.size,
             // The toggle in Settings, not the live binding (which lags a moment after app start).
             accessibilityOn = PermissionChecks.accessibilityEnabled(ctx),
         )

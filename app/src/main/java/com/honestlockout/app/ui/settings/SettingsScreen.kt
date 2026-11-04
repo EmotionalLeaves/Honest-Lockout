@@ -45,6 +45,7 @@ import com.honestlockout.app.data.settings.Keys
 import com.honestlockout.app.engine.GuardResult
 import com.honestlockout.app.engine.SettingChange
 import com.honestlockout.app.ui.AppScaffold
+import com.honestlockout.app.ui.ExpandableSection
 import com.honestlockout.app.ui.SectionCard
 import com.honestlockout.app.ui.guardMessage
 import com.honestlockout.app.ui.nav.Routes
@@ -127,7 +128,7 @@ fun SettingsScreen(nav: NavController) {
             TimingSettings(s, onInt)
             ThresholdSettings(s, onInt)
 
-            SectionCard(stringResource(R.string.settings_templates)) {
+            ExpandableSection(stringResource(R.string.settings_templates), stringResource(R.string.settings_templates_desc)) {
                 templates.forEach { t ->
                     Row(
                         Modifier.fillMaxWidth().clickable { nav.navigate(Routes.template(t.id)) }.padding(vertical = 8.dp),
@@ -139,7 +140,7 @@ fun SettingsScreen(nav: NavController) {
                 }
             }
 
-            SectionCard(stringResource(R.string.settings_screen_rules)) {
+            ExpandableSection(stringResource(R.string.settings_screen_rules), stringResource(R.string.settings_screen_rules_desc)) {
                 OutlinedButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {

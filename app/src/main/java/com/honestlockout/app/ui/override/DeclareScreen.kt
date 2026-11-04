@@ -1,22 +1,32 @@
 package com.honestlockout.app.ui.override
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,8 +39,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -42,6 +54,7 @@ import com.honestlockout.app.data.repo.Eligibility
 import com.honestlockout.app.data.repo.OverrideDraft
 import com.honestlockout.app.data.rules.PurposeTemplates
 import com.honestlockout.app.service.OverrideForegroundService
+import com.honestlockout.app.ui.AppIcon
 import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.SectionCard
@@ -53,9 +66,9 @@ const val STATEMENT_MAX = 120
 
 private data class DeclareSetup(val template: PurposeTemplate, val apps: List<String>, val maxMinutes: Int, val fixedApp: String?)
 
-/** Statement, app, minutes (and Custom extras). Start is disabled until the statement has 8+ characters. */
+/** Statement (with suggestions), app (sheet with search), minutes (quick chips + slider), Custom extras. */
 @Composable
-fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, extend: Boolean) {
+fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, extend: Boolean, presetStatement: String? = null) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -67,19 +80,19 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
         val allowed = PurposeTemplates.split(t.allowedPackages).filter { Format.isInstalled(context, it) }
         val apps = if (allowed.isNotEmpty()) allowed else rules.map { it.packageName }
         val max = if (active != null) {
-            // Minutes used across the whole Extend chain, so extending never exceeds maxMinutes.
             val chainStart = AppGraph.settings.snapshot().extendChainStartedAt.takeIf { it in 1..active.startedAt } ?: active.startedAt
             val used = ((System.currentTimeMillis() - chainStart) / 60_000L).toInt()
             (t.maxMinutes - used).coerceAtLeast(1)
         } else t.maxMinutes.coerceAtLeast(1)
-        value = DeclareSetup(t, apps, max, active?.packageName)
+        value = DeclareSetup(t, apps.sortedBy { Format.appLabel(context, it).lowercase() }, max, active?.packageName)
     }
 
-    var statement by rememberSaveable { mutableStateOf("") }
+    var statement by rememberSaveable { mutableStateOf(presetStatement.orEmpty()) }
     var app by rememberSaveable { mutableStateOf(presetPackage) }
     var minutes by rememberSaveable { mutableIntStateOf(-1) }
     var labels by rememberSaveable { mutableStateOf(listOf<String>()) }
     var shape by rememberSaveable { mutableStateOf(ActivityShape.ANY) }
+    var showAppSheet by remember { mutableStateOf(false) }
     LaunchedEffect(setup) {
         val s = setup ?: return@LaunchedEffect
         if (minutes < 0 || minutes > s.maxMinutes) minutes = s.maxMinutes
@@ -97,30 +110,46 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
         val isCustom = s.template.id == PurposeTemplates.ID_CUSTOM
         Column(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             OutlinedTextField(
                 value = statement,
                 onValueChange = { statement = it.replace('\n', ' ').take(STATEMENT_MAX) },
                 modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.declare_label)) },
                 placeholder = { Text(stringResource(R.string.declare_placeholder)) },
                 supportingText = { Text(stringResource(R.string.declare_count, statement.trim().length, STATEMENT_MAX)) },
                 minLines = 2,
             )
-            SectionCard(stringResource(R.string.declare_app)) {
-                if (s.fixedApp != null) {
-                    FilterChip(selected = true, onClick = {}, label = { Text(Format.appLabel(context, s.fixedApp)) })
-                } else {
-                    if (s.apps.isEmpty() && app == null) Text(stringResource(R.string.declare_no_apps))
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val choices = (listOfNotNull(app) + s.apps).distinct()
-                        choices.forEach { p ->
-                            FilterChip(selected = app == p, onClick = { app = p }, label = { Text(Format.appLabel(context, p)) })
-                        }
-                    }
+            val suggestions = suggestionsFor(s.template.id)
+            if (suggestions.isNotEmpty() && statement.isBlank()) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    suggestions.forEach { sug -> SuggestionChip(onClick = { statement = sug }, label = { Text(sug) }) }
                 }
             }
+
+            SectionCard(stringResource(R.string.declare_app)) {
+                val chosen = app
+                Row(
+                    Modifier.fillMaxWidth().clickable(enabled = s.fixedApp == null) { showAppSheet = true }.padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    if (chosen != null) {
+                        AppIcon(chosen, 40)
+                        Text(Format.appLabel(context, chosen), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                    } else {
+                        Text(stringResource(if (s.apps.isEmpty()) R.string.declare_no_apps else R.string.declare_choose_app), Modifier.weight(1f))
+                    }
+                    if (s.fixedApp == null && s.apps.isNotEmpty()) Icon(Icons.Filled.Search, contentDescription = null)
+                }
+            }
+
             SectionCard(stringResource(R.string.declare_minutes, minutes.coerceAtLeast(1))) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(2, 5, 10, 15, 30).filter { it < s.maxMinutes }.plus(s.maxMinutes).distinct().forEach { m ->
+                        FilterChip(selected = minutes == m, onClick = { minutes = m }, label = { Text(stringResource(R.string.fmt_minutes, m)) })
+                    }
+                }
                 if (s.maxMinutes > 1) {
                     Slider(
                         value = minutes.coerceIn(1, s.maxMinutes).toFloat(),
@@ -129,18 +158,13 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                         steps = (s.maxMinutes - 2).coerceAtLeast(0),
                     )
                 }
-                Text(stringResource(R.string.declare_max, s.maxMinutes), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (isCustom) {
                 SectionCard(stringResource(R.string.declare_custom_screens)) {
                     val all = remember { AppGraph.screenRules.allLabels() }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         all.forEach { l ->
-                            FilterChip(
-                                selected = l in labels,
-                                onClick = { labels = if (l in labels) labels - l else labels + l },
-                                label = { Text(l) },
-                            )
+                            FilterChip(selected = l in labels, onClick = { labels = if (l in labels) labels - l else labels + l }, label = { Text(l) })
                         }
                     }
                 }
@@ -148,10 +172,7 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                     val shapes = ActivityShape.entries
                     SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                         shapes.forEachIndexed { i, sh ->
-                            SegmentedButton(
-                                selected = shape == sh, onClick = { shape = sh },
-                                shape = SegmentedButtonDefaults.itemShape(i, shapes.size),
-                            ) { Text(shapeName(sh)) }
+                            SegmentedButton(selected = shape == sh, onClick = { shape = sh }, shape = SegmentedButtonDefaults.itemShape(i, shapes.size)) { Text(shapeName(sh)) }
                         }
                     }
                 }
@@ -177,8 +198,44 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                 },
             ) { Text(stringResource(R.string.declare_start)) }
         }
+        if (showAppSheet) {
+            AppSheet(s.apps, onPick = { app = it; showAppSheet = false }, onDismiss = { showAppSheet = false })
+        }
     }
 }
+
+@Composable
+private fun AppSheet(apps: List<String>, onPick: (String) -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    var query by remember { mutableStateOf("") }
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        OutlinedTextField(
+            value = query, onValueChange = { query = it }, singleLine = true,
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            placeholder = { Text(stringResource(R.string.apppicker_search)) },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        )
+        LazyColumn(Modifier.padding(top = 8.dp, bottom = 24.dp)) {
+            items(apps.filter { query.isBlank() || Format.appLabel(context, it).contains(query, true) }, key = { it }) { p ->
+                ListItem(
+                    modifier = Modifier.clickable { onPick(p) },
+                    leadingContent = { AppIcon(p) },
+                    headlineContent = { Text(Format.appLabel(context, p)) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun suggestionsFor(templateId: Long): List<String> = when (templateId) {
+    PurposeTemplates.ID_NAVIGATION -> stringArrayResource(R.array.suggest_navigation)
+    PurposeTemplates.ID_REPLY -> stringArrayResource(R.array.suggest_reply)
+    PurposeTemplates.ID_LOOKUP -> stringArrayResource(R.array.suggest_lookup)
+    PurposeTemplates.ID_WORK -> stringArrayResource(R.array.suggest_work)
+    PurposeTemplates.ID_PAY -> stringArrayResource(R.array.suggest_pay)
+    else -> emptyArray()
+}.toList()
 
 @Composable
 private fun shapeName(shape: ActivityShape) = stringResource(

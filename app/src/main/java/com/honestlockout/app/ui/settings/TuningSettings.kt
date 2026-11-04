@@ -22,7 +22,7 @@ import com.honestlockout.app.data.db.EndReason
 import com.honestlockout.app.data.db.Strictness
 import com.honestlockout.app.data.settings.Keys
 import com.honestlockout.app.data.settings.Settings
-import com.honestlockout.app.ui.SectionCard
+import com.honestlockout.app.ui.ExpandableSection
 import com.honestlockout.app.ui.Stepper
 import com.honestlockout.app.ui.rangeOptions
 import kotlinx.coroutines.Dispatchers
@@ -88,7 +88,7 @@ suspend fun suggestThresholds(now: Long): Map<String, Int?> = withContext(Dispat
 fun ThresholdSettings(s: Settings, onChange: (key: String, value: Int) -> Unit) {
     val scope = rememberCoroutineScope()
     var suggestions by remember { mutableStateOf<Map<String, Int?>?>(null) }
-    SectionCard(stringResource(R.string.settings_thresholds)) {
+    ExpandableSection(stringResource(R.string.settings_thresholds), stringResource(R.string.settings_thresholds_desc)) {
         Text(stringResource(R.string.settings_thresholds_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
         THRESHOLD_KEYS.forEach { (label, key) ->
             Stepper(stringResource(label), s.int(key), rangeOptions(1, 200), { "$it" }, { onChange(key, it) })

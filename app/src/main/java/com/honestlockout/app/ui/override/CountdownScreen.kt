@@ -36,6 +36,7 @@ import com.honestlockout.app.R
 import com.honestlockout.app.data.repo.Eligibility
 import com.honestlockout.app.service.OverrideForegroundService
 import com.honestlockout.app.ui.Format
+import com.honestlockout.app.ui.ProgressRing
 import com.honestlockout.app.ui.nav.Routes
 import com.honestlockout.app.ui.theme.HugeNumber
 import kotlinx.coroutines.NonCancellable
@@ -52,6 +53,7 @@ fun CountdownScreen(nav: NavController) {
     val context = LocalContext.current
     val draft = remember { AppGraph.overrideRepo.draft }
     var left by remember { mutableIntStateOf(-1) }
+    var total by remember { mutableIntStateOf(1) }
     var error by remember { mutableStateOf<String?>(null) }
 
     fun cancel() {
@@ -69,6 +71,7 @@ fun CountdownScreen(nav: NavController) {
         if (draft == null) { cancel(); return@LaunchedEffect }
         if (!inFront) { left = -1; return@LaunchedEffect }
         left = AppGraph.settings.snapshot().countdownSec.coerceAtLeast(1)
+        total = left
         while (left > 0) { delay(1_000L); left-- }
         // Past this point nothing may cancel half way: the row and its service start together.
         withContext(NonCancellable) {
@@ -93,7 +96,11 @@ fun CountdownScreen(nav: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (draft == null) return@Column
-            Text(if (left >= 0) "$left" else "", style = HugeNumber, color = MaterialTheme.colorScheme.primary)
+            ProgressRing(progress = if (left >= 0) 1f - left / total.toFloat() else 0f, size = 220, stroke = 14) {
+                Text(if (left >= 0) "$left" else "", style = HugeNumber, color = MaterialTheme.colorScheme.primary)
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(stringResource(R.string.countdown_hint), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(24.dp))
             Text(draft.statement, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
             Spacer(Modifier.height(16.dp))

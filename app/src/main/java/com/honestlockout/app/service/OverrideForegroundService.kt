@@ -124,8 +124,8 @@ class OverrideForegroundService : Service() {
         when (result) {
             TickResult.Timeout -> { timeout(o); return }
             is TickResult.Strike -> { strike(o, result); return }
-            TickResult.Warn -> { syncCounters(); Notifications.showWarning(this, o.statement) }
-            TickResult.AskCheckin -> { syncCounters(); Notifications.showCheckin(this, o.statement) }
+            TickResult.Warn -> { syncCounters(); Haptics.warn(this); Notifications.showWarning(this, o.statement) }
+            TickResult.AskCheckin -> { syncCounters(); Haptics.tap(this); Notifications.showCheckin(this, o.statement) }
             TickResult.Nothing -> Unit
         }
         renderBanner(now, o)

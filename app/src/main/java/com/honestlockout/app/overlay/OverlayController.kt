@@ -90,7 +90,9 @@ class OverlayController(private val appContext: Context) {
         )
         avoidSystemBars(params)
         val wm = ctx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        view.alpha = 0f
         wm.addView(view, params)
+        view.animate().alpha(1f).setDuration(160L).start()
         view.requestFocus()
         fullView = view; fullWm = wm; fullKind = kind; fullPackage = pkg
     }
@@ -127,7 +129,9 @@ class OverlayController(private val appContext: Context) {
         ).apply { gravity = Gravity.TOP; dimAmount = 0.35f }
         avoidSystemBars(params)
         val wm = ctx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        view.translationY = -height / 3f
         wm.addView(view, params)
+        view.animate().translationY(0f).setDuration(220L).start()
         banner = view; bannerWm = wm
     }
 

@@ -71,13 +71,8 @@
     <!-- Home -->
     <string name="home_service_off">The accessibility service is off, so nothing is blocked. Turn it back on in Settings &gt; Accessibility.</string>
     <string name="home_active_title">Override running: %1$s</string>
-    <string name="home_minutes_left">%1$d min left</string>
     <string name="home_lock_it">I got distracted, lock it</string>
     <string name="home_today">Screen time today</string>
-    <string name="home_budget_left">%1$s: %2$d of %3$d min left</string>
-    <string name="home_strikes">Strikes</string>
-    <string name="home_no_strikes">No active strikes</string>
-    <string name="home_strike_count">%1$d active strike(s)</string>
     <string name="home_oldest_expires">Oldest expires %1$s</string>
     <string name="home_next_override_at">Next override allowed at %1$s</string>
     <string name="home_next_override_now">Next override allowed now</string>
@@ -139,12 +134,11 @@
     <string name="refuse_app_lockout">This app is locked out until %1$s.</string>
     <string name="refuse_four_strikes">With 4 or more strikes, only Navigation and Pay overrides are allowed.</string>
     <string name="refuse_override_active">End the current override first.</string>
-    <string name="declare_placeholder">What exactly will you do?</string>
+    <string name="declare_placeholder">e.g. reply to Sam about Friday</string>
     <string name="declare_count">%1$d / %2$d</string>
     <string name="declare_app">App</string>
     <string name="declare_no_apps">Add an app to the block list first.</string>
     <string name="declare_minutes">Minutes: %1$d</string>
-    <string name="declare_max">Up to %1$d min</string>
     <string name="declare_custom_screens">Screens to block</string>
     <string name="declare_custom_shape">Expected activity</string>
     <string name="declare_start">Start</string>
@@ -329,4 +323,58 @@
     <string name="break_glass_sentence">I am choosing to unlock everything and I accept two strikes.</string>
     <string name="break_glass_unlock">Unlock</string>
     <string name="break_glass_active">Everything is unlocked until %1$s.</string>
+    <!-- UX pass -->
+    <string name="apppicker_select_all">Select all (%1$d)</string>
+    <string name="apppicker_clear_all">Clear (%1$d)</string>
+    <string name="apppicker_selected">%1$d selected</string>
+    <string name="apppicker_block_n">Block %1$d app(s)</string>
+    <string name="cat_all">All</string>
+    <string name="cat_social">Social</string>
+    <string name="cat_games">Games</string>
+    <string name="cat_video">Video</string>
+    <string name="cat_other">Other</string>
+    <string name="blocklist_stat_blocked">Blocked</string>
+    <string name="rule_always_short">Locked at all times</string>
+    <string name="home_stat_screen_time">today</string>
+    <string name="home_stat_strikes">strikes</string>
+    <string name="home_stat_blocked">blocked</string>
+    <string name="home_budget_left_short">%1$d of %2$d min left</string>
+    <string name="home_hero_protected">Protected</string>
+    <string name="home_hero_service_off">Not protecting you</string>
+    <string name="home_hero_no_apps">No apps are blocked yet. Add the ones that eat your time.</string>
+    <string name="home_ring_min_left">min left</string>
+    <string name="home_tile_block_sub">%1$d app(s) · add or edit</string>
+    <string name="home_tile_history_sub">Overrides and screen time</string>
+    <string name="home_tile_settings_sub">Strictness, ladder, rules</string>
+    <string name="home_tile_emergency_sub">Costs 2 strikes</string>
+    <string name="declare_label">What exactly will you do?</string>
+    <string name="declare_choose_app">Choose an app</string>
+    <string name="pick_last_time">Same as last time · %1$s · %2$d min</string>
+    <string name="countdown_hint">Take a breath. Still want this?</string>
+    <string name="settings_timing_desc">Grace, countdown, check-ins, windows</string>
+    <string name="settings_templates_desc">Max minutes and blocked screens per purpose</string>
+    <string name="settings_screen_rules_desc">Which in-app screens count as feeds</string>
+    <string-array name="suggest_navigation">
+        <item>Drive to a place I need directions to</item>
+        <item>Check the route and traffic</item>
+    </string-array>
+    <string-array name="suggest_reply">
+        <item>Reply to one person who messaged me</item>
+        <item>Confirm plans for today</item>
+        <item>Answer a question someone asked</item>
+    </string-array>
+    <string-array name="suggest_lookup">
+        <item>Look up one fact and leave</item>
+        <item>Watch one tutorial I need right now</item>
+    </string-array>
+    <string-array name="suggest_work">
+        <item>Finish one task for work</item>
+        <item>Submit an assignment</item>
+        <item>Send one email I owe someone</item>
+    </string-array>
+    <string-array name="suggest_pay">
+        <item>Pay a bill</item>
+        <item>Get a login code</item>
+        <item>Check my balance</item>
+    </string-array>
 </resources>
