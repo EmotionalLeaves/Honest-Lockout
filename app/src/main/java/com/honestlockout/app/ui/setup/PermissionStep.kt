@@ -20,8 +20,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
+import com.honestlockout.app.ui.StatusDot
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -128,13 +127,7 @@ fun StatusChip(granted: Boolean, checkable: Boolean) {
         granted -> stringResource(R.string.status_granted)
         else -> stringResource(R.string.status_not_yet)
     }
-    AssistChip(
-        onClick = {},
-        label = { Text(label) },
-        colors = AssistChipDefaults.assistChipColors(
-            labelColor = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
-        ),
-    )
+    StatusDot(if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary, label)
 }
 
 @Composable
