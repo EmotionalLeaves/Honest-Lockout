@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import com.honestlockout.app.ui.PrimaryButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,9 +44,7 @@ fun ExtendEntry(nav: NavController) {
         val m = message ?: return@AppScaffold
         Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(m)
-            Button(onClick = { nav.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } }) {
-                Text(stringResource(R.string.action_ok))
-            }
+            PrimaryButton(stringResource(R.string.action_ok)) { nav.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } }
         }
     }
 }

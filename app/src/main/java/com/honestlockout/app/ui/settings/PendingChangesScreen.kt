@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +31,7 @@ import com.honestlockout.app.R
 import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.EmptyState
 import com.honestlockout.app.ui.Format
+import com.honestlockout.app.ui.RowDivider
 import kotlinx.coroutines.launch
 
 /** Queued loosening changes. Cancel is tightening, so it is instant. */
@@ -39,21 +43,24 @@ fun PendingChangesScreen(nav: NavController) {
 
     AppScaffold(title = stringResource(R.string.settings_pending), onBack = { nav.popBackStack() }) { padding ->
         val list = pending ?: return@AppScaffold
-        if (list.isEmpty()) { EmptyState(stringResource(R.string.pending_empty), padding); return@AppScaffold }
-        LazyColumn(
-            Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(list, key = { it.id }) { c ->
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
-                    Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(c.description, style = MaterialTheme.typography.titleMedium)
-                            Text(stringResource(R.string.pending_created, Format.dateTime(context, c.createdAt)), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(stringResource(R.string.pending_applies, Format.dateTime(context, c.applyAt)), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        TextButton(onClick = { scope.launch { AppGraph.pendingRepo.cancel(c.id) } }) {
-                            Text(stringResource(R.string.action_cancel))
+        if (list.isEmpty()) { EmptyState(stringResource(R.string.pending_empty), padding, icon = Icons.Outlined.Schedule); return@AppScaffold }
+        Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState())) {
+            Text(stringResource(R.string.pending_intro), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 16.dp))
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+            ) {
+                Column {
+                    list.forEachIndexed { i, c ->
+                        if (i > 0) RowDivider()
+                        Row(Modifier.fillMaxWidth().padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(c.description, style = MaterialTheme.typography.bodyLarge)
+                                Text(stringResource(R.string.pending_applies, Format.dateTime(context, c.applyAt)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            TextButton(onClick = { scope.launch { AppGraph.pendingRepo.cancel(c.id) } }) {
+                                Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.error)
+                            }
                         }
                     }
                 }

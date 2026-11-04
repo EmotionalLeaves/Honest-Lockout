@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.honestlockout.app.ui.SecondaryButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -98,10 +98,7 @@ fun ColumnScope.ThresholdSettings(s: Settings, onChange: (key: String, value: In
             hint = guardedHint(context, s, key, stringResource(R.string.threshold_hint)),
         )
     }
-    OutlinedButton(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = { scope.launch { suggestions = suggestThresholds(System.currentTimeMillis()) } },
-    ) { Text(stringResource(R.string.settings_suggest)) }
+    SecondaryButton(stringResource(R.string.settings_suggest)) { scope.launch { suggestions = suggestThresholds(System.currentTimeMillis()) } }
     suggestions?.let { map ->
         Text(stringResource(R.string.suggest_explain), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         THRESHOLD_KEYS.forEach { (label, key) ->

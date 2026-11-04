@@ -2,7 +2,9 @@ package com.honestlockout.app.ui.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,14 +18,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
@@ -53,7 +54,11 @@ import com.honestlockout.app.engine.GuardResult
 import com.honestlockout.app.engine.SettingChange
 import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.ExpandableSection
-import com.honestlockout.app.ui.SectionCard
+import com.honestlockout.app.ui.GroupHeader
+import com.honestlockout.app.ui.RowDivider
+import com.honestlockout.app.ui.SecondaryButton
+import com.honestlockout.app.ui.SelectRow
+import com.honestlockout.app.ui.TextLink
 import com.honestlockout.app.ui.guardMessage
 import com.honestlockout.app.ui.nav.Routes
 import com.honestlockout.app.ui.setup.PermissionChecks
@@ -143,18 +148,13 @@ fun SettingsScreen(nav: NavController) {
                 HorizontalDivider(Modifier.padding(vertical = 4.dp))
                 Text(stringResource(R.string.settings_screen_rules), style = MaterialTheme.typography.titleSmall)
                 Text(stringResource(R.string.settings_screen_rules_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { nav.navigate(Routes.INSPECTOR) }) {
-                    Text(stringResource(R.string.rules_inspect))
+                SecondaryButton(stringResource(R.string.rules_inspect)) { nav.navigate(Routes.INSPECTOR) }
+                TextLink(stringResource(R.string.rules_reload), color = MaterialTheme.colorScheme.primary) {
+                    scope.launch {
+                        val n = AppGraph.screenRules.reloadFromAssets()
+                        snackbar.showSnackbar(context.getString(R.string.rules_reloaded, n))
+                    }
                 }
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        scope.launch {
-                            val n = AppGraph.screenRules.reloadFromAssets()
-                            snackbar.showSnackbar(context.getString(R.string.rules_reloaded, n))
-                        }
-                    },
-                ) { Text(stringResource(R.string.rules_reload)) }
                 HorizontalDivider(Modifier.padding(vertical = 4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
@@ -175,9 +175,7 @@ fun SettingsScreen(nav: NavController) {
                 }
             }
 
-            OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { nav.navigate(Routes.BREAKGLASS) }) {
-                Text(stringResource(R.string.settings_break_glass), color = MaterialTheme.colorScheme.error)
-            }
+            TextLink(stringResource(R.string.settings_break_glass), color = MaterialTheme.colorScheme.error) { nav.navigate(Routes.BREAKGLASS) }
             Text(
                 stringResource(R.string.about_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -193,68 +191,64 @@ fun SettingsScreen(nav: NavController) {
 private fun HowChangesWork(s: Settings, pendingCount: Int, onOpenPending: () -> Unit) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Filled.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
-                Text(stringResource(R.string.settings_how_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Icon(Icons.Outlined.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                Text(stringResource(R.string.settings_how_title).uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.2.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(stringResource(R.string.settings_how_body, s.loosenDelayHours), color = MaterialTheme.colorScheme.onPrimaryContainer)
+            Text(stringResource(R.string.settings_how_body, s.loosenDelayHours), style = MaterialTheme.typography.bodyLarge)
             if (pendingCount > 0) {
+                RowDivider(inset = 0)
                 Row(
-                    Modifier.fillMaxWidth().clickable(onClick = onOpenPending).padding(vertical = 4.dp),
+                    Modifier.fillMaxWidth().clickable(onClick = onOpenPending).padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        stringResource(R.string.settings_pending_count, pendingCount), Modifier.weight(1f),
-                        style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(stringResource(R.string.settings_pending_count, pendingCount), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
     }
 }
 
-/** Three presets as selectable cards, each saying exactly what it changes. */
+/** Three presets as check rows, each saying exactly what it changes. */
 @Composable
 private fun StrictnessPicker(s: Settings, onPick: (Strictness) -> Unit) {
-    SectionCard(stringResource(R.string.settings_strictness)) {
-        Text(stringResource(R.string.settings_strictness_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Strictness.entries.forEach { level ->
-            val selected = s.strictness == level
-            Card(
-                modifier = Modifier.fillMaxWidth().clickable { if (!selected) onPick(level) },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = if (selected) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainerHigh),
-            ) {
-                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = selected, onClick = { if (!selected) onPick(level) })
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            stringResource(
-                                when (level) {
-                                    Strictness.LENIENT -> R.string.strict_lenient
-                                    Strictness.NORMAL -> R.string.strict_normal
-                                    Strictness.STRICT -> R.string.strict_strict
-                                }
-                            ),
-                            style = MaterialTheme.typography.titleSmall,
-                        )
-                        Text(
-                            stringResource(
-                                when (level) {
-                                    Strictness.LENIENT -> R.string.strict_lenient_desc
-                                    Strictness.NORMAL -> R.string.strict_normal_desc
-                                    Strictness.STRICT -> R.string.strict_strict_desc
-                                }
-                            ),
-                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+    Column {
+        GroupHeader(stringResource(R.string.settings_strictness))
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        ) {
+            Column {
+                Strictness.entries.forEachIndexed { i, level ->
+                    if (i > 0) RowDivider()
+                    SelectRow(
+                        title = stringResource(
+                            when (level) {
+                                Strictness.LENIENT -> R.string.strict_lenient
+                                Strictness.NORMAL -> R.string.strict_normal
+                                Strictness.STRICT -> R.string.strict_strict
+                            }
+                        ),
+                        subtitle = stringResource(
+                            when (level) {
+                                Strictness.LENIENT -> R.string.strict_lenient_desc
+                                Strictness.NORMAL -> R.string.strict_normal_desc
+                                Strictness.STRICT -> R.string.strict_strict_desc
+                            }
+                        ),
+                        selected = s.strictness == level,
+                    ) { if (s.strictness != level) onPick(level) }
                 }
             }
         }
+        Text(
+            stringResource(R.string.settings_strictness_desc), style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+        )
     }
 }
