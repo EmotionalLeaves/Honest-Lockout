@@ -75,7 +75,7 @@ fun TemplateEditorScreen(nav: NavController, id: Long) {
                         FilterChip(
                             selected = l in chosen,
                             onClick = { labels = if (l in chosen) chosen - l else chosen + l },
-                            label = { Text(l) },
+                            label = { Text(com.honestlockout.app.ui.override.screenLabel(l)) },
                         )
                     }
                 }

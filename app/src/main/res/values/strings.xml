@@ -416,4 +416,9 @@
     <string name="settings_advanced">Advanced</string>
     <string name="settings_advanced_desc">Activity limits, screen rules, device admin</string>
     <string name="threshold_hint">Per minute.</string>
+    <string name="shape_typing_hint">Typing: scrolling a feed without typing gets a warning.</string>
+    <string name="shape_reading_hint">Reading: fast, feed-style scrolling gets a warning.</string>
+    <string name="shape_passive_hint">Passive: lots of scrolling or tapping gets a warning.</string>
+    <string name="shape_any_hint">Any: activity isn\'t checked. Only the time and blocked screens apply.</string>
+    <string name="shape_listen_hint">Listen: other apps and a locked screen are fine; time on screen in the app is limited.</string>
 </resources>

@@ -21,9 +21,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SuggestionChip
@@ -152,16 +149,15 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                     }
                 }
                 if (s.maxMinutes > 1) {
-                    // Long purposes snap to 5 min so the slider stays usable.
+                    // Continuous track (no tick dots); values snap to whole minutes, or 5 min for long purposes.
                     val snap = if (s.maxMinutes > 60) 5 else 1
                     Slider(
                         value = minutes.coerceIn(1, s.maxMinutes).toFloat(),
                         onValueChange = { v ->
-                            val m = if (snap > 1) ((v / snap).toInt() * snap).coerceAtLeast(snap) else v.toInt()
+                            val m = if (snap > 1) (Math.round(v / snap) * snap).coerceAtLeast(snap) else Math.round(v)
                             minutes = m.coerceIn(1, s.maxMinutes)
                         },
                         valueRange = 1f..s.maxMinutes.toFloat(),
-                        steps = if (s.maxMinutes <= 60) (s.maxMinutes - 2).coerceAtLeast(0) else 0,
                     )
                 }
                 if (s.template.expectedShape == ActivityShape.LISTEN) {
@@ -176,17 +172,18 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                     val all = remember { AppGraph.screenRules.allLabels() }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         all.forEach { l ->
-                            FilterChip(selected = l in labels, onClick = { labels = if (l in labels) labels - l else labels + l }, label = { Text(l) })
+                            FilterChip(selected = l in labels, onClick = { labels = if (l in labels) labels - l else labels + l }, label = { Text(screenLabel(l)) })
                         }
                     }
                 }
                 SectionCard(stringResource(R.string.declare_custom_shape)) {
-                    val shapes = ActivityShape.entries
-                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                        shapes.forEachIndexed { i, sh ->
-                            SegmentedButton(selected = shape == sh, onClick = { shape = sh }, shape = SegmentedButtonDefaults.itemShape(i, shapes.size)) { Text(shapeName(sh)) }
+                    // Chips wrap onto a second line instead of squeezing five labels into one row.
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ActivityShape.entries.forEach { sh ->
+                            FilterChip(selected = shape == sh, onClick = { shape = sh }, label = { Text(shapeName(sh), maxLines = 1) })
                         }
                     }
+                    Text(shapeHint(shape), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             Button(
@@ -249,6 +246,20 @@ private fun suggestionsFor(templateId: Long): List<String> = when (templateId) {
     PurposeTemplates.ID_LISTEN -> stringArrayResource(R.array.suggest_listen)
     else -> emptyArray()
 }.toList()
+
+/** "home_feed" -> "home feed". */
+fun screenLabel(label: String) = label.replace('_', ' ')
+
+@Composable
+private fun shapeHint(shape: ActivityShape) = stringResource(
+    when (shape) {
+        ActivityShape.TYPING -> R.string.shape_typing_hint
+        ActivityShape.READING -> R.string.shape_reading_hint
+        ActivityShape.PASSIVE -> R.string.shape_passive_hint
+        ActivityShape.ANY -> R.string.shape_any_hint
+        ActivityShape.LISTEN -> R.string.shape_listen_hint
+    }
+)
 
 @Composable
 private fun shapeName(shape: ActivityShape) = stringResource(
