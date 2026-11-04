@@ -77,7 +77,7 @@ object PermissionChecks {
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}"))
 
     /** The settings page each step opens. Notifications on API 33+ use the runtime dialog instead. */
-    fun intentFor(context: Context, id: StepId): Intent? = when (id) {
+    fun intentFor(context: Context, id: StepId): Intent = when (id) {
         StepId.NOTIFICATIONS -> Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
         StepId.USAGE -> Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
         StepId.BATTERY -> Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:${context.packageName}"))

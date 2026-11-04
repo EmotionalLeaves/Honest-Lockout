@@ -47,13 +47,10 @@ class OverrideMonitor(private val random: Random = Random.Default) {
     private var allowed: Set<String> = emptySet()
     private var blockedLabels: Set<String> = emptySet()
     private var shape = ActivityShape.ANY
-    private var strictness = Strictness.NORMAL
-    private var graceMs = 30_000L
-    private var maxWarnings = 3
-    private var checkinMinGap = 3
-    private var checkinMaxGap = 8
-    private var checkinAnswerMs = 30_000L
-    private var th = ShapeThresholds(TYPING_SCROLL_MAX, READING_SCROLL_MAX, PASSIVE_SCROLL_MAX, PASSIVE_CLICK_MAX)
+    private var cfg = MonitorConfig(
+        Strictness.NORMAL, 30_000L, 3, 3, 8, 30_000L,
+        ShapeThresholds(TYPING_SCROLL_MAX, READING_SCROLL_MAX, PASSIVE_SCROLL_MAX, PASSIVE_CLICK_MAX),
+    )
 
     /** Packages that never count as off-app (launcher, this app). Set by the accessibility service. */
     @Volatile var isIgnored: (String) -> Boolean = { false }
@@ -100,13 +97,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
         allowed = template?.let { PurposeTemplates.split(it.allowedPackages).toSet() } ?: emptySet()
         blockedLabels = template?.let { PurposeTemplates.split(it.blockedScreenLabels).toSet() } ?: emptySet()
         shape = template?.expectedShape ?: ActivityShape.ANY
-        strictness = s.strictness
-        graceMs = s.warningGraceSec * 1000L
-        maxWarnings = s.maxWarnings.coerceAtLeast(1)
-        checkinMinGap = s.checkinMinGapMin.coerceAtLeast(1)
-        checkinMaxGap = s.checkinMaxGapMin.coerceAtLeast(checkinMinGap)
-        checkinAnswerMs = (if (strictness == Strictness.STRICT) STRICT_CHECKIN_ANSWER_SEC else s.checkinAnswerSec) * 1000L
-        th = ShapeThresholds.from(s)
+        cfg = MonitorConfig.from(s)
         frontPackage = frontNow ?: o.packageName
         blockedAttempt = false
         screenLabels = emptySet()
@@ -135,7 +126,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
     /** Random gap of checkin_min_gap..checkin_max_gap minutes; never in the first 2 or last 1 minute. */
     private fun scheduleCheckin(from: Long): Long? {
         val o = override ?: return null
-        val gapMin = if (checkinMaxGap > checkinMinGap) random.nextInt(checkinMinGap, checkinMaxGap + 1) else checkinMinGap
+        val gapMin = if (cfg.checkinMaxGap > cfg.checkinMinGap) random.nextInt(cfg.checkinMinGap, cfg.checkinMaxGap + 1) else cfg.checkinMinGap
         val t = maxOf(from + gapMin * 60_000L + random.nextLong(0, 60_000L), o.startedAt + 2 * 60_000L)
         return if (t > endAt(o) - 60_000L) null else t
     }
@@ -208,10 +199,10 @@ class OverrideMonitor(private val random: Random = Random.Default) {
         val w = warningStartedAt
         if (w != null) {
             if (now < hiddenUntil) return BannerState.None
-            return BannerState.Warning(((graceMs - (now - w)) / 1000L).toInt().coerceAtLeast(0))
+            return BannerState.Warning(((cfg.graceMs - (now - w)) / 1000L).toInt().coerceAtLeast(0))
         }
         val c = checkinShownAt ?: return BannerState.None
-        return BannerState.Checkin(((checkinAnswerMs - (now - c)) / 1000L).toInt().coerceAtLeast(0))
+        return BannerState.Checkin(((cfg.checkinAnswerMs - (now - c)) / 1000L).toInt().coerceAtLeast(0))
     }
 
     @Synchronized
@@ -227,7 +218,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
             return TickResult.Nothing
         }
 
-        checkinShownAt?.let { if (now - it >= checkinAnswerMs) return onCheckinMissed() }
+        checkinShownAt?.let { if (now - it >= cfg.checkinAnswerMs) return onCheckinMissed() }
 
         val wasShape = mismatchReason == StrikeReason.WRONG_SHAPE
         val reason = currentMismatch(now)
@@ -254,7 +245,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
                 hiddenUntil = 0
             }
         }
-        warningStartedAt?.let { if (reason != null && now - it >= graceMs) return TickResult.Strike(reason) }
+        warningStartedAt?.let { if (reason != null && now - it >= cfg.graceMs) return TickResult.Strike(reason) }
 
         if (checkinShownAt == null && warningStartedAt == null && screenOn) {
             val due = nextCheckinAt
@@ -270,7 +261,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
             now - since >= debounceFor(reason)
         ) {
             warningCount++
-            if (warningCount >= maxWarnings) return TickResult.Strike(StrikeReason.THIRD_WARNING)
+            if (warningCount >= cfg.maxWarnings) return TickResult.Strike(StrikeReason.THIRD_WARNING)
             warningStartedAt = now
             pausedThisWarning = false
             warnTyping = 0; warnScroll = 0; warnClick = 0
@@ -280,7 +271,7 @@ class OverrideMonitor(private val random: Random = Random.Default) {
     }
 
     private fun debounceFor(reason: StrikeReason): Long =
-        if (reason == StrikeReason.OFF_SCREEN && strictness == Strictness.LENIENT) LENIENT_SCREEN_DEBOUNCE_MS else DEBOUNCE_MS
+        if (reason == StrikeReason.OFF_SCREEN && cfg.strictness == Strictness.LENIENT) LENIENT_SCREEN_DEBOUNCE_MS else DEBOUNCE_MS
 
     private fun currentMismatch(now: Long): StrikeReason? {
         val fp = frontPackage ?: return null
@@ -295,10 +286,10 @@ class OverrideMonitor(private val random: Random = Random.Default) {
     }
 
     private fun shapeMismatch(now: Long): Boolean {
-        if (!ShapeCheck.mismatch(shape, strictness, th, minuteIndex, minutes, shapeBaselineMinute)) return false
+        if (!ShapeCheck.mismatch(shape, cfg.strictness, cfg.thresholds, minuteIndex, minutes, shapeBaselineMinute)) return false
         val w = warningStartedAt
         if (w != null && mismatchReason == StrikeReason.WRONG_SHAPE &&
-            ShapeCheck.backOnTrack(shape, th, now - w, warnTyping, warnScroll, warnClick)
+            ShapeCheck.backOnTrack(shape, cfg.thresholds, now - w, warnTyping, warnScroll, warnClick)
         ) return false
         return true
     }

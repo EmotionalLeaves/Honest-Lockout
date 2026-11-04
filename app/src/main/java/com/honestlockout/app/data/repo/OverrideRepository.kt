@@ -104,14 +104,13 @@ class OverrideRepository(
         val chain = if (d.isExtend) settings.snapshot().extendChain + 1 else 0
         settings.setExtendChain(chain)
         if (!d.isExtend) settings.setExtendChainStartedAt(now)
-        val id = dao.insert(
-            Override(
-                packageName = d.packageName, purposeId = d.templateId, statement = d.statement.trim(),
-                startedAt = now, plannedMin = d.minutes,
-            )
+        val row = Override(
+            packageName = d.packageName, purposeId = d.templateId, statement = d.statement.trim(),
+            startedAt = now, plannedMin = d.minutes,
         )
+        val id = dao.insert(row)
         AppLog.w("HL/Engine", "Override $id started: ${d.packageName} for ${d.minutes} min")
-        return dao.get(id)!!
+        return row.copy(id = id)
     }
 
     /**

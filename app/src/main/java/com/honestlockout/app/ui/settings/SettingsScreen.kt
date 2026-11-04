@@ -1,6 +1,5 @@
 package com.honestlockout.app.ui.settings
 
-import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -175,7 +174,7 @@ fun SettingsScreen(nav: NavController) {
                                 AppGraph.guardSuppressedUntil = System.currentTimeMillis() + 2 * 60_000L
                                 runCatching {
                                     adminLauncher.launch(
-                                        PermissionChecks.intentFor(context, StepId.DEVICE_ADMIN) ?: Intent()
+                                        PermissionChecks.intentFor(context, StepId.DEVICE_ADMIN)
                                     )
                                 }
                             } else {

@@ -120,7 +120,7 @@ fun SetupWizardScreen(onFinished: () -> Unit) {
                         step.id == StepId.NOTIFICATIONS && Build.VERSION.SDK_INT >= 33 ->
                             notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         step.id == StepId.DEVICE_ADMIN ->
-                            runCatching { adminLauncher.launch(PermissionChecks.intentFor(context, step.id)!!) }
+                            runCatching { adminLauncher.launch(PermissionChecks.intentFor(context, step.id)) }
                         else -> PermissionChecks.launch(
                             context, PermissionChecks.intentFor(context, step.id),
                             batteryFallback = step.id == StepId.SAMSUNG_BATTERY,
