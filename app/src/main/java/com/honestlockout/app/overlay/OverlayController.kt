@@ -90,7 +90,12 @@ class OverlayController(private val appContext: Context) {
             type, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.OPAQUE,
         )
         // Full-screen views draw behind the status bar (it stays usable) and pad their content below it.
-        if (Build.VERSION.SDK_INT >= 30) params.fitInsetsTypes = WindowInsets.Type.navigationBars()
+        if (Build.VERSION.SDK_INT >= 30) {
+            params.fitInsetsTypes = WindowInsets.Type.navigationBars()
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        } else if (Build.VERSION.SDK_INT >= 28) {
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
         val wm = ctx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         view.setOnApplyWindowInsetsListener { v, insets ->
             val top = if (Build.VERSION.SDK_INT >= 30) insets.getInsets(WindowInsets.Type.statusBars()).top else insets.systemWindowInsetTop
