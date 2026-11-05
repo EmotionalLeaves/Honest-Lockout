@@ -10,13 +10,13 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.BatteryChargingFull
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.AdminPanelSettings
+import androidx.compose.material.icons.outlined.BatteryChargingFull
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,13 +47,13 @@ data class PermissionStep(
 )
 
 fun stepIcon(id: StepId): ImageVector = when (id) {
-    StepId.NOTIFICATIONS -> Icons.Filled.Notifications
-    StepId.USAGE -> Icons.Filled.Timer
-    StepId.BATTERY, StepId.SAMSUNG_BATTERY -> Icons.Filled.BatteryChargingFull
-    StepId.OVERLAY -> Icons.Filled.Layers
-    StepId.RESTRICTED -> Icons.Filled.LockOpen
-    StepId.ACCESSIBILITY -> Icons.Filled.Visibility
-    StepId.DEVICE_ADMIN -> Icons.Filled.AdminPanelSettings
+    StepId.NOTIFICATIONS -> Icons.Outlined.Notifications
+    StepId.USAGE -> Icons.Outlined.Timer
+    StepId.BATTERY, StepId.SAMSUNG_BATTERY -> Icons.Outlined.BatteryChargingFull
+    StepId.OVERLAY -> Icons.Outlined.Layers
+    StepId.RESTRICTED -> Icons.Outlined.LockOpen
+    StepId.ACCESSIBILITY -> Icons.Outlined.Visibility
+    StepId.DEVICE_ADMIN -> Icons.Outlined.AdminPanelSettings
 }
 
 object PermissionChecks {

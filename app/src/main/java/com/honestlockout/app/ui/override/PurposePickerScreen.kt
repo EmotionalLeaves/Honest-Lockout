@@ -15,13 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.Headphones
-import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.Headphones
+import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.WorkOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -54,13 +54,13 @@ import com.honestlockout.app.ui.nav.Routes
 private data class PickerGate(val refusal: String?, val activeStrikes: Int, val last: Override? = null)
 
 fun purposeIcon(id: Long): ImageVector = when (id) {
-    PurposeTemplates.ID_NAVIGATION -> Icons.Filled.Navigation
-    PurposeTemplates.ID_REPLY -> Icons.Filled.ChatBubble
-    PurposeTemplates.ID_LOOKUP -> Icons.Filled.Search
-    PurposeTemplates.ID_WORK -> Icons.Filled.Work
-    PurposeTemplates.ID_PAY -> Icons.Filled.AccountBalance
-    PurposeTemplates.ID_LISTEN -> Icons.Filled.Headphones
-    else -> Icons.Filled.Tune
+    PurposeTemplates.ID_NAVIGATION -> Icons.Outlined.Navigation
+    PurposeTemplates.ID_REPLY -> Icons.Outlined.ChatBubbleOutline
+    PurposeTemplates.ID_LOOKUP -> Icons.Outlined.Search
+    PurposeTemplates.ID_WORK -> Icons.Outlined.WorkOutline
+    PurposeTemplates.ID_PAY -> Icons.Outlined.AccountBalance
+    PurposeTemplates.ID_LISTEN -> Icons.Outlined.Headphones
+    else -> Icons.Outlined.Tune
 }
 
 /** Enabled purpose templates as cards (Custom last). A refusal banner shows when not eligible. */
