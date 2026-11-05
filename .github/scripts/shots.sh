@@ -49,7 +49,7 @@ if [ -n "${FIRST:-}" ]; then
   shot 20_lock 6
   adb shell dumpsys window windows 2>/dev/null | grep -iE "honestlockout|Window #" | head -20 > shots/windows.txt
 fi
-adb shell am start -W -n $PKG/.MainActivity >/dev/null 2>&1
+adb shell am start -W -f 0x10008000 -n $PKG/.MainActivity >/dev/null 2>&1
 shot 21_home_service_on 4
 # 4. An active unlock (debug only): Today shows the running card.
 open --ez debug_active true

@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.TextLink
 import com.honestlockout.app.engine.DayClock
 import com.honestlockout.app.ui.AppIcon
 import com.honestlockout.app.ui.AppScaffold
@@ -186,6 +187,16 @@ private fun WeekCard(s: HomeState) {
     Column {
         GroupHeader(stringResource(R.string.home_today))
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer), border = cardBorder()) {
+            if (!s.usageAccess) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.home_usage_off_title), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.home_usage_off_detail), style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+                    TextLink(stringResource(R.string.home_usage_off_action)) {
+                        context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    }
+                }
+                return@Card
+            }
             Column(Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(Format.minutes(context, s.todayMinutes), style = MaterialTheme.typography.headlineLarge, modifier = Modifier.weight(1f))

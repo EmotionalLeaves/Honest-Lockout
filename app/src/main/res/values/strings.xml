@@ -160,8 +160,8 @@
     <string name="lock_reason_schedule">Blocked until %1$s</string>
     <string name="lock_reason_lockout">Locked out until %1$s after a strike</string>
     <string name="lock_reason_break_glass_wait">Emergency unlock starts at %1$s</string>
-    <string name="lock_next_now">Unlocks available</string>
-    <string name="lock_next_at">Unlocks available at %1$s</string>
+    <string name="lock_next_now">You can unlock now</string>
+    <string name="lock_next_at">Next unlock at %1$s</string>
     <string name="banner_warning_html"><![CDATA[This doesn\'t match <i>%1$s</i>. Return within %2$d s or end the unlock.]]></string>
     <string name="banner_checkin_html"><![CDATA[Still doing: <i>%1$s</i>?]]></string>
     <string name="banner_seconds">%1$d s left</string>
@@ -459,4 +459,7 @@
     <string name="history_no_strikes">No strikes.</string>
     <string name="day_today">Today</string>
     <string name="day_yesterday">Yesterday</string>
+    <string name="home_usage_off_title">Screen time is off</string>
+    <string name="home_usage_off_detail">Allow usage access to see how long you spend in apps each day.</string>
+    <string name="home_usage_off_action">Allow usage access</string>
 </resources>

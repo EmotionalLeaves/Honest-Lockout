@@ -41,6 +41,7 @@ data class HomeState(
     /** Screen-time minutes for the last 7 days, oldest first; the last one is today. */
     val week: List<Int> = emptyList(),
     val accessibilityOn: Boolean = true,
+    val usageAccess: Boolean = true,
 )
 
 class HomeViewModel @JvmOverloads constructor(
@@ -88,6 +89,7 @@ class HomeViewModel @JvmOverloads constructor(
             } + usageRepo.todayTotalMinutes(now),
             // The toggle in Settings, not the live binding (which lags a moment after app start).
             accessibilityOn = PermissionChecks.accessibilityEnabled(ctx),
+            usageAccess = usageRepo.hasUsageAccess(),
         )
     }.flowOn(Dispatchers.IO).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), HomeState())
 
