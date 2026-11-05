@@ -99,7 +99,10 @@ fun BlockRuleEditorScreen(nav: NavController, packageName: String, isNew: Boolea
         title = Format.appLabel(context, packageName), onBack = { nav.popBackStack() }, snackbar = snackbar,
         bottomBar = {
             if (m != null && rule != null) BottomActionBar {
-                PrimaryButton(stringResource(R.string.action_save), enabled = m != BlockMode.SCHEDULE || scheduleId != null) {
+                val dirty = firstSaveFree || m != rule.mode ||
+                    (m == BlockMode.BUDGET && budget != rule.dailyBudgetMin) ||
+                    (m == BlockMode.SCHEDULE && scheduleId != rule.scheduleId)
+                PrimaryButton(stringResource(R.string.action_save), enabled = dirty && (m != BlockMode.SCHEDULE || scheduleId != null)) {
                     scope.launch {
                         val change = SettingChange.SetBlockMode(packageName, m, budget, scheduleId)
                         val now = System.currentTimeMillis()
@@ -129,10 +132,7 @@ fun BlockRuleEditorScreen(nav: NavController, packageName: String, isNew: Boolea
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 AppIcon(packageName, 56)
-                Column {
-                    Text(Format.appLabel(context, packageName), style = MaterialTheme.typography.titleLarge)
-                    Text(packageName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+                Text(stringResource(R.string.rule_blocked_since, Format.date(context, rule?.createdAt ?: 0L)), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Column {
                 GroupHeader(stringResource(R.string.rule_mode))

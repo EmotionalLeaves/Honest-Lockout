@@ -38,7 +38,10 @@ data class HomeState(
     val activeMinutesLeft: Int = 0,
     val pendingCount: Int = 0,
     val blockedCount: Int = 0,
+    /** Screen-time minutes for the last 7 days, oldest first; the last one is today. */
+    val week: List<Int> = emptyList(),
     val accessibilityOn: Boolean = true,
+    val usageAccess: Boolean = true,
 )
 
 class HomeViewModel @JvmOverloads constructor(
@@ -70,7 +73,7 @@ class HomeViewModel @JvmOverloads constructor(
         }
         HomeState(
             loaded = true,
-            todayMinutes = usageRepo.todayTotalMinutes(now),
+            todayMinutes = maxOf(usageRepo.todayTotalMinutes(now), AppGraph.liveUsage.totalMinutes(now)),
             budgets = budgets,
             activeStrikes = strikeRepo.activeCount(now),
             oldestStrikeExpiresAt = strikeRepo.oldestActive(now)?.expiresAt,
@@ -81,8 +84,12 @@ class HomeViewModel @JvmOverloads constructor(
             } ?: 0,
             pendingCount = pendingCount,
             blockedCount = rules.size,
+            week = (6 downTo 1).map { back ->
+                usageRepo.forDate(DayClock.localDate(now).minusDays(back.toLong())).sumOf { it.minutes }
+            } + maxOf(usageRepo.todayTotalMinutes(now), AppGraph.liveUsage.totalMinutes(now)),
             // The toggle in Settings, not the live binding (which lags a moment after app start).
             accessibilityOn = PermissionChecks.accessibilityEnabled(ctx),
+            usageAccess = usageRepo.hasUsageAccess(),
         )
     }.flowOn(Dispatchers.IO).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), HomeState())
 

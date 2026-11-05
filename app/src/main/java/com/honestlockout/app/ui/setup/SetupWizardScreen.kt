@@ -102,15 +102,26 @@ fun SetupWizardScreen(onFinished: () -> Unit) {
         onBack = if (index > 0) ({ index-- }) else null,
         bottomBar = {
             BottomActionBar {
-                PrimaryButton(stringResource(R.string.setup_open_settings)) { open() }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SecondaryButton(stringResource(R.string.setup_check_again), Modifier.weight(1f)) { refresh++ }
-                    SecondaryButton(
-                        stringResource(if (index == steps.lastIndex) R.string.setup_finish else R.string.setup_next),
-                        Modifier.weight(1f), enabled = granted || !step.checkable,
-                    ) { next() }
+                val nextLabel = stringResource(if (index == steps.lastIndex) R.string.setup_finish else R.string.setup_next)
+                when {
+                    // Done: the only sensible action is to move on.
+                    step.checkable && granted -> PrimaryButton(nextLabel) { next() }
+                    // Can't be checked by the app: open it, then say you did it.
+                    !step.checkable -> {
+                        PrimaryButton(stringResource(R.string.setup_open_settings)) { open() }
+                        SecondaryButton(stringResource(R.string.setup_done_next)) { next() }
+                    }
+                    // Not yet granted: one clear action; Next appears once it's on.
+                    else -> {
+                        PrimaryButton(stringResource(R.string.setup_open_settings)) { open() }
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                            TextLink(stringResource(R.string.setup_check_again)) { refresh++ }
+                        }
+                    }
                 }
-                if (step.optional) TextLink(stringResource(R.string.setup_skip)) { finish() }
+                if (step.optional) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    TextLink(stringResource(R.string.setup_skip)) { finish() }
+                }
             }
         },
     ) { padding ->

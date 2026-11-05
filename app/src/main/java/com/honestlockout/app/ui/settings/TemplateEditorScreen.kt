@@ -70,7 +70,9 @@ fun TemplateEditorScreen(nav: NavController, id: Long) {
         bottomBar = {
             val template = t; val chosen = labels
             if (template != null && chosen != null) BottomActionBar {
-                PrimaryButton(stringResource(R.string.action_save)) {
+                val dirty = max != template.maxMinutes ||
+                    chosen.sorted() != PurposeTemplates.split(template.blockedScreenLabels).sorted()
+                PrimaryButton(stringResource(R.string.action_save), enabled = dirty) {
                     scope.launch {
                         val guard = AppGraph.loosenGuard
                         val results = buildList {

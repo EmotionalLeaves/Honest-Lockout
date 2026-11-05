@@ -5,8 +5,18 @@ package com.honestlockout.app.engine
  * Lets budget blocking react immediately instead of waiting for DailyResetWorker.
  * Time spent under an override is not counted (overrides do not consume budget minutes).
  * Resets at local midnight. Thread-safe.
+ *
+ * Totals are saved to [attach]ed storage whenever a segment closes, so killing the process or
+ * rebooting does not hand back a day's budget.
  */
 class LiveUsageTracker {
+    /** Where the day's totals survive a process restart. */
+    interface Store {
+        fun load(): Pair<String, Map<String, Long>>?
+        fun save(dayKey: String, values: Map<String, Long>)
+    }
+
+    private var store: Store? = null
     private val msByPackage = HashMap<String, Long>()
     private var dayKey: String = ""
     private var currentPkg: String? = null
@@ -14,12 +24,32 @@ class LiveUsageTracker {
     private var segmentCounts: Boolean = false
     private var screenOn: Boolean = true
 
+    /** Restores today's totals saved by an earlier process. Call once at startup. */
+    @Synchronized
+    fun attach(store: Store, now: Long) {
+        val saved = runCatching { store.load() }.getOrNull() // read before anything can overwrite it
+        rollDay(now)
+        this.store = store
+        if (saved != null && saved.first == dayKey) {
+            saved.second.forEach { (p, ms) -> msByPackage[p] = maxOf(msByPackage[p] ?: 0L, ms) }
+        }
+    }
+
+    /**
+     * Merges in today's totals from the system. Keeps the larger figure per app, so a missing or
+     * lagging usage-stats source never gives back time the app already counted.
+     */
     @Synchronized
     fun seed(values: Map<String, Long>, now: Long) {
         rollDay(now)
-        msByPackage.clear()
-        msByPackage.putAll(values)
+        values.forEach { (p, ms) -> msByPackage[p] = maxOf(msByPackage[p] ?: 0L, ms) }
         segmentStart = now // the seed already includes time up to now
+        persist()
+    }
+
+    private fun persist() {
+        val s = store ?: return
+        runCatching { s.save(dayKey, HashMap(msByPackage)) }
     }
 
     /** Front app changed. [counts] is false while the package is covered by an override. */
@@ -53,11 +83,21 @@ class LiveUsageTracker {
         return (ms / 60_000L).toInt()
     }
 
+    /** Every app's minutes today, the running segment included. */
+    @Synchronized
+    fun totalMinutes(now: Long): Int {
+        rollDay(now)
+        var ms = msByPackage.values.sum()
+        if (screenOn && segmentCounts && currentPkg != null && now > segmentStart) ms += now - segmentStart
+        return (ms / 60_000L).toInt()
+    }
+
     private fun closeSegment(now: Long) {
         rollDay(now)
         val pkg = currentPkg
         if (pkg != null && screenOn && segmentCounts && now > segmentStart) {
             msByPackage[pkg] = (msByPackage[pkg] ?: 0L) + (now - segmentStart)
+            persist()
         }
         segmentStart = now
     }
@@ -70,6 +110,7 @@ class LiveUsageTracker {
                 segmentStart = maxOf(segmentStart, DayClock.startOfDay(now))
             }
             dayKey = key
+            persist()
         }
     }
 }

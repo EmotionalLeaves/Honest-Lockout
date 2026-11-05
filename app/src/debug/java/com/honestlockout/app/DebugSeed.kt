@@ -20,6 +20,13 @@ import kotlinx.coroutines.runBlocking
  */
 object DebugSeed {
     fun maybeSeed(intent: Intent?) {
+        if (intent?.getBooleanExtra("debug_active", false) == true) runBlocking {
+            val db = AppGraph.db
+            if (db.overrideDao().getActive() == null) {
+                val pkg = db.blockRuleDao().getAllOnce().firstOrNull()?.packageName ?: return@runBlocking
+                db.overrideDao().insert(Override(packageName = pkg, purposeId = PurposeTemplates.ID_REPLY, statement = "Reply to Sam about Friday", startedAt = System.currentTimeMillis() - 3 * 60_000L, plannedMin = 10))
+            }
+        }
         if (intent?.getBooleanExtra("debug_seed", false) != true) return
         runBlocking {
             val db = AppGraph.db

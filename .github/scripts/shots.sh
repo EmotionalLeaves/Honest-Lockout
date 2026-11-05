@@ -27,7 +27,7 @@ shot 01_setup 4
 open --ez debug_seed true
 shot 02_home 5
 i=3
-for r in blocklist apppicker "override/pick" "override/declare/2?pkg=com.android.chrome&extend=false&stmt=" history settings pending breakglass "template/2"; do
+for r in blocklist apppicker "override/pick?pkg=com.android.chrome" "override/pick" history settings pending breakglass "template/2" "blockrule/com.android.chrome" "schedule/new" "override/declare/7?pkg=com.google.android.youtube&extend=false&stmt="; do
   open --es route "$r"
   shot "$(printf '%02d' $i)_$(echo "$r" | sed 's/[^a-z0-9]/_/g' | cut -c1-20)" 4
   i=$((i+1))
@@ -49,8 +49,11 @@ if [ -n "${FIRST:-}" ]; then
   shot 20_lock 6
   adb shell dumpsys window windows 2>/dev/null | grep -iE "honestlockout|Window #" | head -20 > shots/windows.txt
 fi
-adb shell am start -W -n $PKG/.MainActivity >/dev/null 2>&1
+adb shell am start -W -f 0x10008000 -n $PKG/.MainActivity >/dev/null 2>&1
 shot 21_home_service_on 4
+# 4. An active unlock (debug only): Today shows the running card.
+open --ez debug_active true
+shot 22_home_active 5
 adb logcat -d -s HL/Acc:* HL/Svc:* HL/Engine:* HL/Work:* AndroidRuntime:E > shots/logcat.txt 2>/dev/null
 ls -la shots
 true

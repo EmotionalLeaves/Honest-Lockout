@@ -3,6 +3,15 @@ package com.honestlockout.app.ui.settings
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.HourglassTop
+import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -135,9 +144,9 @@ fun BreakGlassScreen(nav: NavController) {
                 Phase.CONFIRM -> {
                     Text(stringResource(R.string.break_glass_lead), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     SectionCard(stringResource(R.string.break_glass_terms)) {
-                        Term(stringResource(R.string.break_glass_term_unlock, s.breakGlassUnlockMin))
-                        Term(stringResource(R.string.break_glass_term_wait, s.breakGlassWaitMin))
-                        Term(stringResource(R.string.break_glass_term_strikes))
+                        Term(Icons.Outlined.LockOpen, stringResource(R.string.break_glass_term_unlock, s.breakGlassUnlockMin))
+                        Term(Icons.Outlined.HourglassTop, stringResource(R.string.break_glass_term_wait, s.breakGlassWaitMin))
+                        Term(Icons.Outlined.ErrorOutline, stringResource(R.string.break_glass_term_strikes), MaterialTheme.colorScheme.error)
                     }
                 }
                 Phase.WAITING -> {
@@ -163,6 +172,9 @@ fun BreakGlassScreen(nav: NavController) {
 }
 
 @Composable
-private fun Term(text: String) {
-    Text("•  $text", style = MaterialTheme.typography.bodyLarge)
+private fun Term(icon: ImageVector, text: String, tint: Color = MaterialTheme.colorScheme.onSurfaceVariant) {
+    Row(Modifier.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
+        Text(text, style = MaterialTheme.typography.bodyLarge)
+    }
 }
