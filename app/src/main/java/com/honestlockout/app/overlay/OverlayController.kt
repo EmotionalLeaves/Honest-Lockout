@@ -11,7 +11,6 @@ import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.View
 import android.view.WindowInsets
-import android.view.WindowInsetsController
 import android.view.WindowManager
 import com.honestlockout.app.AppLog
 import com.honestlockout.app.R
@@ -87,7 +86,7 @@ class OverlayController(private val appContext: Context) {
         else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
-            type, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.OPAQUE,
+            type, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.TRANSLUCENT,
         )
         // Full-screen views draw behind the status bar (it stays usable) and pad their content below it.
         if (Build.VERSION.SDK_INT >= 30) {
@@ -97,6 +96,9 @@ class OverlayController(private val appContext: Context) {
             params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
         val wm = ctx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        // The content sits below the status bar; the band behind the bar is our background at 85 %,
+        // so the clock stays readable whether the app behind set light or dark bar icons.
+        view.setBackgroundColor(appContext.getColor(R.color.hl_background) and 0x00FFFFFF or (0xD9 shl 24))
         view.setOnApplyWindowInsetsListener { v, insets ->
             val top = if (Build.VERSION.SDK_INT >= 30) insets.getInsets(WindowInsets.Type.statusBars()).top else insets.systemWindowInsetTop
             v.setPadding(0, top, 0, 0)
@@ -104,9 +106,6 @@ class OverlayController(private val appContext: Context) {
         }
         view.alpha = 0f
         wm.addView(view, params)
-        if (Build.VERSION.SDK_INT >= 30) {
-            runCatching { view.windowInsetsController?.setSystemBarsAppearance(0, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS) }
-        }
         view.animate().alpha(1f).setDuration(160L).start()
         view.requestFocus()
         fullView = view; fullWm = wm; fullKind = kind; fullPackage = pkg
