@@ -31,14 +31,20 @@ for r in blocklist apppicker "override/pick" "override/declare/2?pkg=com.android
   i=$((i+1))
 done
 
-# 3. Lock overlay: enable the accessibility service, then open a blocked app.
-adb shell settings put secure enabled_accessibility_services $PKG/com.honestlockout.app.service.LockAccessibilityService || true
-adb shell settings put secure accessibility_enabled 1 || true
-sleep 4
-FIRST=$(adb shell "cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER" | grep -v $PKG | grep -oE '^[a-z0-9_.]+/' | head -1 | tr -d /)
-echo "blocked app: $FIRST"
-adb shell monkey -p "$FIRST" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true
-shot 20_lock 5
-adb shell am start -W -n $PKG/.MainActivity >/dev/null || true
+# 3. Lock overlay: enable the accessibility service, then open a blocked app. Best effort.
+set +e
+adb shell settings put secure enabled_accessibility_services $PKG/com.honestlockout.app.service.LockAccessibilityService
+adb shell settings put secure accessibility_enabled 1
+sleep 5
+for CAND in com.android.chrome com.google.android.apps.maps com.android.settings com.google.android.calculator com.android.camera2 com.google.android.apps.messaging; do
+  if adb shell pm path "$CAND" >/dev/null 2>&1; then FIRST=$CAND; break; fi
+done
+echo "blocked app candidate: ${FIRST:-none}"
+if [ -n "${FIRST:-}" ]; then
+  adb shell monkey -p "$FIRST" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
+  shot 20_lock 6
+fi
+adb shell am start -W -n $PKG/.MainActivity >/dev/null 2>&1
 shot 21_home_service_on 4
 ls -la shots
+true

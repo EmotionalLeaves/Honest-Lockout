@@ -34,6 +34,7 @@ jobs:
           disable-animations: true
           script: bash .github/scripts/shots.sh
       - name: Publish screenshots branch
+        if: always()
         run: |
           cd shots
           git init -q
