@@ -133,6 +133,7 @@ class LockAccessibilityService : AccessibilityService() {
         ignorePackages += setOf("com.android.systemui", "android")
         ime?.let { ignorePackages += it }
         ignorePackages -= launchers
+        AppLog.w(TAG, "launchers=$launchers ignore=$ignorePackages")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -156,6 +157,7 @@ class LockAccessibilityService : AccessibilityService() {
     /** Step 1 (and 6): a window came to the front. */
     private fun onWindowState(pkg: String, className: String?, title: String?) {
         val now = System.currentTimeMillis()
+        AppLog.w(TAG, "window: $pkg/$className")
         if (pkg != packageName) inspector.maybeDump(now, force = true)
         if (pkg in ignorePackages) return
         // Our own overlay windows are not front-app changes; MainActivity is.

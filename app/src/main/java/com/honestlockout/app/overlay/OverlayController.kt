@@ -95,12 +95,14 @@ class OverlayController(private val appContext: Context) {
         view.animate().alpha(1f).setDuration(160L).start()
         view.requestFocus()
         fullView = view; fullWm = wm; fullKind = kind; fullPackage = pkg
+        AppLog.w("HL/Acc", "overlay added: $kind $pkg type=$type")
     }
 
     fun removeFull() = onMain { removeFullNow() }
 
     private fun removeFullNow() {
         val v = fullView ?: return
+        AppLog.w("HL/Acc", "overlay removed: $fullKind $fullPackage", Throwable())
         runCatching { fullWm?.removeViewImmediate(v) }
         fullView = null; fullWm = null; fullKind = null; fullPackage = null
     }
