@@ -45,26 +45,26 @@
     <string name="status_not_yet">Not yet</string>
     <string name="status_reminder">Reminder only</string>
     <string name="step_notifications_title">Notifications</string>
-    <string name="step_notifications_why">Unlocks show a timer notification with I\'m done and Extend.\nWarnings and check-ins also arrive as notifications.</string>
+    <string name="step_notifications_why">Unlocks show a timer notification with I\'m done and Extend. Warnings and check-ins also arrive as notifications.</string>
     <string name="step_usage_title">Usage access</string>
-    <string name="step_usage_why">Daily budgets and screen-time history need to know how long each app was open.\nThis stays on your phone.</string>
+    <string name="step_usage_why">Daily budgets and screen-time history need to know how long each app was open. This stays on your phone.</string>
     <string name="step_battery_title">Ignore battery optimization</string>
-    <string name="step_battery_why">Android stops background apps to save power.\nWithout this exemption, blocking can quietly stop working.</string>
+    <string name="step_battery_why">Android stops background apps to save power. Without this exemption, blocking can quietly stop working.</string>
     <string name="step_samsung_title">Samsung: never sleeping</string>
-    <string name="step_samsung_why">Samsung phones put apps to sleep on their own.\nThis cannot be checked automatically, so it is a reminder.</string>
+    <string name="step_samsung_why">Samsung phones put apps to sleep on their own. This cannot be checked automatically, so it is a reminder.</string>
     <string name="step_samsung_note">Open Battery, then Background usage limits, then Never sleeping apps, and add Honest Lockout.</string>
     <string name="step_overlay_title">Display over other apps</string>
-    <string name="step_overlay_why">Warnings, check-ins and the timer bubble are drawn on top of the app you are using.\nThe lock screen itself works without it.</string>
+    <string name="step_overlay_why">Warnings, check-ins and the timer bubble are drawn on top of the app you are using. The lock screen itself works without it.</string>
     <string name="step_restricted_title">Allow restricted settings</string>
-    <string name="step_restricted_why">Android 13 and later grey out accessibility for apps installed outside the Play Store.\nAllow it once from App info.</string>
+    <string name="step_restricted_why">Android 13 and later grey out accessibility for apps installed outside the Play Store. Allow it once from App info.</string>
     <string name="step_restricted_1">Tap Open settings to open App info.</string>
     <string name="step_restricted_2">Tap the ⋮ menu in the top corner.</string>
     <string name="step_restricted_3">Tap Allow restricted settings, then come back.</string>
     <string name="step_accessibility_title">Accessibility service</string>
-    <string name="step_accessibility_why">This is how the app sees which app is open and covers blocked ones.\nFind Honest Lockout in the list and turn it on.</string>
+    <string name="step_accessibility_why">This is how the app sees which app is open and covers blocked ones. Find Honest Lockout in the list and turn it on.</string>
     <string name="step_accessibility_greyed">Toggle greyed out? Allow restricted settings in App info first (step 5), then try again.</string>
     <string name="step_admin_title">Device admin (optional)</string>
-    <string name="step_admin_why">With device admin on, uninstalling needs it turned off first, and turning it off waits 24 hours.\nYou can skip this.</string>
+    <string name="step_admin_why">With device admin on, uninstalling needs it turned off first, and turning it off waits 24 hours. You can skip this.</string>
     <string name="device_admin_explanation">Uninstalling Honest Lockout will require turning this off first. Honest Lockout uses no device admin policies.</string>
     <string name="device_admin_disable_warning">Turning this off is a loosening and will be queued for 24 hours.</string>
 
@@ -199,8 +199,6 @@
     <string name="history_title">History</string>
     <string name="history_tab_overrides">Unlocks</string>
     <string name="history_tab_screen_time">Screen time</string>
-    <string name="history_filter_all">All</string>
-    <string name="history_filter_strikes">Strikes only</string>
     <string name="history_empty">Nothing here yet.</string>
     <string name="history_planned_actual">%1$s · planned %2$s · used %3$s</string>
     <string name="history_strike_row">Strike: %1$s</string>
@@ -394,7 +392,6 @@
     <string name="schedule_starts">Starts</string>
     <string name="schedule_ends">Ends</string>
     <string name="template_length">Length</string>
-    <string name="history_filter_label">Show</string>
     <string name="pending_intro">These changes loosen a rule, so they wait before applying. Cancel any of them now.</string>
     <string name="break_glass_lead">Unlocks every app at once. Use it when you have to.</string>
     <string name="break_glass_terms">What it costs</string>
@@ -458,4 +455,8 @@
     </plurals>
     <string name="unlock_more_chars">%1$d more characters</string>
     <string name="rule_blocked_since">Blocked since %1$s</string>
+    <string name="history_tab_strikes">Strikes</string>
+    <string name="history_no_strikes">No strikes.</string>
+    <string name="day_today">Today</string>
+    <string name="day_yesterday">Yesterday</string>
 </resources>

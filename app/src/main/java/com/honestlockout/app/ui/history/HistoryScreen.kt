@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.GroupHeader
+import com.honestlockout.app.engine.DayClock
 import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.data.db.EndReason
 import com.honestlockout.app.data.db.StrikeReason
@@ -89,22 +92,25 @@ fun HistoryScreen(nav: NavController) {
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             SegmentedControl(
-                listOf(stringResource(R.string.history_tab_overrides), stringResource(R.string.history_tab_screen_time)), tab,
-                Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                listOf(stringResource(R.string.history_tab_overrides), stringResource(R.string.history_tab_strikes), stringResource(R.string.history_tab_screen_time)), tab,
+                Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
             ) { tab = it }
-            if (tab == 0) OverridesTab(snackbar) else ScreenTimeTab()
+            when (tab) {
+                0 -> OverridesTab(snackbar, strikesOnly = false)
+                1 -> OverridesTab(snackbar, strikesOnly = true)
+                else -> ScreenTimeTab()
+            }
         }
     }
 }
 
 @Composable
-private fun OverridesTab(snackbar: SnackbarHostState) {
+private fun OverridesTab(snackbar: SnackbarHostState, strikesOnly: Boolean) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val overrides by AppGraph.overrideRepo.all().collectAsState(initial = null)
     val strikes by AppGraph.strikeRepo.strikes().collectAsState(initial = emptyList())
     val templates by AppGraph.overrideRepo.templates().collectAsState(initial = emptyList())
-    var strikesOnly by rememberSaveable { mutableStateOf(false) }
     val now = System.currentTimeMillis()
 
     val list = overrides ?: return
@@ -113,17 +119,15 @@ private fun OverridesTab(snackbar: SnackbarHostState) {
         val byOverride = real.filter { it.overrideId != null }.associateBy { it.overrideId }
         val overrideItems = list.map { HistoryItem.OverrideItem(it, byOverride[it.id]) }
             .filter { !strikesOnly || it.strike != null || it.o.endReason == EndReason.STRIKE }
-        val standalone = strikes.filter { it.overrideId == null || it.reason == StrikeReason.APPEAL_REVERSED }.map { HistoryItem.StrikeItem(it) }
+        val standalone = strikes.filter { it.overrideId == null || it.reason == StrikeReason.APPEAL_REVERSED }
+            .filter { !strikesOnly || it.reason != StrikeReason.APPEAL_REVERSED }.map { HistoryItem.StrikeItem(it) }
         (overrideItems + standalone).sortedByDescending { it.at }
     }
 
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(stringResource(R.string.history_filter_label).uppercase(), style = MaterialTheme.typography.labelSmall, color = TextMuted, modifier = Modifier.weight(1f))
-        TextButton(onClick = { strikesOnly = !strikesOnly }, contentPadding = PaddingValues(horizontal = 8.dp)) {
-            Text(stringResource(if (strikesOnly) R.string.history_filter_strikes else R.string.history_filter_all), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-        }
+    if (items.isEmpty()) {
+        EmptyState(stringResource(if (strikesOnly) R.string.history_no_strikes else R.string.history_empty), icon = Icons.Outlined.History)
+        return
     }
-    if (items.isEmpty()) { EmptyState(stringResource(R.string.history_empty), icon = Icons.Outlined.History); return }
 
     fun appeal(s: Strike) = scope.launch {
         val msg = when (AppGraph.strikeRepo.appeal(s.id, System.currentTimeMillis())) {
@@ -134,13 +138,28 @@ private fun OverridesTab(snackbar: SnackbarHostState) {
         snackbar.showSnackbar(context.getString(msg))
     }
 
-    LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(items, key = { if (it is HistoryItem.OverrideItem) "o${it.o.id}" else "s${(it as HistoryItem.StrikeItem).s.id}" }) { item ->
+    val byDay = items.groupBy { DayClock.dateKey(it.at) }
+    LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(bottom = 24.dp)) {
+        byDay.forEach { (day, dayItems) ->
+        item(key = "d$day") { Box(Modifier.padding(top = 12.dp)) { GroupHeader(dayLabel(context, dayItems.first().at, now)) } }
+        items(dayItems, key = { if (it is HistoryItem.OverrideItem) "o${it.o.id}" else "s${(it as HistoryItem.StrikeItem).s.id}" }) { item ->
             when (item) {
                 is HistoryItem.OverrideItem -> OverrideRow(item.o, item.strike, templates.firstOrNull { it.id == item.o.purposeId }?.name.orEmpty(), now) { appeal(it) }
                 is HistoryItem.StrikeItem -> StrikeRow(item.s, now) { appeal(it) }
             }
         }
+        }
+    }
+}
+
+/** "Today", "Yesterday", "Tuesday", or a date further back. */
+private fun dayLabel(context: android.content.Context, at: Long, now: Long): String {
+    val days = DayClock.localDate(now).toEpochDay() - DayClock.localDate(at).toEpochDay()
+    return when (days) {
+        0L -> context.getString(R.string.day_today)
+        1L -> context.getString(R.string.day_yesterday)
+        in 2L..6L -> DayClock.localDate(at).dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.getDefault())
+        else -> Format.date(context, at)
     }
 }
 
@@ -157,7 +176,7 @@ private fun OverrideRow(o: Override, strike: Strike?, purpose: String, now: Long
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "${Format.dateTime(context, o.startedAt)} · ${Format.appLabel(context, o.packageName)}",
+                    "${Format.time(context, o.startedAt)} · ${Format.appLabel(context, o.packageName)}",
                     style = MaterialTheme.typography.labelMedium, color = TextMuted, modifier = Modifier.weight(1f),
                 )
                 ResultChip(o.endReason, forgiven)
@@ -182,7 +201,7 @@ private fun StrikeRow(s: Strike, now: Long, onAppeal: (Strike) -> Unit) {
         border = cardBorder(),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(Format.dateTime(context, s.createdAt), style = MaterialTheme.typography.labelMedium, color = TextMuted)
+            Text(Format.time(context, s.createdAt), style = MaterialTheme.typography.labelMedium, color = TextMuted)
             Text(
                 if (s.reason == StrikeReason.APPEAL_REVERSED) stringResource(R.string.history_appeal_row)
                 else stringResource(R.string.history_strike_row, OverlayTexts.reasonName(context, s.reason)),
