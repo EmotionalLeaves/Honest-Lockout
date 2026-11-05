@@ -1,0 +1,20 @@
+  Window #0 Window{55e8f91 u0 ScreenDecorOverlayBottom}:
+  Window #1 Window{a39962f u0 ScreenDecorOverlay}:
+  Window #2 Window{3e643f3 u0 InputMethod}:
+  Window #3 Window{58b144d u0 com.honestlockout.app}:
+    mOwnerUid=10192 showForAllUsers=false package=com.honestlockout.app appop=NONE
+  Window #4 Window{aa3d2e0 u0 SecondaryHomeHandle0}:
+  Window #5 Window{2e06a1d u0 EdgeBackGestureHandler0}:
+  Window #6 Window{bbbce38 u0 NavigationBar0}:
+  Window #7 Window{b1cbc01 u0 NotificationShade}:
+  Window #8 Window{8d25083 u0 StatusBar}:
+  Window #9 Window{819fc66 u0 ShellDropTarget}:
+  Window #10 Window{9ecabc6 u0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity}:
+  Window #11 Window{1f61bc0 u0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity}:
+  Window #12 Window{a19859f u0 com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity}:
+  Window #13 Window{230bc65 u0 com.honestlockout.app/com.honestlockout.app.MainActivity}:
+    mOwnerUid=10192 showForAllUsers=false package=com.honestlockout.app appop=NONE
+    mBaseLayer=21000 mSubLayer=0    mToken=ActivityRecord{7ae415d u0 com.honestlockout.app/.MainActivity t22}
+    mActivityRecord=ActivityRecord{7ae415d u0 com.honestlockout.app/.MainActivity t22}
+    WindowStateAnimator{bd71d90 com.honestlockout.app/com.honestlockout.app.MainActivity}:
+  Window #14 Window{91b1ca6 u0 com.android.systemui.wallpapers.ImageWallpaper}:

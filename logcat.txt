@@ -1,0 +1,22 @@
+--------- beginning of main
+11-05 05:00:51.995  3356  3457 W HL/Engine: Loaded 12 screen rules
+11-05 05:00:54.277  3356  3654 W HL/Work : Daily reset done for 2026-11-05
+11-05 05:00:54.285  3356  3654 W HL/Work : Daily reset done for 2026-11-05
+11-05 05:00:56.392  3356  3457 W HL/Svc  : Boot/update handled: android.intent.action.BOOT_COMPLETED
+11-05 05:01:01.460  3997  4124 W HL/Engine: Loaded 12 screen rules
+11-05 05:01:10.277  4571  4657 W HL/Engine: Loaded 12 screen rules
+11-05 05:01:17.888  4949  4977 W HL/Engine: Loaded 12 screen rules
+11-05 05:01:23.938  5060  5101 W HL/Engine: Loaded 12 screen rules
+11-05 05:01:30.855  5371  5439 W HL/Engine: Loaded 12 screen rules
+11-05 05:01:38.524  5579  5666 W HL/Engine: Loaded 12 screen rules
+11-05 05:01:46.258  5747  5795 W HL/Engine: Loaded 12 screen rules
+11-05 05:01:52.506  5901  5927 W HL/Engine: Loaded 12 screen rules
+11-05 05:01:58.874  6024  6047 W HL/Engine: Loaded 12 screen rules
+11-05 05:02:05.068  6325  6409 W HL/Engine: Loaded 12 screen rules
+11-05 05:02:11.615  6507  6529 W HL/Engine: Loaded 12 screen rules
+11-05 05:02:17.926  6638  6678 W HL/Engine: Loaded 12 screen rules
+11-05 05:02:23.868  6752  6776 W HL/Engine: Loaded 12 screen rules
+11-05 05:02:29.561  6858  6877 W HL/Engine: Loaded 12 screen rules
+11-05 05:02:34.168  6858  6858 W HL/Acc  : Accessibility service connected
+11-05 05:02:40.222  6858  6858 W HL/Acc  : Locked com.android.chrome: ALWAYS
+11-05 05:02:51.166  7116  7138 W HL/Engine: Loaded 12 screen rules
