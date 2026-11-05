@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,7 +28,7 @@ import com.honestlockout.app.ui.theme.Primary
 
 /** First launch: the brand mark, one line on what the app does, and Get started. */
 @Composable
-fun WelcomeScreen(onStart: () -> Unit) {
+fun WelcomeScreen(onStart: () -> Unit) = Surface(color = MaterialTheme.colorScheme.background) {
     Column(
         Modifier.fillMaxSize().accentGlow(Primary, alpha = 0.22f, radiusFraction = 1.1f).statusBarsPadding().navigationBarsPadding().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
