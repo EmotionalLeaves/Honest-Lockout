@@ -23,9 +23,12 @@ object Format {
 
     fun date(context: Context, ms: Long): String = DateFormat.getMediumDateFormat(context).format(Date(ms))
 
-    fun minutes(context: Context, minutes: Int): String =
-        if (minutes >= 60) context.getString(R.string.fmt_hours_minutes, minutes / 60, minutes % 60)
-        else context.getString(R.string.fmt_minutes, minutes)
+    /** "45 min", "2 h", "1 h 30 min". */
+    fun minutes(context: Context, minutes: Int): String = when {
+        minutes < 60 -> context.getString(R.string.fmt_minutes, minutes)
+        minutes % 60 == 0 -> context.getString(R.string.fmt_hours, minutes / 60)
+        else -> context.getString(R.string.fmt_hours_minutes, minutes / 60, minutes % 60)
+    }
 
     fun appLabel(context: Context, packageName: String): String = runCatching {
         val pm = context.packageManager

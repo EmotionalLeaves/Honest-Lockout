@@ -41,8 +41,11 @@ for CAND in com.android.chrome com.google.android.apps.maps com.android.settings
 done
 echo "blocked app candidate: ${FIRST:-none}"
 if [ -n "${FIRST:-}" ]; then
-  adb shell monkey -p "$FIRST" -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
+  ACT=$(adb shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER "$FIRST" | tail -1 | tr -d '\r')
+  echo "launching $ACT"
+  adb shell am start -n "$ACT" >/dev/null 2>&1
   shot 20_lock 6
+  adb shell dumpsys window windows 2>/dev/null | grep -iE "honestlockout|Window #" | head -20 > shots/windows.txt
 fi
 adb shell am start -W -n $PKG/.MainActivity >/dev/null 2>&1
 shot 21_home_service_on 4
