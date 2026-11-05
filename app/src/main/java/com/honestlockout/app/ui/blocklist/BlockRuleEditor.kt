@@ -130,8 +130,8 @@ fun BlockRuleEditorScreen(nav: NavController, packageName: String, isNew: Boolea
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 AppIcon(packageName, 56)
                 Column {
-                    Text(Format.appLabel(context, packageName), style = MaterialTheme.typography.titleLarge)
-                    Text(packageName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.rule_blocked_since, Format.date(context, rule?.createdAt ?: 0L)), style = MaterialTheme.typography.bodyLarge)
+                    Text(modeSummary(context, rule ?: return@Row, schedules, System.currentTimeMillis()), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             Column {

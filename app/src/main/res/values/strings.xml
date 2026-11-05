@@ -69,20 +69,13 @@
     <string name="device_admin_disable_warning">Turning this off is a loosening and will be queued for 24 hours.</string>
 
     <!-- Home -->
-    <string name="home_service_off">The accessibility service is off, so nothing is blocked. Turn it back on in Settings &gt; Accessibility.</string>
     <string name="home_active_title">Unlocked · %1$s</string>
     <string name="home_lock_it">End and lock</string>
     <string name="home_today">Screen time</string>
     <string name="home_oldest_expires">Oldest clears %1$s</string>
-    <string name="home_next_override_at">Overrides available at %1$s</string>
-    <string name="home_start_override">Start an override</string>
-    <string name="home_block_list">Block list</string>
-    <string name="home_history">History</string>
     <string name="home_settings">Settings</string>
-    <string name="home_emergency_unlock">Emergency unlock</string>
 
     <!-- Block list -->
-    <string name="blocklist_title">Block list</string>
     <string name="blocklist_add">Add app</string>
     <string name="blocklist_empty">No blocked apps yet. Tap Add app to choose one.</string>
     <string name="apppicker_title">Add apps</string>
@@ -111,9 +104,6 @@
     <string name="schedule_in_use">A block rule uses this schedule, so it cannot be deleted.</string>
 
     <!-- Override -->
-    <string name="pick_title">Purpose</string>
-    <string name="pick_for_app">For %1$s</string>
-    <string name="pick_default_minutes">up to %1$s</string>
     <string name="purpose_navigation">Navigation</string>
     <string name="purpose_reply">Reply to someone</string>
     <string name="purpose_lookup">Look something up</string>
@@ -131,13 +121,9 @@
     <string name="refuse_four_strikes">With 4 or more strikes, only Navigation and Pay overrides are allowed.</string>
     <string name="refuse_override_active">End the current override first.</string>
     <string name="declare_placeholder">Reply to Sam about Friday</string>
-    <string name="declare_count">%1$d / %2$d</string>
-    <string name="declare_app">App</string>
     <string name="declare_no_apps">Add an app to the block list first.</string>
-    <string name="declare_minutes">Length: %1$s</string>
     <string name="declare_custom_screens">Screens to block</string>
     <string name="declare_custom_shape">Expected activity</string>
-    <string name="declare_start">Start</string>
     <string name="shape_typing">Typing</string>
     <string name="shape_reading">Reading</string>
     <string name="shape_passive">Passive</string>
@@ -323,23 +309,10 @@
     <string name="cat_games">Games</string>
     <string name="cat_video">Video</string>
     <string name="cat_other">Other</string>
-    <string name="blocklist_stat_blocked">Blocked</string>
     <string name="rule_always_short">Always</string>
-    <string name="home_stat_screen_time">today</string>
-    <string name="home_stat_strikes">strikes</string>
-    <string name="home_stat_blocked">blocked</string>
-    <string name="home_budget_left_short">%1$d of %2$d min left</string>
-    <string name="home_hero_protected">Blocking is on</string>
-    <string name="home_hero_service_off">Blocking is off</string>
-    <string name="home_hero_no_apps">Choose the apps to block.</string>
     <string name="home_ring_min_left">min left</string>
-    <string name="home_tile_block_sub">%1$d apps</string>
-    <string name="home_tile_history_sub">Overrides, screen time</string>
-    <string name="home_tile_settings_sub">Strictness, strikes, timing</string>
-    <string name="home_tile_emergency_sub">Unlock everything · 2 strikes</string>
     <string name="declare_label">What exactly?</string>
     <string name="declare_choose_app">Choose an app</string>
-    <string name="pick_last_time">Same as last time · %1$s · %2$s</string>
     <string name="countdown_hint">Starts when the timer ends. Cancel any time.</string>
     <string name="settings_templates_desc">Max length and blocked screens for each purpose</string>
     <string name="settings_screen_rules_desc">Which screens inside apps count as feeds, reels or shorts. If an app update breaks one, use the inspector to find the new ID.</string>
@@ -414,7 +387,6 @@
     <string name="shape_passive_hint">Passive: lots of scrolling or tapping gets a warning.</string>
     <string name="shape_any_hint">Any: activity isn\'t checked. Only the time and blocked screens apply.</string>
     <string name="shape_listen_hint">Listen: other apps and a locked screen are fine; time on screen in the app is limited.</string>
-    <string name="home_hero_ready">%1$d apps blocked · overrides available</string>
     <string name="rule_mode">Mode</string>
     <string name="rule_budget_desc">Free until the daily budget is used, then locked until midnight.</string>
     <string name="rule_schedule_desc">Locked during the hours of a schedule, free outside them.</string>
@@ -464,7 +436,6 @@
     <string name="unlock_max">up to %1$s</string>
     <string name="unlock_change_app">Change app</string>
     <string name="unlock_start">Unlock for %1$s</string>
-    <string name="unlock_start_hint">Describe what you\'ll do</string>
     <string name="unlock_unavailable">Unlocks unavailable</string>
     <string name="purpose_short_navigation">Navigate</string>
     <string name="purpose_short_reply">Reply</string>
@@ -485,4 +456,6 @@
         <item quantity="one">%1$d app is blocked. Tap one to change how.</item>
         <item quantity="other">%1$d apps are blocked. Tap one to change how.</item>
     </plurals>
+    <string name="unlock_more_chars">%1$d more characters</string>
+    <string name="rule_blocked_since">Blocked since %1$s</string>
 </resources>

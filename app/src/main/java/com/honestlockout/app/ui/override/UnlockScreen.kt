@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -171,11 +174,7 @@ fun UnlockScreen(
         onBack = { nav.popBackStack() }, snackbar = snackbar,
         bottomBar = {
             if (g != null && g.refusal == null) BottomActionBar {
-                PrimaryButton(
-                    if (canStart) stringResource(R.string.unlock_start, Format.minutes(context, minutes.coerceAtLeast(1)))
-                    else stringResource(R.string.unlock_start_hint),
-                    enabled = canStart,
-                ) {
+                PrimaryButton(stringResource(R.string.unlock_start, Format.minutes(context, minutes.coerceAtLeast(1))), enabled = canStart) {
                     val t = template ?: return@PrimaryButton
                     val pkg = app ?: return@PrimaryButton
                     scope.launch {
@@ -207,12 +206,18 @@ fun UnlockScreen(
 
             // Purpose
             Column {
-                GroupHeader(stringResource(R.string.unlock_purpose))
-                Row(
-                    Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+                Box(Modifier.padding(horizontal = 16.dp)) { GroupHeader(stringResource(R.string.unlock_purpose)) }
+                val chipState = rememberLazyListState()
+                LaunchedEffect(templateId, shown.size) {
+                    val i = shown.indexOfFirst { it.id == templateId }
+                    if (i > 1) chipState.animateScrollToItem((i - 1).coerceAtLeast(0))
+                }
+                LazyRow(
+                    state = chipState, modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    shown.forEach { t ->
+                    items(shown, key = { it.id }) { t ->
                         PurposeChip(
                             t, selected = t.id == templateId, enabled = !extend && allowedAt4(t),
                         ) {
@@ -226,7 +231,7 @@ fun UnlockScreen(
                     AnimatedContent(it.id, label = "purposeDesc") { id ->
                         Text(
                             stringResource(PurposeTemplates.descriptionRes(id)), style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 10.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 10.dp).fillMaxWidth(),
                         )
                     }
                 }
@@ -239,6 +244,13 @@ fun UnlockScreen(
                     value = statement, onValueChange = { statement = it.replace('\n', ' ').take(STATEMENT_MAX) },
                     placeholder = stringResource(R.string.declare_placeholder), minLines = 2,
                 )
+                val missing = STATEMENT_MIN - statement.trim().length
+                if (statement.isNotEmpty() && missing > 0) {
+                    Text(
+                        stringResource(R.string.unlock_more_chars, missing), style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 16.dp, top = 6.dp),
+                    )
+                }
                 val last = g.last
                 val suggestions = buildList {
                     if (last != null && !extend && last.statement != statement) add(last.statement)
@@ -388,7 +400,7 @@ private fun purposeShortName(t: PurposeTemplate): String = when (t.id) {
 
 /** Overrides aren't available right now: say why, nothing else. */
 @Composable
-private fun Refused(message: String, padding: androidx.compose.foundation.layout.PaddingValues) {
+private fun Refused(message: String, padding: PaddingValues) {
     Column(
         Modifier.fillMaxSize().padding(padding).padding(32.dp),
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally,

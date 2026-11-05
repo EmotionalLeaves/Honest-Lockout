@@ -195,8 +195,8 @@ private fun WeekCard(s: HomeState) {
                 }
                 Spacer(Modifier.height(16.dp))
                 val max = (week.maxOrNull() ?: 0).coerceAtLeast(1)
-                val track = MaterialTheme.colorScheme.surfaceContainerHigh
-                val past = MaterialTheme.colorScheme.surfaceContainerHighest
+                val track = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f)
+                val past = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
                 Canvas(Modifier.fillMaxWidth().height(64.dp)) {
                     val slot = size.width / 7f
                     val barW = slot * 0.42f
