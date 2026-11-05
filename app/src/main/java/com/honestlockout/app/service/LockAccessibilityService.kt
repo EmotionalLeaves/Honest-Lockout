@@ -2,6 +2,7 @@ package com.honestlockout.app.service
 
 import android.accessibilityservice.AccessibilityService
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -45,7 +46,10 @@ class LockAccessibilityService : AccessibilityService() {
     private lateinit var inspector: ScreenInspector
     /** Never front-app changes: system UI, "android", the keyboard. Launchers are tracked separately. */
     private val ignorePackages = HashSet<String>()
+    /** Home screens plus their companions (search box, assistant, Samsung Free): never "another app". */
     private var launchers: Set<String> = emptySet()
+    /** pkg/class -> is a real Activity. Non-activity windows (popups, overlays, dialogs) never change the front app. */
+    private val activityCache = HashMap<String, Boolean>()
     private val lastContentAt = HashMap<String, Long>()
     private var lastRecheckAt = 0L
     @Volatile private var offRecorded = false
@@ -129,11 +133,23 @@ class LockAccessibilityService : AccessibilityService() {
         }.getOrDefault(emptySet())
         val ime = runCatching { Settings.Secure.getString(contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD) }
             .getOrNull()?.substringBefore('/')
+        val assistant = runCatching { Settings.Secure.getString(contentResolver, "assistant") }.getOrNull()?.substringBefore('/')
+        launchers = launchers + HOME_COMPANIONS + listOfNotNull(assistant)
         ignorePackages.clear()
         ignorePackages += setOf("com.android.systemui", "android")
         ime?.let { ignorePackages += it }
         ignorePackages -= launchers
-        AppLog.w(TAG, "launchers=$launchers ignore=$ignorePackages")
+    }
+
+    /** True when [className] is an Activity of [pkg] (cached). Overlays and popups report widget classes. */
+    private fun isActivity(pkg: String, className: String?): Boolean {
+        val cls = className ?: return false
+        if (!cls.contains('.') || cls.startsWith("android.widget.") || cls.startsWith("android.view.") ||
+            cls.startsWith("android.app.Dialog") || cls.startsWith("androidx.") || cls.startsWith("android.inputmethodservice.")
+        ) return false
+        return activityCache.getOrPut("$pkg/$cls") {
+            runCatching { packageManager.getActivityInfo(ComponentName(pkg, cls), 0); true }.getOrDefault(false)
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -157,11 +173,17 @@ class LockAccessibilityService : AccessibilityService() {
     /** Step 1 (and 6): a window came to the front. */
     private fun onWindowState(pkg: String, className: String?, title: String?) {
         val now = System.currentTimeMillis()
-        AppLog.w(TAG, "window: $pkg/$className")
         if (pkg != packageName) inspector.maybeDump(now, force = true)
         if (pkg in ignorePackages) return
         // Our own overlay windows are not front-app changes; MainActivity is.
         if (pkg == packageName && className != MainActivity::class.java.name) return
+        // A popup, dialog or overlay from some other package (e.g. the launcher's search box right
+        // after HOME) is not a new front app. If it really is a new app whose first window is not an
+        // Activity, the active-window check below catches it a moment later.
+        if (pkg != frontPackage && pkg !in launchers && className != "$pkg.ActiveWindow" && !isActivity(pkg, className)) {
+            main.postDelayed({ confirmFront(pkg) }, ACTIVE_WINDOW_CHECK_MS)
+            return
+        }
         val monitor = AppGraph.monitor
         if (pkg != frontPackage) {
             val covered = monitor.isActive && monitor.isAllowedPackage(pkg) && !EmergencyAllowlist.contains(pkg)
@@ -243,6 +265,13 @@ class LockAccessibilityService : AccessibilityService() {
         AppLog.w(TAG, "Locked $pkg: ${decision.reason}")
     }
 
+    /** Fallback for apps whose first window is not an Activity: trust the active window's package. */
+    private fun confirmFront(pkg: String) {
+        if (pkg == frontPackage) return
+        val active = runCatching { rootInActiveWindow?.packageName?.toString() }.getOrNull() ?: return
+        if (active == pkg) onWindowState(pkg, "$pkg.ActiveWindow", null)
+    }
+
     /** After a TIMEOUT the app in front locks again, with "Time's up". */
     fun reevaluateFront(timesUp: Boolean) {
         val pkg = frontPackage ?: return
@@ -285,6 +314,12 @@ class LockAccessibilityService : AccessibilityService() {
         private const val CONTENT_THROTTLE_MS = 500L
         private const val RECHECK_MS = 1_500L
         private const val HOME_DELAY_MS = 300L
+        private const val ACTIVE_WINDOW_CHECK_MS = 400L
+
+        /** Packages that draw over the home screen and belong to it. */
+        private val HOME_COMPANIONS = setOf(
+            "com.google.android.googlequicksearchbox", "com.samsung.android.app.spage", "com.samsung.android.bixby.agent",
+        )
 
         /**
          * System pickers and dialogs an override's task can legitimately pass through (share
