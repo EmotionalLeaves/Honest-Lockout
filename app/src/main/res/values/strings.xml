@@ -70,10 +70,10 @@
 
     <!-- Home -->
     <string name="home_service_off">The accessibility service is off, so nothing is blocked. Turn it back on in Settings &gt; Accessibility.</string>
-    <string name="home_active_title">Override running: %1$s</string>
+    <string name="home_active_title">Unlocked · %1$s</string>
     <string name="home_lock_it">End and lock</string>
-    <string name="home_today">Screen time today</string>
-    <string name="home_oldest_expires">Oldest expires %1$s</string>
+    <string name="home_today">Screen time</string>
+    <string name="home_oldest_expires">Oldest clears %1$s</string>
     <string name="home_next_override_at">Overrides available at %1$s</string>
     <string name="home_start_override">Start an override</string>
     <string name="home_block_list">Block list</string>
@@ -92,7 +92,7 @@
     <string name="mode_budget">Budget</string>
     <string name="mode_schedule">Schedule</string>
     <string name="mode_budget_summary">%1$d min/day</string>
-    <string name="mode_budget_left">%1$d min/day, %2$d left</string>
+    <string name="mode_budget_left">%1$d min a day · %2$d left</string>
     <string name="mode_schedule_summary">%1$s %2$s–%3$s</string>
     <string name="rule_always_desc">Locked at all times. Only an override opens it.</string>
     <string name="rule_budget_label">Daily budget</string>
@@ -120,17 +120,17 @@
     <string name="purpose_work">Work or school task</string>
     <string name="purpose_pay">Pay, bank or 2FA code</string>
     <string name="purpose_custom">Custom</string>
-    <string name="purpose_navigation_desc">Directions in a map app. Expect little scrolling.</string>
-    <string name="purpose_reply_desc">Write a reply. Feeds, reels, stories and shorts stay blocked.</string>
-    <string name="purpose_lookup_desc">Find something in the browser or YouTube. Shorts and the home feed stay blocked.</string>
-    <string name="purpose_work_desc">Get a task done. Feeds, reels, stories and shorts stay blocked.</string>
-    <string name="purpose_pay_desc">A payment, a balance check or a login code.</string>
-    <string name="purpose_custom_desc">You choose the screens to block and the activity to expect.</string>
+    <string name="purpose_navigation_desc">Maps and directions. Little scrolling expected.</string>
+    <string name="purpose_reply_desc">Messages only. Feeds, reels, stories and shorts stay blocked.</string>
+    <string name="purpose_lookup_desc">Search or watch one thing. Shorts and the home feed stay blocked.</string>
+    <string name="purpose_work_desc">Get one task done. Feeds stay blocked.</string>
+    <string name="purpose_pay_desc">Payments, banking and login codes.</string>
+    <string name="purpose_custom_desc">Choose what stays blocked and what activity to expect.</string>
     <string name="refuse_global_lockout">Overrides return at %1$s.</string>
     <string name="refuse_app_lockout">This app is locked out until %1$s.</string>
     <string name="refuse_four_strikes">With 4 or more strikes, only Navigation and Pay overrides are allowed.</string>
     <string name="refuse_override_active">End the current override first.</string>
-    <string name="declare_placeholder">e.g. reply to Sam about Friday</string>
+    <string name="declare_placeholder">Reply to Sam about Friday</string>
     <string name="declare_count">%1$d / %2$d</string>
     <string name="declare_app">App</string>
     <string name="declare_no_apps">Add an app to the block list first.</string>
@@ -241,7 +241,7 @@
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_strictness">Strictness</string>
-    <string name="settings_strictness_desc">Sets the warning time, check-ins and activity limits together. Picking a looser level waits like any other loosening.</string>
+    <string name="settings_strictness_desc">Moving to a looser level applies after 24 hours.</string>
     <string name="strict_lenient">Lenient</string>
     <string name="strict_normal">Normal</string>
     <string name="strict_strict">Strict</string>
@@ -324,7 +324,7 @@
     <string name="cat_video">Video</string>
     <string name="cat_other">Other</string>
     <string name="blocklist_stat_blocked">Blocked</string>
-    <string name="rule_always_short">Locked at all times</string>
+    <string name="rule_always_short">Always</string>
     <string name="home_stat_screen_time">today</string>
     <string name="home_stat_strikes">strikes</string>
     <string name="home_stat_blocked">blocked</string>
@@ -337,7 +337,7 @@
     <string name="home_tile_history_sub">Overrides, screen time</string>
     <string name="home_tile_settings_sub">Strictness, strikes, timing</string>
     <string name="home_tile_emergency_sub">Unlock everything · 2 strikes</string>
-    <string name="declare_label">What will you do?</string>
+    <string name="declare_label">What exactly?</string>
     <string name="declare_choose_app">Choose an app</string>
     <string name="pick_last_time">Same as last time · %1$s · %2$s</string>
     <string name="countdown_hint">Starts when the timer ends. Cancel any time.</string>
@@ -367,7 +367,7 @@
         <item>Check my balance</item>
     </string-array>
     <string name="purpose_listen">Listen in background</string>
-    <string name="purpose_listen_desc">Audio while you sleep or do something else. Only screen time inside the app is limited.</string>
+    <string name="purpose_listen_desc">Audio in the background. No check-ins; screen time in the app is capped.</string>
     <string name="shape_listen">Listen</string>
     <string-array name="suggest_listen">
         <item>Fall asleep to a video</item>
@@ -376,11 +376,11 @@
     </string-array>
     <string name="declare_listen_note">No check-ins. You can have the app open with the screen on for up to %1$d min in total to pick what to play. Playback isn\'t stopped when time\'s up, and the time\'s-up notification is silent.</string>
     <string name="settings_how_title">How changes work</string>
-    <string name="settings_how_body">Stricter changes apply now. Looser changes apply after %1$d hours and can be cancelled while they wait.</string>
+    <string name="settings_how_body">Stricter changes apply now. Looser ones apply after %1$d hours.</string>
     <string name="settings_pending_count">%1$d change(s) waiting · view</string>
-    <string name="strict_lenient_desc">45 s to return after a warning. Check-ins every 5–10 min. Scrolling patterns are not judged; blocked screens need 10 s to count.</string>
-    <string name="strict_normal_desc">30 s to return after a warning. Check-ins every 3–8 min. Scrolling judged over 2 minutes.</string>
-    <string name="strict_strict_desc">20 s to return, 20 s to answer check-ins every 2–5 min. Scrolling judged minute by minute.</string>
+    <string name="strict_lenient_desc">45 s to return · check-ins every 5–10 min</string>
+    <string name="strict_normal_desc">30 s to return · check-ins every 3–8 min</string>
+    <string name="strict_strict_desc">20 s to return · check-ins every 2–5 min</string>
     <string name="ladder_summary">1st strike: app locked for %1$s, overrides wait %2$s</string>
     <string name="ladder_sentence">The app stays locked for %1$s, and every new override waits %2$s.</string>
     <string name="ladder_row_1">1 strike</string>
@@ -437,4 +437,52 @@
     <string name="welcome_point_3">Looser rules take 24 hours to apply</string>
     <string name="welcome_start">Get started</string>
     <string name="welcome_private">No account. Nothing leaves your phone.</string>
+    <string name="tab_today">Today</string>
+    <string name="tab_apps">Apps</string>
+    <string name="tab_history">History</string>
+    <string name="status_off">Off</string>
+    <string name="status_on">Blocking</string>
+    <string name="status_waiting">Cooling down</string>
+    <string name="status_ready">Ready</string>
+    <string name="status_off_headline">Blocking is paused</string>
+    <string name="status_off_detail">Turn on Honest Lockout in Accessibility to start blocking.</string>
+    <string name="status_off_action">Turn on</string>
+    <string name="status_empty_headline">Nothing blocked yet</string>
+    <string name="status_empty_detail">Choose the apps that take your time.</string>
+    <string name="status_empty_action">Choose apps</string>
+    <string name="status_waiting_headline">Unlocks return at %1$s</string>
+    <string name="status_waiting_detail">A recent strike paused unlocks.</string>
+    <string name="status_on_action">Unlock an app</string>
+    <string name="home_week_avg">avg %1$s</string>
+    <string name="home_limits">Daily limits</string>
+    <string name="home_limit_left">%1$d min left</string>
+    <string name="home_limit_used">Used up</string>
+    <string name="unlock_title">Unlock</string>
+    <string name="unlock_extend_title">Extend</string>
+    <string name="unlock_purpose">Purpose</string>
+    <string name="unlock_length">Length</string>
+    <string name="unlock_max">up to %1$s</string>
+    <string name="unlock_change_app">Change app</string>
+    <string name="unlock_start">Unlock for %1$s</string>
+    <string name="unlock_start_hint">Describe what you\'ll do</string>
+    <string name="unlock_unavailable">Unlocks unavailable</string>
+    <string name="purpose_short_navigation">Navigate</string>
+    <string name="purpose_short_reply">Reply</string>
+    <string name="purpose_short_lookup">Look up</string>
+    <string name="purpose_short_work">Work</string>
+    <string name="purpose_short_pay">Pay or 2FA</string>
+    <string name="purpose_short_listen">Listen</string>
+    <string name="purpose_short_custom">Custom</string>
+    <plurals name="status_on_headline">
+        <item quantity="one">%1$d app blocked</item>
+        <item quantity="other">%1$d apps blocked</item>
+    </plurals>
+    <plurals name="home_strikes_active">
+        <item quantity="one">%1$d active strike</item>
+        <item quantity="other">%1$d active strikes</item>
+    </plurals>
+    <plurals name="apps_summary">
+        <item quantity="one">%1$d app is blocked. Tap one to change how.</item>
+        <item quantity="other">%1$d apps are blocked. Tap one to change how.</item>
+    </plurals>
 </resources>

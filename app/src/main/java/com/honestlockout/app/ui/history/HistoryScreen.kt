@@ -81,7 +81,7 @@ fun HistoryScreen(nav: NavController) {
 
     AppScaffold(
         title = stringResource(R.string.history_title),
-        onBack = { nav.popBackStack() },
+        onBack = null,
         snackbar = snackbar,
         titleModifier = Modifier.pointerInput(Unit) {
             detectTapGestures(onLongPress = { exportLauncher.launch("honest-lockout-log.txt") })

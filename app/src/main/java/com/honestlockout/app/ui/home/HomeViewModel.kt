@@ -38,6 +38,8 @@ data class HomeState(
     val activeMinutesLeft: Int = 0,
     val pendingCount: Int = 0,
     val blockedCount: Int = 0,
+    /** Screen-time minutes for the last 7 days, oldest first; the last one is today. */
+    val week: List<Int> = emptyList(),
     val accessibilityOn: Boolean = true,
 )
 
@@ -81,6 +83,9 @@ class HomeViewModel @JvmOverloads constructor(
             } ?: 0,
             pendingCount = pendingCount,
             blockedCount = rules.size,
+            week = (6 downTo 1).map { back ->
+                usageRepo.forDate(DayClock.localDate(now).minusDays(back.toLong())).sumOf { it.minutes }
+            } + usageRepo.todayTotalMinutes(now),
             // The toggle in Settings, not the live binding (which lags a moment after app start).
             accessibilityOn = PermissionChecks.accessibilityEnabled(ctx),
         )

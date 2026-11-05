@@ -8,6 +8,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,6 +23,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.honestlockout.app.AppGraph
@@ -28,9 +34,8 @@ import com.honestlockout.app.ui.blocklist.ScheduleEditorScreen
 import com.honestlockout.app.ui.history.HistoryScreen
 import com.honestlockout.app.ui.home.HomeScreen
 import com.honestlockout.app.ui.override.CountdownScreen
-import com.honestlockout.app.ui.override.DeclareScreen
 import com.honestlockout.app.ui.override.ExtendEntry
-import com.honestlockout.app.ui.override.PurposePickerScreen
+import com.honestlockout.app.ui.override.UnlockScreen
 import com.honestlockout.app.ui.settings.BreakGlassScreen
 import com.honestlockout.app.ui.settings.InspectorScreen
 import com.honestlockout.app.ui.settings.PendingChangesScreen
@@ -82,12 +87,38 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
     val nav = rememberNavController()
     val start = if (s.setupComplete) Routes.HOME else Routes.WELCOME
 
+    val entry by nav.currentBackStackEntryAsState()
+    val route = entry?.destination?.route
+    val tabRoutes = TABS.map { it.route }.toSet()
+    val isTab = { r: String? -> r in tabRoutes }
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0),
+        bottomBar = {
+            if (isTab(route)) TabBar(route) { target ->
+                nav.navigate(target) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        },
+    ) { shell ->
     NavHost(
         navController = nav, startDestination = start,
-        enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(260)) { it / 6 } },
+        modifier = Modifier.padding(shell).consumeWindowInsets(shell),
+        // Tabs cross-fade; pushed screens slide in from the right.
+        enterTransition = {
+            if (isTab(initialState.destination.route) && isTab(targetState.destination.route)) fadeIn(tween(180))
+            else fadeIn(tween(220)) + slideInHorizontally(tween(260)) { it / 6 }
+        },
         exitTransition = { fadeOut(tween(160)) },
         popEnterTransition = { fadeIn(tween(220)) },
-        popExitTransition = { fadeOut(tween(160)) + slideOutHorizontally(tween(260)) { it / 6 } },
+        popExitTransition = {
+            if (isTab(initialState.destination.route) && isTab(targetState.destination.route)) fadeOut(tween(160))
+            else fadeOut(tween(160)) + slideOutHorizontally(tween(260)) { it / 6 }
+        },
     ) {
         composable(Routes.WELCOME) { WelcomeScreen(onStart = { nav.navigate(Routes.SETUP) }) }
         composable(Routes.SETUP) {
@@ -113,7 +144,7 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
         composable(
             Routes.OVERRIDE_PICK,
             arguments = listOf(navArgument("pkg") { type = NavType.StringType; nullable = true; defaultValue = null }),
-        ) { PurposePickerScreen(nav, it.arguments?.getString("pkg")?.takeIf { p -> p.isNotEmpty() }) }
+        ) { UnlockScreen(nav, it.arguments?.getString("pkg")?.takeIf { p -> p.isNotEmpty() }) }
         composable(
             Routes.OVERRIDE_DECLARE,
             arguments = listOf(
@@ -123,10 +154,10 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
                 navArgument("stmt") { type = NavType.StringType; nullable = true; defaultValue = null },
             ),
         ) {
-            DeclareScreen(
+            UnlockScreen(
                 nav,
-                templateId = it.arguments?.getLong("templateId") ?: 0L,
                 presetPackage = it.arguments?.getString("pkg")?.takeIf { p -> p.isNotEmpty() },
+                presetTemplateId = it.arguments?.getLong("templateId"),
                 extend = it.arguments?.getBoolean("extend") ?: false,
                 presetStatement = it.arguments?.getString("stmt")?.takeIf { p -> p.isNotEmpty() },
             )
@@ -141,6 +172,7 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
         }
         composable(Routes.INSPECTOR) { InspectorScreen(nav) }
         composable(Routes.BREAKGLASS) { BreakGlassScreen(nav) }
+    }
     }
 
     LaunchedEffect(pendingRoute, s.setupComplete) {

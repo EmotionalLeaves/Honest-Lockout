@@ -2,6 +2,12 @@ package com.honestlockout.app.ui.blocklist
 
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import com.honestlockout.app.ui.cardBorder
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,8 +70,8 @@ fun BlockListScreen(nav: NavController) {
     LaunchedEffect(Unit) { while (true) { delay(30_000L); now.longValue = System.currentTimeMillis() } }
 
     AppScaffold(
-        title = stringResource(R.string.blocklist_title),
-        onBack = { nav.popBackStack() },
+        title = stringResource(R.string.tab_apps),
+        onBack = null,
         actions = {
             IconButton(onClick = { nav.navigate(Routes.APPPICKER) }) {
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.blocklist_add), tint = MaterialTheme.colorScheme.primary)
@@ -83,35 +89,38 @@ fun BlockListScreen(nav: NavController) {
             return@AppScaffold
         }
         val sorted = list.sortedBy { Format.appLabel(context, it.packageName).lowercase() }
-        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 24.dp)) {
+        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp)) {
             item {
-                SectionCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                        Stat("${list.size}", stringResource(R.string.blocklist_stat_blocked))
-                        Stat("${list.count { it.mode == BlockMode.ALWAYS }}", stringResource(R.string.mode_always))
-                        Stat("${list.count { it.mode == BlockMode.BUDGET }}", stringResource(R.string.mode_budget))
-                        Stat("${list.count { it.mode == BlockMode.SCHEDULE }}", stringResource(R.string.mode_schedule))
-                    }
-                }
+                Text(
+                    context.resources.getQuantityString(R.plurals.apps_summary, list.size, list.size),
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp, bottom = 12.dp),
+                )
             }
-            items(sorted, key = { it.packageName }) { rule ->
-                ListItem(
-                    modifier = Modifier.clickable { nav.navigate(Routes.blockRule(rule.packageName)) },
-                    leadingContent = { AppIcon(rule.packageName, 44) },
-                    headlineContent = { Text(Format.appLabel(context, rule.packageName)) },
-                    supportingContent = {
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(modeSummary(context, rule, schedules, now.longValue))
-                            if (rule.mode == BlockMode.BUDGET && rule.dailyBudgetMin > 0) {
-                                val used = AppGraph.liveUsage.minutesFor(rule.packageName, now.longValue)
-                                UsageBar(used / rule.dailyBudgetMin.toFloat(), color = if (used >= rule.dailyBudgetMin) Warning else Primary)
+            item {
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer), border = cardBorder()) {
+                    Column {
+                        sorted.forEachIndexed { i, rule ->
+                            if (i > 0) RowDivider(inset = 68)
+                            Row(
+                                Modifier.fillMaxWidth().clickable { nav.navigate(Routes.blockRule(rule.packageName)) }
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
+                            ) {
+                                AppIcon(rule.packageName, 38)
+                                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(Format.appLabel(context, rule.packageName), style = MaterialTheme.typography.bodyLarge)
+                                    Text(modeSummary(context, rule, schedules, now.longValue), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    if (rule.mode == BlockMode.BUDGET && rule.dailyBudgetMin > 0) {
+                                        val used = AppGraph.liveUsage.minutesFor(rule.packageName, now.longValue)
+                                        UsageBar(used / rule.dailyBudgetMin.toFloat(), color = if (used >= rule.dailyBudgetMin) Warning else Primary)
+                                    }
+                                }
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
-                    },
-                    trailingContent = { ModeChip(rule.mode) },
-                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
-                )
-                RowDivider(inset = 76)
+                    }
+                }
             }
         }
     }
