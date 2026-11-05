@@ -35,11 +35,14 @@ class LiveUsageTracker {
         }
     }
 
+    /**
+     * Merges in today's totals from the system. Keeps the larger figure per app, so a missing or
+     * lagging usage-stats source never gives back time the app already counted.
+     */
     @Synchronized
     fun seed(values: Map<String, Long>, now: Long) {
         rollDay(now)
-        msByPackage.clear()
-        msByPackage.putAll(values)
+        values.forEach { (p, ms) -> msByPackage[p] = maxOf(msByPackage[p] ?: 0L, ms) }
         segmentStart = now // the seed already includes time up to now
         persist()
     }
