@@ -83,6 +83,15 @@ class LiveUsageTracker {
         return (ms / 60_000L).toInt()
     }
 
+    /** Every app's minutes today, the running segment included. */
+    @Synchronized
+    fun totalMinutes(now: Long): Int {
+        rollDay(now)
+        var ms = msByPackage.values.sum()
+        if (screenOn && segmentCounts && currentPkg != null && now > segmentStart) ms += now - segmentStart
+        return (ms / 60_000L).toInt()
+    }
+
     private fun closeSegment(now: Long) {
         rollDay(now)
         val pkg = currentPkg

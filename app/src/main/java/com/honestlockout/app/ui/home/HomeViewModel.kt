@@ -73,7 +73,7 @@ class HomeViewModel @JvmOverloads constructor(
         }
         HomeState(
             loaded = true,
-            todayMinutes = usageRepo.todayTotalMinutes(now),
+            todayMinutes = maxOf(usageRepo.todayTotalMinutes(now), AppGraph.liveUsage.totalMinutes(now)),
             budgets = budgets,
             activeStrikes = strikeRepo.activeCount(now),
             oldestStrikeExpiresAt = strikeRepo.oldestActive(now)?.expiresAt,
@@ -86,7 +86,7 @@ class HomeViewModel @JvmOverloads constructor(
             blockedCount = rules.size,
             week = (6 downTo 1).map { back ->
                 usageRepo.forDate(DayClock.localDate(now).minusDays(back.toLong())).sumOf { it.minutes }
-            } + usageRepo.todayTotalMinutes(now),
+            } + maxOf(usageRepo.todayTotalMinutes(now), AppGraph.liveUsage.totalMinutes(now)),
             // The toggle in Settings, not the live binding (which lags a moment after app start).
             accessibilityOn = PermissionChecks.accessibilityEnabled(ctx),
             usageAccess = usageRepo.hasUsageAccess(),
