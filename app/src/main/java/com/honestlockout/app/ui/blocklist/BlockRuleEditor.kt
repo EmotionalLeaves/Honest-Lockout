@@ -99,7 +99,10 @@ fun BlockRuleEditorScreen(nav: NavController, packageName: String, isNew: Boolea
         title = Format.appLabel(context, packageName), onBack = { nav.popBackStack() }, snackbar = snackbar,
         bottomBar = {
             if (m != null && rule != null) BottomActionBar {
-                PrimaryButton(stringResource(R.string.action_save), enabled = m != BlockMode.SCHEDULE || scheduleId != null) {
+                val dirty = firstSaveFree || m != rule.mode ||
+                    (m == BlockMode.BUDGET && budget != rule.dailyBudgetMin) ||
+                    (m == BlockMode.SCHEDULE && scheduleId != rule.scheduleId)
+                PrimaryButton(stringResource(R.string.action_save), enabled = dirty && (m != BlockMode.SCHEDULE || scheduleId != null)) {
                     scope.launch {
                         val change = SettingChange.SetBlockMode(packageName, m, budget, scheduleId)
                         val now = System.currentTimeMillis()

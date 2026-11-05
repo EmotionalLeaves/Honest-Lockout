@@ -247,9 +247,5 @@ private fun StrictnessPicker(s: Settings, onPick: (Strictness) -> Unit) {
                 }
             }
         }
-        Text(
-            stringResource(R.string.settings_strictness_desc), style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 16.dp, top = 8.dp),
-        )
     }
 }

@@ -40,6 +40,7 @@
     <string name="setup_next">Next</string>
     <string name="setup_finish">Finish</string>
     <string name="setup_skip">Skip</string>
+    <string name="setup_done_next">I've done this</string>
     <string name="setup_open_app_info">Open App info</string>
     <string name="status_granted">Granted</string>
     <string name="status_not_yet">Not yet</string>
@@ -120,7 +121,7 @@
     <string name="refuse_app_lockout">This app is locked out until %1$s.</string>
     <string name="refuse_four_strikes">With 4 or more strikes, only Navigation and Pay unlocks are allowed.</string>
     <string name="refuse_override_active">End the current unlock first.</string>
-    <string name="declare_placeholder">Reply to Sam about Friday</string>
+    <string name="declare_placeholder">In a few words, what will you do?</string>
     <string name="declare_no_apps">Add an app to the block list first.</string>
     <string name="declare_custom_screens">Screens to block</string>
     <string name="declare_custom_shape">Expected activity</string>
@@ -225,7 +226,6 @@
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_strictness">Strictness</string>
-    <string name="settings_strictness_desc">Moving to a looser level applies after 24 hours.</string>
     <string name="strict_lenient">Lenient</string>
     <string name="strict_normal">Normal</string>
     <string name="strict_strict">Strict</string>

@@ -185,7 +185,7 @@ fun AppTextField(
 ) {
     TextField(
         value = value, onValueChange = onValueChange, modifier = modifier.fillMaxWidth(),
-        placeholder = placeholder?.let { { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant) } },
+        placeholder = placeholder?.let { { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)) } },
         singleLine = singleLine, minLines = minLines, leadingIcon = leadingIcon, keyboardOptions = keyboardOptions,
         shape = ControlShape,
         colors = TextFieldDefaults.colors(
