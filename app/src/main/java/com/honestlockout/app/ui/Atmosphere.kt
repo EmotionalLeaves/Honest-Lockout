@@ -77,10 +77,15 @@ fun Modifier.pressScale(interaction: MutableInteractionSource): Modifier {
 
 /** Children appear one after another, fading up, the first time this is composed. */
 @Composable
-fun Staggered(modifier: Modifier = Modifier, stepMs: Int = 50, content: @Composable StaggerScope.() -> Unit) {
+fun Staggered(
+    modifier: Modifier = Modifier,
+    stepMs: Int = 50,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    content: @Composable StaggerScope.() -> Unit,
+) {
     var shown by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { shown = true }
-    Column(modifier) { StaggerScope(shown, stepMs, this).content() }
+    Column(modifier, horizontalAlignment = horizontalAlignment) { StaggerScope(shown, stepMs, this).content() }
 }
 
 class StaggerScope(private val shown: Boolean, private val stepMs: Int, private val column: ColumnScope) {

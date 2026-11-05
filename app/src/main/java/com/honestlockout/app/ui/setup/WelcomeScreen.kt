@@ -33,7 +33,7 @@ fun WelcomeScreen(onStart: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.weight(1f))
-        Staggered(stepMs = 90) {
+        Staggered(stepMs = 90, horizontalAlignment = Alignment.CenterHorizontally) {
             Item {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Image(painterResource(R.drawable.ic_brand_mark), contentDescription = null, modifier = Modifier.size(96.dp))
