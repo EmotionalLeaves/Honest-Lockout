@@ -40,7 +40,7 @@
     <string name="setup_next">Next</string>
     <string name="setup_finish">Finish</string>
     <string name="setup_skip">Skip</string>
-    <string name="setup_done_next">I've done this</string>
+    <string name="setup_done_next">I\'ve done this</string>
     <string name="setup_open_app_info">Open App info</string>
     <string name="status_granted">Granted</string>
     <string name="status_not_yet">Not yet</string>
