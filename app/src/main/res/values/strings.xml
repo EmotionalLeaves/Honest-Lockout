@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Honest Lockout</string>
-    <string name="accessibility_description">Honest Lockout uses this service to see which app is in front, cover blocked apps with a lock screen, and compare what you do during an override with what you said you would do. Nothing leaves your phone.</string>
+    <string name="accessibility_description">Honest Lockout uses this service to see which app is in front, cover blocked apps with a lock screen, and compare what you do during an unlock with what you said you would do. Nothing leaves your phone.</string>
 
     <!-- Common -->
     <string name="action_save">Save</string>
@@ -45,7 +45,7 @@
     <string name="status_not_yet">Not yet</string>
     <string name="status_reminder">Reminder only</string>
     <string name="step_notifications_title">Notifications</string>
-    <string name="step_notifications_why">Overrides show a timer notification with I\'m done and Extend.\nWarnings and check-ins also arrive as notifications.</string>
+    <string name="step_notifications_why">Unlocks show a timer notification with I\'m done and Extend.\nWarnings and check-ins also arrive as notifications.</string>
     <string name="step_usage_title">Usage access</string>
     <string name="step_usage_why">Daily budgets and screen-time history need to know how long each app was open.\nThis stays on your phone.</string>
     <string name="step_battery_title">Ignore battery optimization</string>
@@ -87,7 +87,7 @@
     <string name="mode_budget_summary">%1$d min/day</string>
     <string name="mode_budget_left">%1$d min a day · %2$d left</string>
     <string name="mode_schedule_summary">%1$s %2$s–%3$s</string>
-    <string name="rule_always_desc">Locked at all times. Only an override opens it.</string>
+    <string name="rule_always_desc">Locked at all times. Only an unlock opens it.</string>
     <string name="rule_budget_label">Daily budget</string>
     <string name="rule_schedule_label">Schedule</string>
     <string name="rule_new_schedule">New schedule</string>
@@ -116,10 +116,10 @@
     <string name="purpose_work_desc">Get one task done. Feeds stay blocked.</string>
     <string name="purpose_pay_desc">Payments, banking and login codes.</string>
     <string name="purpose_custom_desc">Choose what stays blocked and what activity to expect.</string>
-    <string name="refuse_global_lockout">Overrides return at %1$s.</string>
+    <string name="refuse_global_lockout">Unlocks return at %1$s.</string>
     <string name="refuse_app_lockout">This app is locked out until %1$s.</string>
-    <string name="refuse_four_strikes">With 4 or more strikes, only Navigation and Pay overrides are allowed.</string>
-    <string name="refuse_override_active">End the current override first.</string>
+    <string name="refuse_four_strikes">With 4 or more strikes, only Navigation and Pay unlocks are allowed.</string>
+    <string name="refuse_override_active">End the current unlock first.</string>
     <string name="declare_placeholder">Reply to Sam about Friday</string>
     <string name="declare_no_apps">Add an app to the block list first.</string>
     <string name="declare_custom_screens">Screens to block</string>
@@ -129,14 +129,14 @@
     <string name="shape_passive">Passive</string>
     <string name="shape_any">Any</string>
     <string name="countdown_app_minutes">%1$s · %2$d min</string>
-    <string name="extend_none">There is no override running.</string>
-    <string name="extend_refused">That\'s the extend limit (2 in a row). End this override and start a new one if you need more time.</string>
+    <string name="extend_none">There is no unlock running.</string>
+    <string name="extend_refused">That\'s the extend limit (2 in a row). End this unlock and start a new one if you need more time.</string>
 
     <!-- Notifications -->
-    <string name="channel_override">Running override</string>
+    <string name="channel_override">Running unlock</string>
     <string name="channel_warning">Warnings and check-ins</string>
-    <string name="channel_info">Override results</string>
-    <string name="notif_override_title">Override starting</string>
+    <string name="channel_info">Unlock results</string>
+    <string name="notif_override_title">Unlock starting</string>
     <string name="notif_override_progress">%1$d of %2$d min</string>
     <string name="notif_done">I\'m done</string>
     <string name="notif_extend">Extend</string>
@@ -145,13 +145,13 @@
     <string name="notif_checkin_title">Check-in</string>
     <string name="notif_checkin_text">Still doing: %1$s?</string>
     <string name="notif_times_up">Time\'s up on: %1$s</string>
-    <string name="toast_done">Override ended.</string>
-    <string name="toast_confessed">Override ended. No strike.</string>
+    <string name="toast_done">Unlock ended.</string>
+    <string name="toast_confessed">Unlock ended. No strike.</string>
     <string name="toast_forgiven">Clean streak: one strike cleared.</string>
     <string name="toast_unlocked">Unlocked for %1$d minutes.</string>
 
     <!-- Overlays -->
-    <string name="lock_override">Override</string>
+    <string name="lock_override">Unlock</string>
     <string name="lock_close">Close</string>
     <string name="lock_times_up">Time\'s up</string>
     <string name="lock_reason_always">Always blocked</string>
@@ -159,9 +159,9 @@
     <string name="lock_reason_schedule">Blocked until %1$s</string>
     <string name="lock_reason_lockout">Locked out until %1$s after a strike</string>
     <string name="lock_reason_break_glass_wait">Emergency unlock starts at %1$s</string>
-    <string name="lock_next_now">Overrides available</string>
-    <string name="lock_next_at">Overrides available at %1$s</string>
-    <string name="banner_warning_html"><![CDATA[This doesn\'t match <i>%1$s</i>. Return within %2$d s or end the override.]]></string>
+    <string name="lock_next_now">Unlocks available</string>
+    <string name="lock_next_at">Unlocks available at %1$s</string>
+    <string name="banner_warning_html"><![CDATA[This doesn\'t match <i>%1$s</i>. Return within %2$d s or end the unlock.]]></string>
     <string name="banner_checkin_html"><![CDATA[Still doing: <i>%1$s</i>?]]></string>
     <string name="banner_seconds">%1$d s left</string>
     <string name="banner_back_to_it">Back to it</string>
@@ -170,7 +170,7 @@
     <string name="bubble_minutes">%1$d\'</string>
     <string name="lockout_title">Strike %1$d of the week</string>
     <string name="lockout_app_until">%1$s is locked until %2$s</string>
-    <string name="lockout_overrides_return">Overrides return at %1$s</string>
+    <string name="lockout_overrides_return">Unlocks return at %1$s</string>
     <string name="lockout_ok">OK</string>
     <string name="guard_title">Change queued</string>
     <string name="guard_body">Turning Honest Lockout off is a loosening. It has been queued and will apply in 24 hours. Until then this page is covered.</string>
@@ -190,14 +190,14 @@
     <string name="reason_off_screen">Stayed on a blocked screen</string>
     <string name="reason_wrong_shape">Activity didn\'t match the purpose</string>
     <string name="reason_checkin_missed">Missed a check-in</string>
-    <string name="reason_third_warning">Third warning in one override</string>
+    <string name="reason_third_warning">Third warning in one unlock</string>
     <string name="reason_tamper">Accessibility service turned off</string>
     <string name="reason_break_glass">Emergency unlock</string>
     <string name="reason_appeal_reversed">Appeal: strike reversed</string>
 
     <!-- History -->
     <string name="history_title">History</string>
-    <string name="history_tab_overrides">Overrides</string>
+    <string name="history_tab_overrides">Unlocks</string>
     <string name="history_tab_screen_time">Screen time</string>
     <string name="history_filter_all">All</string>
     <string name="history_filter_strikes">Strikes only</string>
@@ -232,20 +232,20 @@
     <string name="strict_normal">Normal</string>
     <string name="strict_strict">Strict</string>
     <string name="settings_ladder">What a strike costs</string>
-    <string name="settings_ladder_desc">You get a strike when a warning runs out, on the 3rd warning in one override, on a missed check-in, or when the accessibility service is turned off. Strikes expire after %1$d days. The cost depends on how many you have right now:</string>
-    <string name="ladder_row_4">4 or more (only Navigation and Pay overrides)</string>
+    <string name="settings_ladder_desc">You get a strike when a warning runs out, on the 3rd warning in one unlock, on a missed check-in, or when the accessibility service is turned off. Strikes expire after %1$d days. The cost depends on how many you have right now:</string>
+    <string name="ladder_row_4">4 or more (only Navigation and Pay unlocks)</string>
     <string name="ladder_app_lock">App lock</string>
-    <string name="ladder_wait">Override wait</string>
-    <string name="ladder_rest_of_declared">rest of the override</string>
+    <string name="ladder_wait">Unlock wait</string>
+    <string name="ladder_rest_of_declared">rest of the unlock</string>
     <string name="ladder_rest_of_day">rest of the day</string>
     <string name="timing_grace">Time to return</string>
     <string name="timing_countdown">Start countdown</string>
     <string name="timing_checkin_min">Check-in gap, shortest</string>
     <string name="timing_checkin_max">Check-in gap, longest</string>
     <string name="timing_checkin_answer">Time to answer a check-in</string>
-    <string name="timing_max_warnings">Warnings per override</string>
+    <string name="timing_max_warnings">Warnings per unlock</string>
     <string name="timing_strike_window">Strikes expire after</string>
-    <string name="timing_clean_runs">Clean overrides to clear a strike</string>
+    <string name="timing_clean_runs">Clean unlocks to clear a strike</string>
     <string name="timing_loosen_delay">Wait for looser changes</string>
     <string name="timing_break_glass_wait">Emergency unlock wait</string>
     <string name="timing_break_glass_unlock">Emergency unlock length</string>
@@ -256,7 +256,7 @@
     <string name="threshold_passive_scroll">Navigation: scrolls</string>
     <string name="threshold_passive_click">Navigation: taps</string>
     <string name="settings_suggest">Suggest thresholds</string>
-    <string name="suggest_explain">From the last 14 days of clean overrides (90th percentile). Nothing changes until you tap Apply.</string>
+    <string name="suggest_explain">From the last 14 days of clean unlocks (90th percentile). Nothing changes until you tap Apply.</string>
     <string name="suggest_none">%1$s: not enough data yet</string>
     <string name="suggest_value">%1$s: suggest %2$d (now %3$d)</string>
     <string name="settings_templates">Purposes</string>
@@ -354,8 +354,8 @@
     <string name="strict_lenient_desc">45 s to return · check-ins every 5–10 min</string>
     <string name="strict_normal_desc">30 s to return · check-ins every 3–8 min</string>
     <string name="strict_strict_desc">20 s to return · check-ins every 2–5 min</string>
-    <string name="ladder_summary">1st strike: app locked for %1$s, overrides wait %2$s</string>
-    <string name="ladder_sentence">The app stays locked for %1$s, and every new override waits %2$s.</string>
+    <string name="ladder_summary">Four steps, from a short lock to a full day</string>
+    <string name="ladder_sentence">The app stays locked for %1$s, and every new unlock waits %2$s.</string>
     <string name="ladder_row_1">1 strike</string>
     <string name="ladder_row_2">2 strikes</string>
     <string name="ladder_row_3">3 strikes</string>
@@ -363,13 +363,13 @@
     <string name="ladder_no_wait">no wait</string>
     <string name="hint_raise_waits">Raising it waits %1$d h.</string>
     <string name="hint_lower_waits">Lowering it waits %1$d h.</string>
-    <string name="settings_overrides_section">During an override</string>
+    <string name="settings_overrides_section">During an unlock</string>
     <string name="settings_overrides_section_desc">Countdown, warnings, check-ins</string>
     <string name="settings_record_section">Strikes and exits</string>
     <string name="settings_record_section_desc">Expiry, clearing strikes, delays, emergency unlock</string>
-    <string name="timing_countdown_hint">Pause before an override begins.</string>
+    <string name="timing_countdown_hint">Pause before an unlock begins.</string>
     <string name="timing_grace_hint">After a warning, before it becomes a strike.</string>
-    <string name="timing_max_warnings_hint">Reaching this many in one override is a strike.</string>
+    <string name="timing_max_warnings_hint">Reaching this many in one unlock is a strike.</string>
     <string name="timing_checkin_gap_hint">Check-ins come at a random time between these two.</string>
     <string name="timing_checkin_answer_hint">Unanswered by then counts as missed.</string>
     <string name="timing_strike_window_hint">How long a strike counts against you.</string>
