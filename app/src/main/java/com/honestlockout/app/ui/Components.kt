@@ -1,7 +1,6 @@
 package com.honestlockout.app.ui
 
 import android.content.Context
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
@@ -101,9 +100,8 @@ fun SectionCard(title: String? = null, modifier: Modifier = Modifier, content: @
     Column(modifier.fillMaxWidth()) {
         if (title != null) GroupHeader(title)
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().cardEdge(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         ) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp), content = content)
         }

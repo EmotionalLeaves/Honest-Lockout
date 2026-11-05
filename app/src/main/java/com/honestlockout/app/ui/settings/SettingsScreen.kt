@@ -2,7 +2,6 @@ package com.honestlockout.app.ui.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +45,7 @@ import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.BuildConfig
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.data.db.Strictness
 import com.honestlockout.app.data.rules.PurposeTemplates
 import com.honestlockout.app.data.settings.Keys
@@ -193,7 +193,7 @@ private fun HowChangesWork(s: Settings, pendingCount: Int, onOpenPending: () -> 
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        border = cardBorder(),
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -222,7 +222,7 @@ private fun StrictnessPicker(s: Settings, onPick: (Strictness) -> Unit) {
         GroupHeader(stringResource(R.string.settings_strictness))
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+            border = cardBorder(),
         ) {
             Column {
                 Strictness.entries.forEachIndexed { i, level ->

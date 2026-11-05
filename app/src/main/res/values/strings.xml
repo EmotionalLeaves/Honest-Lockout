@@ -431,4 +431,10 @@
     <string name="break_glass_term_strikes">Adds 2 strikes</string>
     <string name="break_glass_cancel_wait">Cancel the unlock</string>
     <string name="break_glass_type_here">Type it here</string>
+    <string name="welcome_tagline">Block the apps that take your time. Unlock one only by saying what you\'ll do, and for how long.</string>
+    <string name="welcome_point_1">Honest exits are always free</string>
+    <string name="welcome_point_2">Drifting gets a warning, then a strike</string>
+    <string name="welcome_point_3">Looser rules take 24 hours to apply</string>
+    <string name="welcome_start">Get started</string>
+    <string name="welcome_private">No account. Nothing leaves your phone.</string>
 </resources>

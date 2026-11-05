@@ -37,9 +37,11 @@ import com.honestlockout.app.ui.settings.PendingChangesScreen
 import com.honestlockout.app.ui.settings.SettingsScreen
 import com.honestlockout.app.ui.settings.TemplateEditorScreen
 import com.honestlockout.app.ui.setup.SetupWizardScreen
+import com.honestlockout.app.ui.setup.WelcomeScreen
 
 /** Route names. Arguments use {name}; helpers build concrete routes. */
 object Routes {
+    const val WELCOME = "welcome"
     const val SETUP = "setup"
     const val HOME = "home"
     const val BLOCKLIST = "blocklist"
@@ -78,7 +80,7 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
     val settings by AppGraph.settings.data.collectAsState(initial = null)
     val s = settings ?: run { Box(Modifier.fillMaxSize()); return }
     val nav = rememberNavController()
-    val start = if (s.setupComplete) Routes.HOME else Routes.SETUP
+    val start = if (s.setupComplete) Routes.HOME else Routes.WELCOME
 
     NavHost(
         navController = nav, startDestination = start,
@@ -87,9 +89,10 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
         popEnterTransition = { fadeIn(tween(220)) },
         popExitTransition = { fadeOut(tween(160)) + slideOutHorizontally(tween(260)) { it / 6 } },
     ) {
+        composable(Routes.WELCOME) { WelcomeScreen(onStart = { nav.navigate(Routes.SETUP) }) }
         composable(Routes.SETUP) {
             SetupWizardScreen(onFinished = {
-                nav.navigate(Routes.HOME) { popUpTo(Routes.SETUP) { inclusive = true } }
+                nav.navigate(Routes.HOME) { popUpTo(Routes.WELCOME) { inclusive = true } }
             })
         }
         composable(Routes.HOME) { HomeScreen(nav) }

@@ -2,7 +2,6 @@ package com.honestlockout.app.ui.history
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.data.db.EndReason
 import com.honestlockout.app.data.db.StrikeReason
 import com.honestlockout.app.data.db.entities.Override
@@ -152,7 +152,7 @@ private fun OverrideRow(o: Override, strike: Strike?, purpose: String, now: Long
     Card(
         modifier = Modifier.fillMaxWidth().alpha(if (forgiven) 0.5f else 1f),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        border = cardBorder(),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -179,7 +179,7 @@ private fun StrikeRow(s: Strike, now: Long, onAppeal: (Strike) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().alpha(if (greyed) 0.5f else 1f),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        border = cardBorder(),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(Format.dateTime(context, s.createdAt), style = MaterialTheme.typography.labelMedium, color = TextMuted)

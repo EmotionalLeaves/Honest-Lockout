@@ -17,8 +17,10 @@ adb shell dumpsys deviceidle whitelist +$PKG || true
 shot() { sleep "${2:-3}"; adb exec-out screencap -p > "shots/$1.png"; echo "shot $1"; }
 open() { adb shell am force-stop $PKG; adb shell am start -W -n $PKG/.MainActivity "$@" >/dev/null; }
 
-# 1. Fresh install: setup wizard.
+# 1. Fresh install: welcome, then the setup wizard.
 open
+shot 00_welcome 4
+open --es route setup
 shot 01_setup 4
 
 # 2. Seed data, then every main screen by route.

@@ -1,6 +1,5 @@
 package com.honestlockout.app.ui.override
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.data.db.ActivityShape
 import com.honestlockout.app.data.db.entities.PurposeTemplate
 import com.honestlockout.app.data.repo.Eligibility
@@ -210,7 +210,7 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                     val all = remember { AppGraph.screenRules.allLabels() }
                     Card(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                        border = cardBorder(),
                     ) {
                         Column {
                             all.forEachIndexed { i, l ->
