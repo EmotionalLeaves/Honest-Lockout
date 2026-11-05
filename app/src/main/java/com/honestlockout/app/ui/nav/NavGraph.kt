@@ -145,7 +145,7 @@ fun AppNavHost(pendingRoute: String?, onRouteConsumed: () -> Unit) {
 
     LaunchedEffect(pendingRoute, s.setupComplete) {
         val route = pendingRoute ?: return@LaunchedEffect
-        if (s.setupComplete) navigateExternal(nav, Routes.fromExternal(route))
+        if (s.setupComplete || route == Routes.SETUP) navigateExternal(nav, Routes.fromExternal(route))
         onRouteConsumed()
     }
 }
