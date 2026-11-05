@@ -452,7 +452,7 @@ fun purposeIcon(id: Long): ImageVector = when (id) {
 }
 
 /** "home_feed" -> "home feed". */
-fun screenLabel(label: String) = label.replace('_', ' ')
+fun screenLabel(label: String) = label.replace('_', ' ').replaceFirstChar { it.uppercaseChar() }
 
 @Composable
 private fun suggestionsFor(templateId: Long): List<String> = when (templateId) {

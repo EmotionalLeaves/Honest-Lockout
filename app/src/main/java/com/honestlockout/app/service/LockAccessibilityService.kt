@@ -195,7 +195,9 @@ class LockAccessibilityService : AccessibilityService() {
         val overlay = AppGraph.overlay
         if (overlay.fullKind == OverlayController.FullKind.CHANGE_QUEUED && !guard.isSettingsPackage(pkg, title)) {
             overlay.removeFull() // the guard only covers Settings pages
-        } else if (overlay.hasFullScreen && pkg !in launchers && pkg != packageName) {
+        } else if (pkg == packageName) {
+            overlay.removeFull() // our own app is never covered: it's where you unlock or change rules
+        } else if (overlay.hasFullScreen && pkg !in launchers) {
             val sameLock = overlay.fullKind == OverlayController.FullKind.LOCK && overlay.fullPackage == pkg
             if (!sameLock) overlay.removeFull()
         }
