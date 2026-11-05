@@ -109,7 +109,7 @@ fun PurposePickerScreen(nav: NavController, packageName: String?) {
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
                     ) {
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(stringResource(R.string.pick_last_time, lastTemplate.name, last.plannedMin).uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp), color = MaterialTheme.colorScheme.primary)
+                            Text(stringResource(R.string.pick_last_time, lastTemplate.name, Format.minutes(context, last.plannedMin)).uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp), color = MaterialTheme.colorScheme.primary)
                             Text(last.statement, style = MaterialTheme.typography.titleMedium)
                         }
                     }
@@ -136,7 +136,7 @@ fun PurposePickerScreen(nav: NavController, packageName: String?) {
                             Text(t.name, style = MaterialTheme.typography.titleMedium)
                             Text(stringResource(PurposeTemplates.descriptionRes(t.id)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        Text(stringResource(R.string.pick_default_minutes, t.maxMinutes), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.pick_default_minutes, Format.minutes(context, t.maxMinutes)), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }

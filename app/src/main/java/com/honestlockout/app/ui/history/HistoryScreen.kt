@@ -163,7 +163,7 @@ private fun OverrideRow(o: Override, strike: Strike?, purpose: String, now: Long
                 ResultChip(o.endReason, forgiven)
             }
             Text(o.statement, style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(R.string.history_planned_actual, purpose, o.plannedMin, actual), style = MaterialTheme.typography.bodySmall, color = TextMuted)
+            Text(stringResource(R.string.history_planned_actual, purpose, Format.minutes(context, o.plannedMin), Format.minutes(context, actual)), style = MaterialTheme.typography.bodySmall, color = TextMuted)
             if (strike != null) {
                 Text(OverlayTexts.reasonName(context, strike.reason), style = MaterialTheme.typography.bodySmall, color = Danger)
                 StrikeFooter(strike, now, onAppeal)

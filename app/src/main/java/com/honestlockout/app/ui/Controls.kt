@@ -23,6 +23,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -203,4 +205,35 @@ fun DayToggles(days: String, labels: Array<String>, onChange: (String) -> Unit) 
             }
         }
     }
+}
+
+/** A small quiet pill for one-tap suggestions. */
+@Composable
+fun Pill(text: String, onClick: () -> Unit) {
+    Box(
+        Modifier.clip(RoundedCornerShape(999.dp)).background(MaterialTheme.colorScheme.surfaceContainer).clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+    ) { Text(text, style = MaterialTheme.typography.bodyMedium, maxLines = 1) }
+}
+
+/** A 4 dp track with a round thumb, instead of Material's thick track. */
+@Composable
+fun ThinSlider(value: Float, onValueChange: (Float) -> Unit, valueRange: ClosedFloatingPointRange<Float>, modifier: Modifier = Modifier) {
+    val colors = SliderDefaults.colors(
+        activeTrackColor = MaterialTheme.colorScheme.primary,
+        inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+    )
+    Slider(
+        value = value, onValueChange = onValueChange, valueRange = valueRange, modifier = modifier.fillMaxWidth(),
+        colors = colors,
+        thumb = {
+            Box(Modifier.size(22.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onSurface))
+        },
+        track = { state ->
+            SliderDefaults.Track(
+                sliderState = state, modifier = Modifier.height(4.dp), colors = colors,
+                thumbTrackGapSize = 0.dp, drawStopIndicator = null,
+            )
+        },
+    )
 }

@@ -46,5 +46,6 @@ if [ -n "${FIRST:-}" ]; then
 fi
 adb shell am start -W -n $PKG/.MainActivity >/dev/null 2>&1
 shot 21_home_service_on 4
+adb logcat -d -s HL/Acc:* HL/Svc:* HL/Engine:* HL/Work:* AndroidRuntime:E > shots/logcat.txt 2>/dev/null
 ls -la shots
 true
