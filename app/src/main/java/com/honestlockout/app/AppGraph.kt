@@ -83,6 +83,7 @@ object AppGraph {
         ladder = StrikeLadder(settings, overrideRepo)
         loosenGuard = LoosenGuard(application, db, settings, pendingRepo)
         overlay = OverlayController(application)
+        liveUsage.attach(PrefsUsageStore(application), System.currentTimeMillis())
     }
 }
 
@@ -130,5 +131,23 @@ class InspectorState {
         val seen = _lines.value.toHashSet()
         val fresh = newLines.filter { it !in seen }
         if (fresh.isNotEmpty()) _lines.value = (_lines.value + fresh).takeLast(1000)
+    }
+}
+
+/** Today's live usage totals in a small private prefs file: "day" plus "pkg=ms" lines. */
+private class PrefsUsageStore(context: android.content.Context) : LiveUsageTracker.Store {
+    private val prefs = context.getSharedPreferences("live_usage", android.content.Context.MODE_PRIVATE)
+
+    override fun load(): Pair<String, Map<String, Long>>? {
+        val day = prefs.getString("day", null) ?: return null
+        val values = prefs.getString("ms", "").orEmpty().lineSequence().mapNotNull { line ->
+            val i = line.lastIndexOf('=')
+            if (i <= 0) null else line.substring(i + 1).toLongOrNull()?.let { line.substring(0, i) to it }
+        }.toMap()
+        return day to values
+    }
+
+    override fun save(dayKey: String, values: Map<String, Long>) {
+        prefs.edit().putString("day", dayKey).putString("ms", values.entries.joinToString("\n") { "${it.key}=${it.value}" }).apply()
     }
 }
