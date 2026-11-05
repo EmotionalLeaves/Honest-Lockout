@@ -33,7 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -44,7 +44,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -65,26 +64,29 @@ fun AppScaffold(
     actions: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    // Large title that collapses into the bar as the content scrolls (iOS-style).
-    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    // One compact row directly under the status bar: back chevron (if any) and a large title.
     Scaffold(
-        modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
         topBar = {
-            LargeTopAppBar(
-                title = { Text(title, modifier = titleModifier, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+            TopAppBar(
+                title = {
+                    Text(
+                        title, modifier = titleModifier, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                },
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBackIos, contentDescription = stringResource(R.string.cd_back))
+                            Icon(Icons.AutoMirrored.Filled.ArrowBackIos, contentDescription = stringResource(R.string.cd_back), modifier = Modifier.size(20.dp))
                         }
                     }
                 },
                 actions = { actions() },
+                expandedHeight = 64.dp,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background,
                 ),
-                scrollBehavior = scroll,
             )
         },
         snackbarHost = { if (snackbar != null) SnackbarHost(snackbar) },

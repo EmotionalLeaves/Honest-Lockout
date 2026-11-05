@@ -86,10 +86,24 @@ class OverlayController(private val appContext: Context) {
         else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
-            type, 0, PixelFormat.OPAQUE,
+            type, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.TRANSLUCENT,
         )
-        avoidSystemBars(params)
+        // Full-screen views draw behind the status bar (it stays usable) and pad their content below it.
+        if (Build.VERSION.SDK_INT >= 30) {
+            params.fitInsetsTypes = WindowInsets.Type.navigationBars()
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        } else if (Build.VERSION.SDK_INT >= 28) {
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
         val wm = ctx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        // The content sits below the status bar; the band behind the bar is our background at 50 %,
+        // so the clock stays readable whether the app behind set light or dark bar icons.
+        view.setBackgroundColor(appContext.getColor(R.color.hl_background) and 0x00FFFFFF or (0x80 shl 24))
+        view.setOnApplyWindowInsetsListener { v, insets ->
+            val top = if (Build.VERSION.SDK_INT >= 30) insets.getInsets(WindowInsets.Type.statusBars()).top else insets.systemWindowInsetTop
+            v.setPadding(0, top, 0, 0)
+            insets
+        }
         view.alpha = 0f
         wm.addView(view, params)
         view.animate().alpha(1f).setDuration(160L).start()

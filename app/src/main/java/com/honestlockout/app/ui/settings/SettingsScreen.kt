@@ -54,6 +54,7 @@ import com.honestlockout.app.engine.GuardResult
 import com.honestlockout.app.engine.SettingChange
 import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.ExpandableSection
+import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.GroupHeader
 import com.honestlockout.app.ui.RowDivider
 import com.honestlockout.app.ui.SecondaryButton
@@ -133,8 +134,8 @@ fun SettingsScreen(nav: NavController) {
                             Text(t.name, style = MaterialTheme.typography.bodyLarge)
                             val screens = PurposeTemplates.split(t.blockedScreenLabels)
                             Text(
-                                if (screens.isEmpty()) stringResource(R.string.template_row_no_screens, t.maxMinutes)
-                                else stringResource(R.string.template_row, t.maxMinutes, screens.joinToString(", ")),
+                                if (screens.isEmpty()) stringResource(R.string.template_row_no_screens, Format.minutes(context, t.maxMinutes))
+                                else stringResource(R.string.template_row, Format.minutes(context, t.maxMinutes), screens.joinToString(", ")),
                                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }

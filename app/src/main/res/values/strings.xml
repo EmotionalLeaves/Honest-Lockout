@@ -113,7 +113,7 @@
     <!-- Override -->
     <string name="pick_title">Purpose</string>
     <string name="pick_for_app">For %1$s</string>
-    <string name="pick_default_minutes">up to %1$d min</string>
+    <string name="pick_default_minutes">up to %1$s</string>
     <string name="purpose_navigation">Navigation</string>
     <string name="purpose_reply">Reply to someone</string>
     <string name="purpose_lookup">Look something up</string>
@@ -216,7 +216,7 @@
     <string name="history_filter_all">All</string>
     <string name="history_filter_strikes">Strikes only</string>
     <string name="history_empty">Nothing here yet.</string>
-    <string name="history_planned_actual">%1$s · planned %2$d min · used %3$d min</string>
+    <string name="history_planned_actual">%1$s · planned %2$s · used %3$s</string>
     <string name="history_strike_row">Strike: %1$s</string>
     <string name="history_appeal_row">Appeal: strike reversed</string>
     <string name="history_forgiven">Forgiven</string>
@@ -286,7 +286,7 @@
     <string name="pending_applies">Applies %1$s</string>
     <string name="settings_device_admin">Device admin</string>
     <string name="settings_device_admin_desc">Uninstalling requires turning this off first. Turning it off waits like other looser changes.</string>
-    <string name="settings_break_glass">Emergency unlock everything</string>
+    <string name="settings_break_glass">Emergency unlock</string>
     <string name="about_version">Version %1$s (build %2$d)</string>
     <string name="change_remove_rule">Remove %1$s from block list</string>
     <string name="change_set_mode">Set %1$s to %2$s</string>
@@ -339,7 +339,7 @@
     <string name="home_tile_emergency_sub">Unlock everything · 2 strikes</string>
     <string name="declare_label">What will you do?</string>
     <string name="declare_choose_app">Choose an app</string>
-    <string name="pick_last_time">Same as last time · %1$s · %2$d min</string>
+    <string name="pick_last_time">Same as last time · %1$s · %2$s</string>
     <string name="countdown_hint">Starts when the timer ends. Cancel any time.</string>
     <string name="settings_templates_desc">Max length and blocked screens for each purpose</string>
     <string name="settings_screen_rules_desc">Which screens inside apps count as feeds, reels or shorts. If an app update breaks one, use the inspector to find the new ID.</string>
@@ -367,7 +367,7 @@
         <item>Check my balance</item>
     </string-array>
     <string name="purpose_listen">Listen in background</string>
-    <string name="purpose_listen_desc">Audio while you sleep or do something else. Other apps and a locked screen are fine; only time on screen inside the app is limited.</string>
+    <string name="purpose_listen_desc">Audio while you sleep or do something else. Only screen time inside the app is limited.</string>
     <string name="shape_listen">Listen</string>
     <string-array name="suggest_listen">
         <item>Fall asleep to a video</item>
@@ -404,8 +404,8 @@
     <string name="timing_loosen_delay_hint">Applies to every looser change, including this one.</string>
     <string name="timing_break_glass_wait_hint">Delay before an emergency unlock starts.</string>
     <string name="timing_break_glass_unlock_hint">How long everything stays unlocked.</string>
-    <string name="template_row">Up to %1$d min · blocks %2$s</string>
-    <string name="template_row_no_screens">Up to %1$d min</string>
+    <string name="template_row">Up to %1$s · blocks %2$s</string>
+    <string name="template_row_no_screens">Up to %1$s</string>
     <string name="settings_advanced">Advanced</string>
     <string name="settings_advanced_desc">Activity limits, screen rules, device admin</string>
     <string name="threshold_hint">Per minute.</string>

@@ -73,6 +73,7 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = viewModel()) {
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            if (!s.loaded) { Spacer(Modifier.height(1.dp)); return@Column }
             AnimatedContent(targetState = s.active != null, label = "hero") { running ->
                 if (running) ActiveHero(s, vm) else StatusHero(s, nav)
             }
@@ -171,7 +172,8 @@ private fun StatusHero(s: HomeState, nav: NavController) {
                     s.nextOverrideAt != null -> stringResource(R.string.home_next_override_at, Format.dateTime(context, s.nextOverrideAt))
                     else -> stringResource(R.string.home_hero_ready, s.blockedCount)
                 },
-                style = MaterialTheme.typography.titleLarge,
+                style = if (ok) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge,
+                color = if (ok) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Button(
                 onClick = { nav.navigate(if (s.blockedCount == 0) Routes.APPPICKER else Routes.pick()) },

@@ -2,11 +2,11 @@ package com.honestlockout.app.ui.override
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,9 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,7 +59,9 @@ import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.AppTextField
 import com.honestlockout.app.ui.BottomActionBar
 import com.honestlockout.app.ui.GroupHeader
+import com.honestlockout.app.ui.Pill
 import com.honestlockout.app.ui.PrimaryButton
+import com.honestlockout.app.ui.ThinSlider
 import com.honestlockout.app.ui.RowDivider
 import com.honestlockout.app.ui.SelectRow
 import com.honestlockout.app.ui.Format
@@ -157,12 +157,8 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
             }
             val suggestions = suggestionsFor(s.template.id)
             if (suggestions.isNotEmpty() && statement.isBlank()) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                    suggestions.forEach { sug ->
-                        TextButton(onClick = { statement = sug }, contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)) {
-                            Text(sug, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-                        }
-                    }
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    suggestions.forEach { sug -> Pill(sug) { statement = sug } }
                 }
             }
 
@@ -192,7 +188,7 @@ fun DeclareScreen(nav: NavController, templateId: Long, presetPackage: String?, 
                 if (s.maxMinutes > 1) {
                     // Continuous track (no tick dots); values snap to whole minutes, or 5 min for long purposes.
                     val snap = if (s.maxMinutes > 60) 5 else 1
-                    Slider(
+                    ThinSlider(
                         value = minutes.coerceIn(1, s.maxMinutes).toFloat(),
                         onValueChange = { v ->
                             val m = if (snap > 1) (Math.round(v / snap) * snap).coerceAtLeast(snap) else Math.round(v)

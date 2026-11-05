@@ -6,5 +6,18 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:colorAccent">@color/hl_primary</item>
+        <item name="android:colorPrimary">@color/hl_primary</item>
+        <item name="android:textColorPrimary">@color/hl_text</item>
+        <item name="android:textColorSecondary">@color/hl_text_muted</item>
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:buttonStyle">@style/Widget.HonestLockout.Button</item>
+    </style>
+
+    <!-- Overlay buttons: flat, no state-list elevation, Inter semibold. -->
+    <style name="Widget.HonestLockout.Button" parent="android:Widget.Material.Button">
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
     </style>
 </resources>
