@@ -17,7 +17,7 @@ val Inter = FontFamily(
 )
 
 private fun style(size: Int, weight: FontWeight, line: Int, tracking: Float = 0f) =
-    TextStyle(fontFamily = Inter, fontSize = size.sp, fontWeight = weight, lineHeight = line.sp, letterSpacing = tracking.sp)
+    TextStyle(fontFamily = Inter, fontSize = size.sp, fontWeight = weight, lineHeight = line.sp, letterSpacing = tracking.sp, fontFeatureSettings = "tnum")
 
 /** A tight scale: bold display titles, semibold headings, regular body, medium labels. */
 val AppTypography = Typography(
@@ -39,4 +39,4 @@ val AppTypography = Typography(
 )
 
 /** The countdown number. */
-val HugeNumber = TextStyle(fontFamily = Inter, fontSize = 112.sp, fontWeight = FontWeight.Bold, letterSpacing = (-4).sp, lineHeight = 112.sp)
+val HugeNumber = TextStyle(fontFamily = Inter, fontSize = 112.sp, fontWeight = FontWeight.Bold, letterSpacing = (-4).sp, lineHeight = 112.sp, fontFeatureSettings = "tnum")

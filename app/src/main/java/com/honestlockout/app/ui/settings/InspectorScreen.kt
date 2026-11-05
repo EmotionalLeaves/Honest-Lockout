@@ -1,6 +1,5 @@
 package com.honestlockout.app.ui.settings
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.PrimaryButton
 import com.honestlockout.app.ui.SecondaryButton
@@ -72,7 +72,7 @@ fun InspectorScreen(nav: NavController) {
             Card(
                 modifier = Modifier.fillMaxSize(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                border = cardBorder(),
             ) {
                 SelectionContainer {
                     LazyColumn(Modifier.fillMaxSize().padding(12.dp)) {

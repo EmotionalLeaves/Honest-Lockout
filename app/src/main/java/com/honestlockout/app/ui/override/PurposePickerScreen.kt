@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.data.db.entities.Override
 import com.honestlockout.app.data.repo.Eligibility
 import com.honestlockout.app.data.rules.PurposeTemplates
@@ -125,7 +126,7 @@ fun PurposePickerScreen(nav: NavController, packageName: String?) {
                         .clickable(enabled = allowed) { nav.navigate(Routes.declare(t.id, packageName)) },
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    border = cardBorder(),
                 ) {
                     Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         Box(

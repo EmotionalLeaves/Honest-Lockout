@@ -2,6 +2,9 @@ package com.honestlockout.app.ui
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +36,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,21 +58,33 @@ private val ControlShape = RoundedCornerShape(14.dp)
 
 @Composable
 fun PrimaryButton(text: String, modifier: Modifier = Modifier, enabled: Boolean = true, onClick: () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
+    val haptic = LocalHapticFeedback.current
+    val primary = MaterialTheme.colorScheme.primary
+    val fill = if (enabled) Brush.verticalGradient(listOf(primary.copy(alpha = 1f), primary.copy(red = primary.red * 0.9f, green = primary.green * 0.9f, blue = primary.blue * 0.9f)))
+    else Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surfaceContainerHigh))
     Button(
-        onClick = onClick, enabled = enabled, shape = ControlShape,
-        modifier = modifier.fillMaxWidth().height(50.dp),
+        onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); onClick() },
+        enabled = enabled, shape = ControlShape, interactionSource = interaction,
+        modifier = modifier.fillMaxWidth().height(50.dp).pressScale(interaction),
+        contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = Color.Transparent, disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-    ) { Text(text, style = MaterialTheme.typography.titleMedium) }
+    ) {
+        Box(Modifier.fillMaxSize().background(fill, ControlShape), contentAlignment = Alignment.Center) {
+            Text(text, style = MaterialTheme.typography.titleMedium)
+        }
+    }
 }
 
 @Composable
 fun SecondaryButton(text: String, modifier: Modifier = Modifier, enabled: Boolean = true, onClick: () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
     Button(
-        onClick = onClick, enabled = enabled, shape = ControlShape,
-        modifier = modifier.fillMaxWidth().height(50.dp),
+        onClick = onClick, enabled = enabled, shape = ControlShape, interactionSource = interaction,
+        modifier = modifier.fillMaxWidth().height(50.dp).pressScale(interaction),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -75,9 +94,12 @@ fun SecondaryButton(text: String, modifier: Modifier = Modifier, enabled: Boolea
 
 @Composable
 fun DangerButton(text: String, modifier: Modifier = Modifier, enabled: Boolean = true, onClick: () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
+    val haptic = LocalHapticFeedback.current
     Button(
-        onClick = onClick, enabled = enabled, shape = ControlShape,
-        modifier = modifier.fillMaxWidth().height(50.dp),
+        onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); onClick() },
+        enabled = enabled, shape = ControlShape, interactionSource = interaction,
+        modifier = modifier.fillMaxWidth().height(50.dp).pressScale(interaction),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError,
             disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,

@@ -2,7 +2,6 @@ package com.honestlockout.app.ui.blocklist
 
 import android.app.TimePickerDialog
 import android.text.format.DateFormat
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.data.db.entities.Schedule
 import com.honestlockout.app.engine.ScheduleLogic
 import com.honestlockout.app.engine.SettingChange
@@ -119,7 +119,7 @@ fun ScheduleEditorScreen(nav: NavController, id: Long?) {
                 GroupHeader(stringResource(R.string.schedule_hours))
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    border = cardBorder(),
                 ) {
                     Column {
                         TimeRow(stringResource(R.string.schedule_starts), ScheduleLogic.hhmm(start)) { pickTime(start) { start = it } }

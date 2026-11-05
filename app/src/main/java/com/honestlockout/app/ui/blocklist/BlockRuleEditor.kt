@@ -1,6 +1,5 @@
 package com.honestlockout.app.ui.blocklist
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.data.db.BlockMode
 import com.honestlockout.app.engine.GuardResult
 import com.honestlockout.app.engine.ScheduleLogic
@@ -162,7 +162,7 @@ fun BlockRuleEditorScreen(nav: NavController, packageName: String, isNew: Boolea
                     GroupHeader(stringResource(R.string.rule_schedule_label))
                     Card(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                        border = cardBorder(),
                     ) {
                         Column {
                             schedules.forEach { s ->

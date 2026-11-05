@@ -1,7 +1,6 @@
 package com.honestlockout.app.ui.home
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,9 +48,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.ui.AppScaffold
 import com.honestlockout.app.ui.Format
 import com.honestlockout.app.ui.GroupHeader
+import com.honestlockout.app.ui.Staggered
+import com.honestlockout.app.ui.StatusOrb
+import com.honestlockout.app.ui.accentGlow
 import com.honestlockout.app.ui.ProgressRing
 import com.honestlockout.app.ui.Stat
 import com.honestlockout.app.ui.UsageBar
@@ -69,20 +72,22 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = viewModel()) {
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refreshNow() }
 
     AppScaffold(title = stringResource(R.string.app_name), onBack = null) { padding ->
-        Column(
-            Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+        if (!s.loaded) return@AppScaffold
+        Staggered(
+            Modifier.fillMaxSize().accentGlow(if (s.accessibilityOn) Primary else Danger).padding(padding)
+                .padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
         ) {
-            if (!s.loaded) { Spacer(Modifier.height(1.dp)); return@Column }
-            AnimatedContent(targetState = s.active != null, label = "hero") { running ->
-                if (running) ActiveHero(s, vm) else StatusHero(s, nav)
+            Item {
+                AnimatedContent(targetState = s.active != null, label = "hero") { running ->
+                    if (running) ActiveHero(s, vm) else StatusHero(s, nav)
+                }
             }
-
-            Column {
+            Item { Spacer(Modifier.height(16.dp)) }
+            Item { Column {
                 GroupHeader(stringResource(R.string.home_today))
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    border = cardBorder(),
                 ) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -104,11 +109,11 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = viewModel()) {
                         }
                     }
                 }
-            }
-
-            Card(
+            } }
+            Item { Spacer(Modifier.height(16.dp)) }
+            Item { Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                border = cardBorder(),
             ) {
                 Column {
                     NavRow(Icons.Outlined.Block, Primary, stringResource(R.string.home_block_list), stringResource(R.string.home_tile_block_sub, s.blockedCount)) { nav.navigate(Routes.BLOCKLIST) }
@@ -119,8 +124,8 @@ fun HomeScreen(nav: NavController, vm: HomeViewModel = viewModel()) {
                     HorizontalDivider(Modifier.padding(start = 60.dp), color = MaterialTheme.colorScheme.outline)
                     NavRow(Icons.Outlined.LockOpen, Danger, stringResource(R.string.home_emergency_unlock), stringResource(R.string.home_tile_emergency_sub)) { nav.navigate(Routes.BREAKGLASS) }
                 }
-            }
-            Spacer(Modifier.height(16.dp))
+            } }
+            Item { Spacer(Modifier.height(24.dp)) }
         }
     }
 }
@@ -155,11 +160,11 @@ private fun StatusHero(s: HomeState, nav: NavController) {
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        border = cardBorder(),
     ) {
         Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.size(8.dp).clip(CircleShape).background(if (ok) Primary else Danger))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                StatusOrb(if (ok) Primary else Danger, size = 8)
                 Text(
                     stringResource(if (ok) R.string.home_hero_protected else R.string.home_hero_service_off).uppercase(),
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.2.sp), color = TextMuted,

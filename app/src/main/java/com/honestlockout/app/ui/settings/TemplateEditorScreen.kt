@@ -2,7 +2,6 @@ package com.honestlockout.app.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.honestlockout.app.AppGraph
 import com.honestlockout.app.R
+import com.honestlockout.app.ui.cardBorder
 import com.honestlockout.app.data.rules.PurposeTemplates
 import com.honestlockout.app.engine.SettingChange
 import com.honestlockout.app.ui.AppScaffold
@@ -103,7 +103,7 @@ fun TemplateEditorScreen(nav: NavController, id: Long) {
                 GroupHeader(stringResource(R.string.template_screens))
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    border = cardBorder(),
                 ) {
                     Column {
                         (allLabels + chosen).distinct().sorted().forEachIndexed { i, l ->
